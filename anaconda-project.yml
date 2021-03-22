@@ -1,0 +1,21 @@
+# TODO: delete this, replace with dodo
+
+name: janki
+
+commands:
+  lab:
+    unix: jupyter lab --no-browser --debug
+
+env_specs:
+  default:
+    channels:
+      - conda-forge
+      - nodefaults
+    packages:
+      - sqlalchemy >=1.4
+      - jupyterlab >=3,<4
+      - toml
+      - ipywidgets
+      - json-e
+      - genson
+      - hypothesis-jsonschema

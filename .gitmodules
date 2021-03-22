@@ -1,0 +1,3 @@
+[submodule "vendor/anki"]
+	path = vendor/anki
+	url = https://github.com/ankitects/anki
