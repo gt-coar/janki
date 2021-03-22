@@ -1,5 +1,5 @@
 [submodule "vendor/anki"]
-	path = vendor/anki
+	path = vendor/ankitects/anki
 	url = https://github.com/ankitects/anki
 [submodule "vendor/ankidroid/Anki-Android.wiki"]
 	path = vendor/ankidroid/Anki-Android.wiki
