@@ -51,7 +51,9 @@ env_specs:
     packages:
       - diffoscope
       - genson
+      - importnb
       - json-e
+      - libcst
       - nodejs >=12,!=13.*,<15
       - pip
       - sqlacodegen

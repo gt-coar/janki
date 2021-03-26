@@ -2,3 +2,4 @@ envs/
 .ipynb_checkpoints/
 __pycache__
 _anki_schema/
+.doit*
