@@ -1,15 +1,11 @@
 // Copyright (c) 2021 University System of Georgia and janki contributors
 // Distributed under the terms of the BSD-3-Clause License.
 
-import {
-  ILayoutRestorer,
-  JupyterLab,
-  JupyterFrontEndPlugin,
-} from '@jupyterlab/application';
+import { JupyterLab, JupyterFrontEndPlugin } from '@jupyterlab/application';
 
 import { PLUGIN_ID, ICardManager } from './tokens';
 
-import { ICardManager } from './manager';
+import { CardManager } from './manager';
 
 /**
  * The editor tracker extension.

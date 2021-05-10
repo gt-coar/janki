@@ -3,4 +3,7 @@ __pycache__
 .env/
 .ipynb_checkpoints/
 .yarn-packages/
+*.tsbuildinfo
+build/
+lib/
 node_modules/

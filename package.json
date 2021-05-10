@@ -18,10 +18,9 @@
   },
   "scripts": {
     "bootstrap": "jlpm --prefer-offline && lerna bootstrap",
-    "eslint": "cd packages && eslint --ext .js,.ts,.tsx --fix .",
-    "eslint:check": "cd packages && eslint --ext .js,.ts,.tsx ."
+    "build:lib": "lerna run build:lib"
   },
   "workspaces": [
-    "js/*"
+    "src/js/*"
   ]
 }

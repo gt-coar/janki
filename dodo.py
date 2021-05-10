@@ -48,9 +48,15 @@ def task_setup():
 def task_build():
     """build intermediate artifacts"""
     yield dict(
-        name="lib",
-        doc="build the js lib",
-        file_dep=[P.YARN_INTEGRITY, *P.ALL_TS_SRC, *P.PKG_JSONS, *P.TSCONFIGS],
+        name="js:lib",
+        doc="build the js libs",
+        file_dep=[
+            P.YARN_INTEGRITY,
+            *P.ALL_TS_SRC,
+            *P.PKG_JSONS,
+            *P.ALL_SCHEMA,
+            *P.TSCONFIGS,
+        ],
         actions=[[P.JLPM, "build:lib"]],
         targets=[P.TSBUILDINFO],
     )
@@ -313,7 +319,7 @@ class P:
         SRC_JS.glob("*/tsconfig.json"),
         SRC_JS.glob("*/src/tsconfig.json"),
     )
-    TSBUILDINFO = PKG_META.parent / "tsconfig.tsbuildinfo"
+    TSBUILDINFO = PKG_META.parent / ".src.tsbuildinfo"
     EXT_DIST = JANKI_PY / "labextensions"
     EXT_PKG_JSONS = [*EXT_DIST.glob("*/*/package.json")]
     TS_SRC = ROOT / "src"
@@ -385,7 +391,7 @@ class U:
             env = dict(**os.environ)
             env.update(**kwargs.pop("env"))
             kwargs["env"] = env
-        return tools.CmdAction(*cmd, cwd=cwd, shell=False, **kwargs)
+        return tools.CmdAction([*cmd], cwd=cwd, shell=False, **kwargs)
 
     @staticmethod
     def _do(task, ok=None, **kwargs):

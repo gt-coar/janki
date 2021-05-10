@@ -1,6 +1,12 @@
 {
+  "name": "@gt-coar/janki-meta",
+  "version": "0.0.0",
   "private": true,
   "devDependencies": {
+    "typescript": "~4.2.4",
     "@gt-coar/janki": "file:../core"
+  },
+  "scripts": {
+    "build:lib": "tsc --b src"
   }
 }

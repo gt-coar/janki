@@ -5,12 +5,12 @@ import { Token } from '@lumino/coreutils';
 
 import * as PACKAGE_ from '../package.json';
 
-export const PACKAGE = PACKAGE;
+export const PACKAGE = PACKAGE_;
 export const NS = PACKAGE['name'];
 export const PLUGIN_ID = `${NS}:plugin`;
+
+export const ICardManager = new Token<ICardManager>(PLUGIN_ID);
 
 export interface ICardManager {
   ready: Promise<void>;
 }
-
-export const ICardManager = new Token<ICardManager>(PLUGIN_ID);
