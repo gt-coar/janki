@@ -38,8 +38,8 @@ def task_setup():
         doc="ensure local npm dependencies",
         file_dep=[*P.PKG_JSONS, P.ROOT_PKG_JSON],
         actions=[
-            [P.JLPM],
-            [P.JLPM, "lerna", "bootstrap"],
+            [C.JLPM],
+            [C.JLPM, "lerna", "bootstrap"],
         ],
         targets=[P.YARN_INTEGRITY],
     )
@@ -57,8 +57,8 @@ def task_build():
             *P.ALL_SCHEMA,
             *P.TSCONFIGS,
         ],
-        actions=[[P.JLPM, "build:lib"]],
-        targets=[P.TSBUILDINFO],
+        actions=[[C.JLPM, "build:lib"]],
+        targets=[B.TSBUILDINFO],
     )
 
     for pkg_json, data in D.PKG_JSONS.items():
@@ -70,9 +70,9 @@ def task_build():
         yield dict(
             name=f"""ext:{data["name"]}""",
             doc="build the federated labextension",
-            actions=[[P.JLPM, "build:ext", "--scope", data["name"]]],
-            file_dep=[P.TSBUILDINFO, *file_dep],
-            targets=[P.EXT_DIST / data["name"] / "package.json"],
+            actions=[[C.JLPM, "build:ext", "--scope", data["name"]]],
+            file_dep=[B.TSBUILDINFO, *file_dep],
+            targets=[B.EXT_DIST / data["name"] / "package.json"],
         )
 
 
@@ -89,13 +89,13 @@ def task_dist():
             doc=f"build the npm distribution for {pkg}",
             file_dep=file_dep,
             actions=[
-                (tools.create_folder, [P.DIST]),
-                U._act(P.NPM, "pack", pkg, cwd=P.DIST),
+                (tools.create_folder, [B.DIST]),
+                U._act(C.NPM, "pack", pkg, cwd=B.DIST),
             ],
             targets=targets,
         )
 
-    for cmd, dist in D.PY_DIST_CMD.items():
+    for cmd, dist in B.PY_DIST_CMD.items():
         yield dict(
             name=cmd,
             doc=f"build the python {cmd}",
@@ -112,31 +112,35 @@ def task_dist():
             targets=[dist],
         )
 
+    hash_deps = [B.SDIST, B.WHEEL] + sum(
+        [
+            U._tgz_for(pkg_json)[0]
+            for pkg_json, data in D.PKG_JSONS.items()
+            if "jupyterlab" in data
+        ],
+        [],
+    )
+
     def _run_hash():
         # mimic sha256sum CLI
-        if P.SHA256SUMS.exists():
-            P.SHA256SUMS.unlink()
+        if B.SHA256SUMS.exists():
+            B.SHA256SUMS.unlink()
 
         lines = []
 
-        for p in D.HASH_DEPS:
-            if p.parent != P.DIST:
-                tgt = P.DIST / p.name
-                if tgt.exists():
-                    tgt.unlink()
-                shutil.copy2(p, tgt)
+        for p in hash_deps:
             lines += ["  ".join([sha256(p.read_bytes()).hexdigest(), p.name])]
 
         output = "\n".join(lines)
         print(output)
-        P.SHA256SUMS.write_text(output)
+        B.SHA256SUMS.write_text(output)
 
     yield dict(
         name="hash",
         doc="make a hash bundle of the dist artifacts",
         actions=[_run_hash],
-        file_dep=D.HASH_DEPS,
-        targets=[P.SHA256SUMS],
+        file_dep=hash_deps,
+        targets=[B.SHA256SUMS],
     )
 
 
@@ -226,7 +230,7 @@ def task_lint():
             file_dep=[*P.ALL_PRETTIER, P.YARN_INTEGRITY],
             actions=[
                 [
-                    P.JLPM,
+                    C.JLPM,
                     "prettier",
                     "--list-different",
                     "--write",
@@ -241,7 +245,7 @@ def task_lint():
         dict(
             name="eslint",
             file_dep=[*P.ALL_TS_SRC, *P.ALL_SCHEMA, B.OK_PRETTIER],
-            actions=[[P.JLPM, "eslint:fix"]],
+            actions=[[C.JLPM, "eslint:fix"]],
         ),
         B.OK_ESLINT,
     )
@@ -295,7 +299,7 @@ class C:
     # constants and commands
     PY_NAME = "janki"
     ENC = dict(encoding="utf-8")
-    IGNORE = [".ipynb_checkpoints", "node_modules"]
+    IGNORE = [".ipynb_checkpoints", "node_modules", ".egg-info"]
     PYM = ["python", "-m"]
     PIP = [*PYM, "pip"]
     JP = ["jupyter"]
@@ -303,6 +307,10 @@ class C:
     LAB = [*JP, "lab"]
     SETUP = ["python", "setup.py"]
     TWINE_CHECK = [*PYM, "twine", "check"]
+    JLPM = Path(shutil.which("jlpm")).resolve()
+    NPM = Path(
+        shutil.which("npm") or shutil.which("npm.cmd") or shutil.which("npm.exe")
+    ).resolve()
 
 
 class P:
@@ -311,16 +319,8 @@ class P:
     DODO = Path(__file__)
     ROOT = DODO.parent
 
-    BUILD = ROOT / "build"
-    DIST = ROOT / "dist"
-    LIB = ROOT / "lib"
     BINDER = ROOT / ".binder"
     CI = ROOT / ".github"
-    JLPM = Path(shutil.which("jlpm")).resolve()
-    NPM = Path(
-        shutil.which("npm") or shutil.which("npm.cmd") or shutil.which("npm.exe")
-    ).resolve()
-
     SETUP_PY = ROOT / "setup.py"
     SETUP_CFG = ROOT / "setup.cfg"
     MANIFEST = ROOT / "MANIFEST.in"
@@ -337,10 +337,7 @@ class P:
         SRC_JS.glob("*/tsconfig.json"),
         SRC_JS.glob("*/src/tsconfig.json"),
     )
-    TSBUILDINFO = PKG_META.parent / ".src.tsbuildinfo"
     ESLINTRC = SRC_JS / ".eslintrc.js"
-    EXT_DIST = JANKI_PY / "labextensions"
-    EXT_PKG_JSONS = [*EXT_DIST.glob("*/*/package.json")]
     TS_SRC = ROOT / "src"
 
     ALL_SCHEMA = PU._clean(SRC_JS.rglob("*/schema/*.json"))
@@ -379,15 +376,6 @@ class P:
     )
 
     YARN_INTEGRITY = ROOT / "node_modules/.yarn-integrity"
-    # WEBPACK_JS = ROOT / "webpack.config.js"
-    SHA256SUMS = DIST / "SHA256SUMS"
-
-
-class B:
-    """built"""
-
-    OK_ESLINT = P.BUILD / "eslint.ok"
-    OK_PRETTIER = P.BUILD / "prettier.ok"
 
 
 class D:
@@ -397,14 +385,6 @@ class D:
         pkg_json: json.loads(pkg_json.read_text(**C.ENC)) for pkg_json in P.PKG_JSONS
     }
     PKG_CORE = PKG_JSONS[P.PKG_CORE]
-    SDIST = P.DIST / ("{}-{}.tar.gz".format(C.PY_NAME, PKG_CORE["version"]))
-    WHEEL = P.DIST / (
-        "{}-{}-py3-none-any.whl".format(
-            C.PY_NAME.replace("-", "_"), PKG_CORE["version"]
-        )
-    )
-    PY_DIST_CMD = {"sdist": SDIST, "bdist_wheel": WHEEL}
-    HASH_DEPS = [WHEEL, SDIST]  # TODO: figure out entropy, *NPM_TGZ.values()]
 
     # this line is very long, should end with "contributors," but close enough
     COPYRIGHT = (
@@ -414,6 +394,25 @@ class D:
         )
     )
     LICENSE = "Distributed under the terms of the BSD-3-Clause License."
+
+
+class B:
+    """built"""
+
+    DIST = P.ROOT / "dist"
+    BUILD = P.ROOT / "build"
+    EXT_DIST = P.JANKI_PY / "labextensions"
+    TSBUILDINFO = P.PKG_META.parent / ".src.tsbuildinfo"
+    OK_ESLINT = BUILD / "eslint.ok"
+    OK_PRETTIER = BUILD / "prettier.ok"
+    SDIST = DIST / ("{}-{}.tar.gz".format(C.PY_NAME, D.PKG_CORE["version"]))
+    WHEEL = DIST / (
+        "{}-{}-py3-none-any.whl".format(
+            C.PY_NAME.replace("-", "_"), D.PKG_CORE["version"]
+        )
+    )
+    PY_DIST_CMD = {"sdist": SDIST, "bdist_wheel": WHEEL}
+    SHA256SUMS = DIST / "SHA256SUMS"
 
 
 class U:
@@ -451,7 +450,7 @@ class U:
         src = path / "src"
         style = path / "style"
         schema = path / "schema"
-        tgz = P.DIST / (
+        tgz = B.DIST / (
             "{}-{}.tgz".format(
                 pkg["name"].replace("@", "").replace("/", "-"), pkg["version"]
             )

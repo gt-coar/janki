@@ -3,8 +3,10 @@ __pycache__
 .env/
 .ipynb_checkpoints/
 .yarn-packages/
+*.egg-info
 *.tsbuildinfo
 build/
+dist/
 lib/
 node_modules/
 src/py/janki/labextensions/

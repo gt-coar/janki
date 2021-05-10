@@ -9,9 +9,10 @@ channels:
 dependencies:
   # build
   - doit
+  - nodejs >=14,<15
   - pip
   - python >=3.7
-  - nodejs >=14,<15
+  - twine
   # run
   - genanki
   - jupyterlab >=3.0.14
