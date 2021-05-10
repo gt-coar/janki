@@ -1,6 +1,6 @@
 {
-    "private": true,
-    "devDependencies": {
-        "@gt-coar/janki": "file:../core"
-    }
+  "private": true,
+  "devDependencies": {
+    "@gt-coar/janki": "file:../core"
+  }
 }

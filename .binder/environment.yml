@@ -1,4 +1,6 @@
 # a full development, test, and documentation environment for janki
+# Copyright (c) 2021 University System of Georgia and janki contributors
+# Distributed under the terms of the BSD-3-Clause License.
 name: janki-dev
 
 channels:
@@ -15,14 +17,18 @@ dependencies:
   - jupyterlab >=3.0.14
   # - ankipandas  # TODO replace once available
   - pip:
-    - randomfiletree
-    - ankipandas
+      - randomfiletree
+      - ankipandas
   # extras
   - ipydrawio-export
   - jupyterlab-markup
   - jupyterlab-tour
   # demo
   - jupyterlab-gt-coar-theme
+  # lint
+  - isort
+  - black
+  - pyflakes
   # unit test
   - pytest-cov
   - pytest-html

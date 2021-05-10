@@ -79,7 +79,7 @@ def task_dist():
             file_dep=file_dep,
             actions=[
                 (tools.create_folder, [P.DIST]),
-                U._act(P.NPM, "pack", pkg, cwd=P.DIST)
+                U._act(P.NPM, "pack", pkg, cwd=P.DIST),
             ],
             targets=targets,
         )
@@ -212,7 +212,15 @@ def task_lint():
         name="prettier",
         doc="format things with prettier",
         file_dep=[*P.ALL_PRETTIER, P.YARN_INTEGRITY],
-        actions=[["jlpm", "--silent", "lint"]],
+        actions=[
+            [
+                P.JLPM,
+                "prettier",
+                "--list-different",
+                "--write",
+                *[p.relative_to(P.ROOT) for p in P.ALL_PRETTIER],
+            ]
+        ],
     )
 
     def _header(path):
@@ -257,16 +265,14 @@ class PU:
                         break
                 if not ignored:
                     cleaned += [path]
-        return cleaned
+        return sorted(set(cleaned))
+
 
 class C:
     # constants and commands
     PY_NAME = "janki"
     ENC = dict(encoding="utf-8")
-    IGNORE = [
-        ".ipynb_checkpoints",
-        "node_modules"
-    ]
+    IGNORE = [".ipynb_checkpoints", "node_modules"]
     PYM = ["python", "-m"]
     PIP = [*PYM, "pip"]
     JP = ["jupyter"]
@@ -278,6 +284,7 @@ class C:
 
 class P:
     """paths"""
+
     DODO = Path(__file__)
     ROOT = DODO.parent
 
@@ -287,7 +294,9 @@ class P:
     BINDER = ROOT / ".binder"
     CI = ROOT / ".github"
     JLPM = Path(shutil.which("jlpm")).resolve()
-    NPM = Path(shutil.which("npm") or shutil.which("npm.cmd") or shutil.which("npm.exe")).resolve()
+    NPM = Path(
+        shutil.which("npm") or shutil.which("npm.cmd") or shutil.which("npm.exe")
+    ).resolve()
 
     SETUP_PY = ROOT / "setup.py"
     SETUP_CFG = ROOT / "setup.cfg"
@@ -299,28 +308,37 @@ class P:
     PKG_JSONS = [*SRC_JS.glob("*/package.json")]
     PKG_CORE = SRC_JS / "core/package.json"
     PKG_META = SRC_JS / "_meta/package.json"
-    TSCONFIGS = [ROOT / "tsconfigbase.json", *SRC_JS.glob("*/tsconfig.json")]
+    TSCONFIGS = PU._clean(
+        SRC_JS / "tsconfigbase.json",
+        SRC_JS.glob("*/tsconfig.json"),
+        SRC_JS.glob("*/src/tsconfig.json"),
+    )
     TSBUILDINFO = PKG_META.parent / "tsconfig.tsbuildinfo"
     EXT_DIST = JANKI_PY / "labextensions"
     EXT_PKG_JSONS = [*EXT_DIST.glob("*/*/package.json")]
     TS_SRC = ROOT / "src"
-    STYLE = ROOT / "style"
 
-    ALL_TS_SRC = PU._clean(SRC_JS.rglob("*.ts"))
+    ALL_SCHEMA = PU._clean(SRC_JS.rglob("*/schema/*.json"))
+    ALL_TS_SRC = PU._clean(
+        SRC_JS.rglob("*/src/**/*.ts"), SRC_JS.rglob("*/src/**/*.tsx")
+    )
     ALL_PY_SRC = PU._clean(SRC_PY.rglob("*.py"))
-    ALL_PY = [*ALL_PY_SRC, DODO]
-    ALL_CSS = [*STYLE.rglob("*.css")]
-    ALL_JSON = [*ROOT.glob("*.json"), *BINDER.rglob("*.json")]
+    ALL_PY = PU._clean(ALL_PY_SRC, DODO)
+    ALL_STYLE = PU._clean(SRC_JS.glob("*/style/*.css"), SRC_JS.glob("*/style/*.js"))
+    ALL_JSON = PU._clean(
+        ROOT.glob("*.json"), BINDER.rglob("*.json"), PKG_JSONS, TSCONFIGS, ALL_SCHEMA
+    )
     README = ROOT / "README.md"
     LICENSE = ROOT / "LICENSE.txt"
     ALL_MD = sorted(ROOT.glob("*.md"))
-    ALL_STYLE = [*ALL_CSS, *STYLE.rglob("*.svg")]
     ALL_YAML = [*CI.rglob("*.yml"), *BINDER.glob("*.yml")]
-    ALL_PRETTIER = [*ALL_MD, *ALL_STYLE, *ALL_JSON, *ALL_YAML]
+    ALL_PRETTIER = PU._clean(
+        ALL_MD, ALL_STYLE, ALL_JSON, ALL_YAML, ALL_TS_SRC, ALL_STYLE
+    )
     ALL_SHELL = [BINDER / "postBuild"]
     ALL_HEADERS = PU._clean(
         ALL_PY,
-        ALL_CSS,
+        ALL_STYLE,
         ALL_TS_SRC,
         ALL_MD,
         ALL_YAML,
@@ -336,17 +354,19 @@ class P:
 
 class D:
     """data"""
+
     PKG_JSONS = {
-        pkg_json: json.loads(pkg_json.read_text(**C.ENC))
-        for pkg_json in P.PKG_JSONS
+        pkg_json: json.loads(pkg_json.read_text(**C.ENC)) for pkg_json in P.PKG_JSONS
     }
     PKG_CORE = PKG_JSONS[P.PKG_CORE]
     SDIST = P.DIST / ("{}-{}.tar.gz".format(C.PY_NAME, PKG_CORE["version"]))
     WHEEL = P.DIST / (
-        "{}-{}-py3-none-any.whl".format(C.PY_NAME.replace("-", "_"), PKG_CORE["version"])
+        "{}-{}-py3-none-any.whl".format(
+            C.PY_NAME.replace("-", "_"), PKG_CORE["version"]
+        )
     )
     PY_DIST_CMD = {"sdist": SDIST, "bdist_wheel": WHEEL}
-    HASH_DEPS = [WHEEL, SDIST] # TODO: figure out entropy, *NPM_TGZ.values()]
+    HASH_DEPS = [WHEEL, SDIST]  # TODO: figure out entropy, *NPM_TGZ.values()]
 
     # this line is very long, should end with "contributors," but close enough
     COPYRIGHT = (
@@ -359,7 +379,6 @@ class D:
 
 
 class U:
-
     @staticmethod
     def _act(*cmd, cwd=P.ROOT, **kwargs):
         if "env" in kwargs:
@@ -372,7 +391,7 @@ class U:
     def _do(task, ok=None, **kwargs):
         cwd = kwargs.get("cwd", None)
         task["actions"] = [
-            U._act(act) if isinstance(act, list) else act
+            U._act(act, cwd=cwd, **kwargs) if isinstance(act, list) else act
             for act in task["actions"]
         ]
 
