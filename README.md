@@ -1,5 +1,14 @@
 # janki
 
+[![binder-badge][]][binder] [![build][workflow-badge]][workflow]
+
+[binder]: http://mybinder.org/v2/gh/gt-coar/janki/main?urlpath=lab
+[binder-badge]: https://mybinder.org/badge_logo.svg
+[workflow-badge]:
+  https://github.com/gt-coar/janki/workflows/.github/workflows/ci.yml/badge.svg
+[workflow]:
+  https://github.com/gt-coar/janki/actions?query=branch%3Amain+workflow%3A.github%2Fworkflows%2Fci.yml
+
 > > > ### What is [janki](#janki)?
 > > >
 > > > ---
@@ -15,14 +24,20 @@
 ## Install
 
 ```bash
-pip install janki
+# TBD: pip install janki
 ```
 
 or
 
 ```bash
-conda install -c conda-forge janki
+# TBD: conda install -c conda-forge janki
 ```
+
+### Development install
+
+See the [contributing guide].
+
+[contributing guide]: https://github.com/gt-coar/janki/blob/main/CONTRIBUTING.md
 
 ## Usage
 
@@ -75,6 +90,8 @@ jupyter janki import -i my-janki.anki2.json
 ```bash
 jupyter janki export -o my-janki.anki2.json -f anki2
 ```
+
+[contributing guide]: https://github.com/gt-coar/janki/blob/main/CONTRIBUTING.md
 
 ---
 

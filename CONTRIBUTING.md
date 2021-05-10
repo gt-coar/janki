@@ -15,7 +15,7 @@
 - Create and activate the development environment
 
   ```bash
-  mamba env update --prefix ./.env --file .binder/environment.yml
+  CONDARC=./github/.condarc mamba env update --prefix ./.env --file .binder/environment.yml
   source activate ./.env
   ```
 
