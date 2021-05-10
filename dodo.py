@@ -102,12 +102,12 @@ def task_dist():
             actions=[[*C.SETUP, cmd], [*C.TWINE_CHECK, dist]],
             file_dep=[
                 *P.ALL_PY_SRC,
-                # P.EXT_PKG, TODO: WHAT
+                *B.EXT_PKG_JSON,
                 P.README,
                 P.LICENSE,
                 P.MANIFEST,
                 P.SETUP_PY,
-                P.SETUP_CFG,
+                P.SETUP_CFG
             ],
             targets=[dist],
         )
@@ -186,7 +186,7 @@ def task_watch():
         watchers = [
             subprocess.Popen(args)
             for args in [
-                ["jlpm", "watch:lib"],
+                [C.JLPM, "watch:lib"],
                 [*C.LAB_EXT, "watch", "."],
             ]
         ]
@@ -402,6 +402,11 @@ class B:
     DIST = P.ROOT / "dist"
     BUILD = P.ROOT / "build"
     EXT_DIST = P.JANKI_PY / "labextensions"
+    EXT_PKG_JSON = [
+        P.JANKI_PY / "labextensions" / data["name"] / "package.json"
+        for pkg_json, data in D.PKG_JSONS.items()
+        if "jupyterlab" in data
+    ]
     TSBUILDINFO = P.PKG_META.parent / ".src.tsbuildinfo"
     OK_ESLINT = BUILD / "eslint.ok"
     OK_PRETTIER = BUILD / "prettier.ok"
