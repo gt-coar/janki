@@ -20,10 +20,11 @@
   },
   "scripts": {
     "bootstrap": "jlpm --prefer-offline && lerna bootstrap",
-    "build:lib": "lerna run build:lib",
-    "build:ext": "lerna run build:ext",
+    "build:lib": "lerna run --stream --parallel build:lib",
+    "build:ext": "lerna run --stream --parallel build:ext",
     "eslint:fix": "cd src/js && eslint --ext .js,.ts,.tsx --fix .",
-    "eslint:check": "cd src/js && eslint --ext .js,.ts,.tsx ."
+    "eslint:check": "cd src/js && eslint --ext .js,.ts,.tsx .",
+    "watch": "lerna run --stream --parallel watch"
   },
   "workspaces": [
     "src/js/*"

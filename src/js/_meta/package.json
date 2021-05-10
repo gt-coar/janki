@@ -9,6 +9,7 @@
     "typescript": "~4.2.4"
   },
   "scripts": {
-    "build:lib": "tsc --b src"
+    "build:lib": "tsc --build src",
+    "watch": "jlpm build:lib --watch --preserveWatchOutput"
   }
 }

@@ -186,8 +186,8 @@ def task_watch():
         watchers = [
             subprocess.Popen(args)
             for args in [
-                [C.JLPM, "watch:lib"],
-                [*C.LAB_EXT, "watch", "."],
+                [C.JLPM, "watch"],
+                # [*C.LAB_EXT, "watch", "."],
             ]
         ]
 

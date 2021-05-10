@@ -38,7 +38,8 @@
     "url": "https://github.com/gt-coar/janki"
   },
   "scripts": {
-    "build:ext": "jupyter labextension build ."
+    "build:ext": "jupyter labextension build .",
+    "watch": "jupyter labextension watch ."
   },
   "sideEffects": true,
   "jupyterlab": {
