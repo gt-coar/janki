@@ -28,7 +28,7 @@ DOIT_CONFIG = {
 
 def task_binder():
     """prepare for basic interactive development, as on binder"""
-    return dict(task_dep=["dev:ext"], actions=[["echo", "ok"]])
+    return dict(task_dep=["dev"], actions=[["echo", "ok"]])
 
 
 def task_setup():
@@ -107,7 +107,7 @@ def task_dist():
                 P.LICENSE,
                 P.MANIFEST,
                 P.SETUP_PY,
-                P.SETUP_CFG
+                P.SETUP_CFG,
             ],
             targets=[dist],
         )
@@ -164,7 +164,7 @@ def task_dev():
 
     yield dict(
         name="ext",
-        doc="ensure the labextension is symlinked for live development",
+        doc="ensure labextension is symlinked for live development",
         actions=[[*C.LAB_EXT, "develop", "--overwrite", "."]],
         task_dep=["dev:py"],
     )
@@ -174,7 +174,7 @@ def task_lab():
     """start jupyterlab"""
     return dict(
         uptodate=[lambda: False],
-        task_dep=["dev:ext"],
+        task_dep=["dev"],
         actions=[[*C.LAB, "--no-browser", "--debug"]],
     )
 
@@ -205,7 +205,7 @@ def task_watch():
 
     return dict(
         uptodate=[lambda: False],
-        task_dep=["dev:ext"],
+        task_dep=["dev"],
         actions=[tools.PythonInteractiveAction(_watch)],
     )
 
