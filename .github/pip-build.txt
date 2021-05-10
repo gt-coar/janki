@@ -1,0 +1,9 @@
+black
+doit
+flake8
+isort >=5
+jupyterlab ==3.*
+pip
+pytest
+setuptools
+wheel
