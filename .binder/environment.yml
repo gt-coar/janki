@@ -1,8 +1,38 @@
+# a full development, test, and documentation environment for janki
+name: janki-dev
+
 channels:
-- conda-forge
-- nodefaults
+  - https://conda.anaconda.org/conda-forge
 
 dependencies:
-- python >=3.7
-- doit
-- toml
+  # build
+  - doit
+  - pip
+  - python >=3.7
+  - nodejs >=14,<15
+  # run
+  - genanki
+  - jupyterlab >=3.0.14
+  # - ankipandas  # TODO replace once available
+  - pip:
+    - randomfiletree
+    - ankipandas
+  # extras
+  - ipydrawio-export
+  - jupyterlab-markup
+  - jupyterlab-tour
+  # demo
+  - jupyterlab-gt-coar-theme
+  # unit test
+  - pytest-cov
+  - pytest-html
+  - hypothesis-jsonschema
+  # acceptance test
+  - firefox =78
+  - geckodriver
+  - robotframework-jupyterlibrary
+  # docs
+  - pydata-sphinx-theme >=0.6.2
+  - myst-nb
+  - sphinx-jsonschema
+  - pytest-check-links

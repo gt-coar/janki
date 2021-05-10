@@ -1,5 +1,6 @@
-envs/
-.ipynb_checkpoints/
 __pycache__
-_anki_schema/
 .doit*
+.env/
+.ipynb_checkpoints/
+.yarn-packages/
+node_modules/
