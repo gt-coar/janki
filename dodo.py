@@ -357,7 +357,7 @@ class P:
     )
     README = ROOT / "README.md"
     LICENSE = ROOT / "LICENSE.txt"
-    ALL_MD = sorted(ROOT.glob("*.md"))
+    ALL_MD = PU._clean(ROOT.glob("*.md"), CI.rglob("*.md"), SRC_JS.glob("*/*.md"))
     ALL_YAML = [*CI.rglob("*.yml"), *BINDER.glob("*.yml")]
     ALL_PRETTIER = PU._clean(
         ALL_MD, ALL_STYLE, ALL_JSON, ALL_YAML, ALL_TS_SRC, ALL_STYLE, ESLINTRC

@@ -43,7 +43,7 @@
   },
   "sideEffects": true,
   "jupyterlab": {
-    "extension": true,
+    "extension": "lib/plugin.js",
     "discovery": {
       "server": {
         "base": {

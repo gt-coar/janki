@@ -4,13 +4,14 @@
 import { JupyterLab, JupyterFrontEndPlugin } from '@jupyterlab/application';
 
 import { CardManager } from './manager';
-import { PLUGIN_ID, ICardManager } from './tokens';
+import { PLUGIN_ID, ICardManager, PACKAGE } from './tokens';
 
 /**
  * The editor tracker extension.
  */
 const corePlugin: JupyterFrontEndPlugin<ICardManager> = {
   activate: (app: JupyterLab) => {
+    console.log(`${PLUGIN_ID} ${PACKAGE.version} activated`);
     const manager = new CardManager();
     return manager;
   },

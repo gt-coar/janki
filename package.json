@@ -16,7 +16,8 @@
   },
   "prettier": {
     "singleQuote": true,
-    "proseWrap": "always"
+    "proseWrap": "always",
+    "printWidth": 88
   },
   "scripts": {
     "bootstrap": "jlpm --prefer-offline && lerna bootstrap",

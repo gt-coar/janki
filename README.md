@@ -5,11 +5,9 @@
 > > > ---
 > > >
 > > > - [ ] a system for mastering complex topics by reviewing topical _Cards_
-> > > - [ ] a _JupyterLab_ extension for creating, viewing, and **reviewing**
-> > >       _Cards_
+> > > - [ ] a _JupyterLab_ extension for creating, viewing, and **reviewing** _Cards_
 > > > - [ ] a _Jupyter Server_ extension for storing _Cards_
-> > > - [ ] a _Command Line Interface_ for importing/exporting _Cards_ to other
-> > >       formats
+> > > - [ ] a _Command Line Interface_ for importing/exporting _Cards_ to other formats
 > > > - [ ] free software licensed under the [BSD-3-Clause] License
 
 ## How does it Work?
@@ -41,15 +39,15 @@ jupyterlab
 
 ### Get More _Cards_
 
-When viewing supported document types, the _Cards_ sidebar will show the option
-to _Import Cards_.
+When viewing supported document types, the _Cards_ sidebar will show the option to
+_Import Cards_.
 
 ### Make New _Cards_
 
 #### In Jupyter Notebooks
 
-- When viewing a _Notebook_, click on the _Card_ icon in the _Notebook Toolbar_
-  to add a new _Card\_\_ to that \_Cell_'s metadata
+- When viewing a _Notebook_, click on the _Card_ icon in the _Notebook Toolbar_ to add a
+  new _Card\_\_ to that \_Cell_'s metadata
 
 #### In Markdown
 
@@ -61,8 +59,8 @@ Create a
 
 ## Import/Export
 
-> both mechanisms support a `-j/--jmespath` argument, allowing for rich
-> filtering of the _Cards_ imported or exported. See the
+> both mechanisms support a `-j/--jmespath` argument, allowing for rich filtering of the
+> _Cards_ imported or exported. See the
 
 [jmespath]: https://jmespath.org
 
