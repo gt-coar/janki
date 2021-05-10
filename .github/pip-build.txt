@@ -6,4 +6,5 @@ jupyterlab ==3.*
 pip
 pytest
 setuptools
+twine
 wheel
