@@ -84,10 +84,20 @@ module.exports = {
     'no-async-promise-executor': 'off',
     'prefer-spread': 'off',
     'react/display-name': 'off',
+    'import/no-unresolved': 'off',
   },
   settings: {
     react: {
       version: 'detect',
+    },
+    'import/parsers': {
+      '@typescript-eslint/parser': ['.ts', '.tsx'],
+    },
+    'import/resolver': {
+      typescript: {
+        alwaysTryTypes: true,
+        project: ['*/tsconfig.json', '*/src/tsconfig.json'],
+      },
     },
   },
 };
