@@ -61,14 +61,13 @@ def task_build():
         targets=[P.TSBUILDINFO],
     )
 
-    # todo: figure this out
-    # yield dict(
-    #     name="ext",
-    #     doc="build the federated labextension",
-    #     actions=[[P.JLPM, "build:ext"]],
-    #     file_dep=[P.TSBUILDINFO, *P.ALL_STYLE],
-    #     targets=[P.EXT_PKGS],
-    # )
+    yield dict(
+        name="ext",
+        doc="build the federated labextension",
+        actions=[[P.JLPM, "build:ext"]],
+        file_dep=[P.TSBUILDINFO, *P.ALL_STYLE],
+        # targets=[P.EXT_PKGS],
+    )
 
 
 def task_dist():

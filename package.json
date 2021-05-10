@@ -21,6 +21,7 @@
   "scripts": {
     "bootstrap": "jlpm --prefer-offline && lerna bootstrap",
     "build:lib": "lerna run build:lib",
+    "build:ext": "lerna run build:ext",
     "eslint:fix": "cd src/js && eslint --ext .js,.ts,.tsx --fix .",
     "eslint:check": "cd src/js && eslint --ext .js,.ts,.tsx ."
   },
