@@ -12,23 +12,10 @@ from pathlib import Path
 
 from doit import tools
 
-os.environ.update(
-    NODE_OPTS="--max-old-space-size=4096",
-    PYTHONIOENCODING="utf-8",
-    PIP_DISABLE_PIP_VERSION_CHECK="1",
-)
-
-DOIT_CONFIG = {
-    "backend": "sqlite3",
-    "verbosity": 2,
-    "par_type": "thread",
-    "default_tasks": ["binder"],
-}
-
 
 def task_binder():
     """prepare for basic interactive development, as on binder"""
-    return dict(task_dep=["dev"], actions=[["echo", "ok"]])
+    yield dict(name="setup", file_dep=[B.OK_EXT_DEV], actions=[["echo", "ok"]])
 
 
 def task_setup():
@@ -146,35 +133,66 @@ def task_dist():
 
 def task_dev():
     """prepare for interactive development"""
-    yield dict(
-        name="py",
-        doc="install python for interactive development",
-        actions=[
-            [
-                *C.PIP,
-                "install",
-                "-e",
-                ".",
-                "--no-deps",
-                "--ignore-installed",
-            ]
-        ],
-        # file_dep=[P.EXT_PKG], TODO
+    yield U._do(
+        dict(
+            name="py",
+            doc="install python for interactive development",
+            actions=[
+                [
+                    *C.PIP,
+                    "install",
+                    "-e",
+                    ".",
+                    "--no-deps",
+                    "--ignore-installed",
+                ]
+            ],
+            file_dep=[
+                *B.EXT_PKG_JSON,
+                P.SETUP_PY,
+                P.SETUP_CFG,
+            ],
+        ),
+        ok=B.OK_PIP_DEV,
     )
 
+    yield U._do(
+        dict(
+            name="ext",
+            doc="ensure labextension is symlinked for live development",
+            file_dep=[B.OK_PIP_DEV],
+            actions=[[*C.LAB_EXT, "develop", "--overwrite", "."]],
+        ),
+        ok=B.OK_EXT_DEV,
+    )
+
+
+def task_test():
     yield dict(
-        name="ext",
-        doc="ensure labextension is symlinked for live development",
-        actions=[[*C.LAB_EXT, "develop", "--overwrite", "."]],
-        task_dep=["dev:py"],
+        name="pytest",
+        actions=[
+            [
+                *C.PYM,
+                "pytest",
+                "--pyargs",
+                C.PY_NAME,
+                "--cov",
+                C.PY_NAME,
+                "--no-cov-on-fail",
+                "--cov-fail-under",
+                C.COV_THRESHOLD,
+            ]
+        ],
+        file_dep=[*P.ALL_PY_SRC, B.OK_EXT_DEV],
     )
 
 
 def task_lab():
     """start jupyterlab"""
-    return dict(
+    yield dict(
+        name="launch",
         uptodate=[lambda: False],
-        task_dep=["dev"],
+        file_dep=[B.OK_EXT_DEV],
         actions=[[*C.LAB, "--no-browser", "--debug"]],
     )
 
@@ -203,9 +221,10 @@ def task_watch():
             stop()
         return True
 
-    return dict(
+    yield dict(
+        name="ts",
         uptodate=[lambda: False],
-        task_dep=["dev"],
+        file_dep=[B.OK_EXT_DEV],
         actions=[tools.PythonInteractiveAction(_watch)],
     )
 
@@ -311,6 +330,7 @@ class C:
     NPM = Path(
         shutil.which("npm") or shutil.which("npm.cmd") or shutil.which("npm.exe")
     ).resolve()
+    COV_THRESHOLD = "100"
 
 
 class P:
@@ -410,6 +430,8 @@ class B:
     TSBUILDINFO = P.PKG_META.parent / ".src.tsbuildinfo"
     OK_ESLINT = BUILD / "eslint.ok"
     OK_PRETTIER = BUILD / "prettier.ok"
+    OK_PIP_DEV = BUILD / "pip.dev.ok"
+    OK_EXT_DEV = BUILD / "ext.dev.ok"
     SDIST = DIST / ("{}-{}.tar.gz".format(C.PY_NAME, D.PKG_CORE["version"]))
     WHEEL = DIST / (
         "{}-{}-py3-none-any.whl".format(
@@ -472,3 +494,17 @@ class U:
         )
 
         return [tgz], file_dep
+
+
+os.environ.update(
+    NODE_OPTS="--max-old-space-size=4096",
+    PYTHONIOENCODING="utf-8",
+    PIP_DISABLE_PIP_VERSION_CHECK="1",
+)
+
+DOIT_CONFIG = {
+    "backend": "sqlite3",
+    "verbosity": 2,
+    "par_type": "thread",
+    "default_tasks": ["binder"],
+}

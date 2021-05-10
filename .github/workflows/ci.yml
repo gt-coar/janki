@@ -1,2 +1,185 @@
 # Copyright (c) 2021 University System of Georgia and janki contributors
 # Distributed under the terms of the BSD-3-Clause License.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  PYTHONUNBUFFERED: '1'
+  PYTHONIOENCODING: 'utf-8'
+  PIP_DISABLE_PIP_VERSION_CHECK: '1'
+
+  # our stuff
+  ATEST_RETRIES: '3'
+  CACHE_EPOCH: '1'
+  DOIT_N_BUILD: '-n4'
+  DOIT_N_TEST: '-n4'
+
+jobs:
+  build:
+    name: build
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      matrix:
+        os: [ubuntu]
+        python-version: ['3.8']
+    defaults:
+      run:
+        shell: bash -l {0}
+    env:
+      BUILDING_IN_CI: '1'
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      # configure builtin providers
+      - name: setup (python)
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+
+      - name: setup (node)
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      # restore caches
+      - name: cache (pip)
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: |
+            ${{ env.CACHE_EPOCH }}-${{ runner.os }}-pip-${{ hashFiles('.github/pip-build.txt') }}
+          restore-keys: |
+            ${{ env.CACHE_EPOCH }}-${{ runner.os }}-pip-
+
+      - name: cache (node)
+        uses: actions/cache@v2
+        id: cache-node-modules
+        with:
+          path: '**/node_modules'
+          key: |
+            ${{ env.CACHE_EPOCH }}-${{ runner.os }}-node-build-${{ hashFiles('yarn.lock', '.gitub/pip-build.txt') }}
+
+      - name: cache (yarn)
+        uses: actions/cache@v2
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        id: cache-yarn-packages
+        with:
+          path: .yarn-packages
+          key: |
+            ${{ env.CACHE_EPOCH }}-yarn-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ env.CACHE_EPOCH }}-yarn-${{ runner.os }}-
+            ${{ env.CACHE_EPOCH }}-yarn-
+
+      - name: setup (pip)
+        run: pip install -U pip wheel setuptools
+
+      - name: setup (pip build)
+        run: pip install -U -v -r .github/pip-build.txt
+
+      - name: check (pip)
+        run: |
+          set -eux
+          mkdir -p build/pip
+          pip freeze | tee build/pip/dist.pip.freeze
+          pip check
+
+      - name: upload (pip freeze)
+        uses: actions/upload-artifact@v2
+        with:
+          name: janki ${{ github.run_number }} build pip freeze
+          path: ./build/pip/
+
+      - name: list
+        run: doit list --all --status
+
+      - name: build
+        run: doit ${{ matrix.DOIT_N_BUILD }} dist || doit dist
+
+      - name: status
+        run: doit list --all --status | sort
+        if: always()
+
+      - name: upload (dist)
+        uses: actions/upload-artifact@v2
+        with:
+          name: janki ${{ github.run_number }} dist
+          path: ./dist
+
+  test:
+    needs: [build]
+    name: ${{ matrix.os }} ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu', 'macos', 'windows']
+        python-version: ['3.6', '3.8']
+        include:
+          - python-version: '3.6'
+            CI_ARTIFACT: 'sdist'
+          - python-version: '3.8'
+            CI_ARTIFACT: 'wheel'
+    env:
+      TESTING_IN_CI: '1'
+    steps:
+      - name: configure line endings
+        run: |
+          git config --global core.autocrlf false
+
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: cache (conda)
+        uses: actions/cache@v2
+        with:
+          path: ~/conda_pkgs_dir
+          key: |
+            ${{ env.CACHE_EPOCH }}-${{ runner.os }}-conda-${{ matrix.python-version }}-${{ hashFiles('.binder/environment.yml') }}
+          restore-keys: |
+            ${{ env.CACHE_EPOCH }}-${{ runner.os }}-conda-${{ matrix.python-version }}-
+
+      - name: install (conda)
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          condarc-file: .github/.condarc
+          miniforge-variant: Mambaforge
+          python-version: ${{ matrix.python-version }}
+          environment-file: .binder/environment.yml
+          use-only-tar-bz2: true
+          use-mamba: true
+
+      - name: download (dist)
+        uses: actions/download-artifact@v2
+        with:
+          name: janki ${{ github.run_number }} dist
+          path: ./dist
+
+      - name: test (linux)
+        if: ${{ contains(matrix.os, 'ubuntu') }}
+        shell: bash -l {0}
+        run: |
+          doit $DOIT_N_TEST test || doit test
+
+      - name: test (macos)
+        if: ${{ contains(matrix.os, 'macos') }}
+        shell: bash -l {0}
+        run: |
+          doit $DOIT_N_TEST test || doit test
+
+      - name: test (windows)
+        if: ${{ contains(matrix.os, 'windows') }}
+        shell: cmd /C CALL {0}
+        env:
+          DOIT_N_TEST: '-n1'
+        run: |
+          doit %DOIT_N_TEST% test || doit test
