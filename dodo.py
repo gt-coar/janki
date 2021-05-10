@@ -61,13 +61,19 @@ def task_build():
         targets=[P.TSBUILDINFO],
     )
 
-    yield dict(
-        name="ext",
-        doc="build the federated labextension",
-        actions=[[P.JLPM, "build:ext"]],
-        file_dep=[P.TSBUILDINFO, *P.ALL_STYLE],
-        # targets=[P.EXT_PKGS],
-    )
+    for pkg_json, data in D.PKG_JSONS.items():
+        if not data.get("jupyterlab"):
+            continue
+
+        file_dep = U._tgz_for(pkg_json)[1]
+
+        yield dict(
+            name=f"""ext:{data["name"]}""",
+            doc="build the federated labextension",
+            actions=[[P.JLPM, "build:ext", "--scope", data["name"]]],
+            file_dep=[P.TSBUILDINFO, *file_dep],
+            targets=[P.EXT_DIST / data["name"] / "package.json"],
+        )
 
 
 def task_dist():

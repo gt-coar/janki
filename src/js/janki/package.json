@@ -53,7 +53,8 @@
         ]
       }
     },
-    "outputDir": "../../py/janki/labextensions/@gt-coar/janki"
+    "outputDir": "../../py/janki/labextensions/@gt-coar/janki",
+    "schemaDir": "schema"
   },
   "styleModule": "style/index.js"
 }
