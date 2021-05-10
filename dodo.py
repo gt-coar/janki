@@ -20,6 +20,9 @@ def task_binder():
 
 def task_setup():
     """ensure a working setup"""
+    if C.TESTING_IN_CI:
+        return
+
     yield dict(
         name="js",
         doc="ensure local npm dependencies",
@@ -34,6 +37,9 @@ def task_setup():
 
 def task_build():
     """build intermediate artifacts"""
+    if C.TESTING_IN_CI:
+        return
+
     yield dict(
         name="js:lib",
         doc="build the js libs",
@@ -65,6 +71,9 @@ def task_build():
 
 def task_dist():
     """build artifacts for distribution"""
+    if C.TESTING_IN_CI:
+        return
+
     for pkg_json in P.PKG_JSONS:
         if pkg_json == P.PKG_META:
             continue
@@ -133,41 +142,50 @@ def task_dist():
 
 def task_dev():
     """prepare for interactive development"""
+
+    file_dep = (
+        []
+        if C.TESTING_IN_CI
+        else [
+            *B.EXT_PKG_JSON,
+            P.SETUP_PY,
+            P.SETUP_CFG,
+        ]
+    )
+
+    pip_args = [*C.PIP, "install", "-v", "--no-deps", "--ignore-installed"]
+
+    pip_args += [C.CI_ARTIFACT] if C.TESTING_IN_CI else ["-e", "."]
+
     yield U._do(
         dict(
             name="py",
             doc="install python for interactive development",
-            actions=[
-                [
-                    *C.PIP,
-                    "install",
-                    "-e",
-                    ".",
-                    "--no-deps",
-                    "--ignore-installed",
-                ]
-            ],
-            file_dep=[
-                *B.EXT_PKG_JSON,
-                P.SETUP_PY,
-                P.SETUP_CFG,
-            ],
+            actions=[pip_args],
+            file_dep=file_dep,
         ),
         ok=B.OK_PIP_DEV,
     )
 
+    ext_actions = (
+        [] if C.TESTING_IN_CI else [[*C.LAB_EXT, "develop", "--overwrite", "."]]
+    )
+
+    ext_actions += [["jupyter", "labextension", "list"]]
+
     yield U._do(
         dict(
             name="ext",
-            doc="ensure labextension is symlinked for live development",
+            doc="ensure labextension is available",
             file_dep=[B.OK_PIP_DEV],
-            actions=[[*C.LAB_EXT, "develop", "--overwrite", "."]],
+            actions=ext_actions,
         ),
         ok=B.OK_EXT_DEV,
     )
 
 
 def task_test():
+    """run tests"""
     yield dict(
         name="pytest",
         actions=[
@@ -189,6 +207,10 @@ def task_test():
 
 def task_lab():
     """start jupyterlab"""
+
+    if C.TESTING_IN_CI:
+        return
+
     yield dict(
         name="launch",
         uptodate=[lambda: False],
@@ -199,6 +221,9 @@ def task_lab():
 
 def task_watch():
     """watch typescript sources, rebuilding as files change"""
+
+    if C.TESTING_IN_CI:
+        return
 
     def _watch():
         watchers = [
@@ -231,6 +256,10 @@ def task_watch():
 
 def task_lint():
     """apply source formatting and linting"""
+
+    if C.TESTING_IN_CI:
+        return
+
     yield dict(
         name="py",
         doc="run basic python formatting/checking",
@@ -331,6 +360,8 @@ class C:
         shutil.which("npm") or shutil.which("npm.cmd") or shutil.which("npm.exe")
     ).resolve()
     COV_THRESHOLD = "100"
+    TESTING_IN_CI = bool(json.loads(os.environ.get("TESTING_IN_CI", "0")))
+    CI_ARTIFACT = os.environ.get("CI_ARTIFACT")
 
 
 class P:
