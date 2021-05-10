@@ -3,9 +3,8 @@
 
 import { JupyterLab, JupyterFrontEndPlugin } from '@jupyterlab/application';
 
-import { PLUGIN_ID, ICardManager } from './tokens';
-
 import { CardManager } from './manager';
+import { PLUGIN_ID, ICardManager } from './tokens';
 
 /**
  * The editor tracker extension.

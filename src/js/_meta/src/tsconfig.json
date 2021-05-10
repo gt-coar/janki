@@ -12,7 +12,7 @@
       "path": ".."
     },
     {
-      "path": "../../core/src"
+      "path": "../../janki/src"
     }
   ]
 }

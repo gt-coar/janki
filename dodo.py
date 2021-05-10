@@ -36,7 +36,7 @@ def task_setup():
     yield dict(
         name="js",
         doc="ensure local npm dependencies",
-        file_dep=[*P.PKG_JSONS],
+        file_dep=[*P.PKG_JSONS, P.ROOT_PKG_JSON],
         actions=[
             [P.JLPM],
             [P.JLPM, "lerna", "bootstrap"],
@@ -214,19 +214,31 @@ def task_lint():
         ],
     )
 
-    yield dict(
-        name="prettier",
-        doc="format things with prettier",
-        file_dep=[*P.ALL_PRETTIER, P.YARN_INTEGRITY],
-        actions=[
-            [
-                P.JLPM,
-                "prettier",
-                "--list-different",
-                "--write",
-                *[p.relative_to(P.ROOT) for p in P.ALL_PRETTIER],
-            ]
-        ],
+    yield U._do(
+        dict(
+            name="prettier",
+            doc="format things with prettier",
+            file_dep=[*P.ALL_PRETTIER, P.YARN_INTEGRITY],
+            actions=[
+                [
+                    P.JLPM,
+                    "prettier",
+                    "--list-different",
+                    "--write",
+                    *[p.relative_to(P.ROOT) for p in P.ALL_PRETTIER],
+                ]
+            ],
+        ),
+        B.OK_PRETTIER,
+    )
+
+    yield U._do(
+        dict(
+            name="eslint",
+            file_dep=[*P.ALL_TS_SRC, *P.ALL_SCHEMA, B.OK_PRETTIER],
+            actions=[[P.JLPM, "eslint:fix"]],
+        ),
+        B.OK_ESLINT,
     )
 
     def _header(path):
@@ -311,8 +323,9 @@ class P:
     SRC_PY = ROOT / "src/py"
     SRC_JS = ROOT / "src/js"
     JANKI_PY = SRC_PY / C.PY_NAME
+    ROOT_PKG_JSON = ROOT / "package.json"
     PKG_JSONS = [*SRC_JS.glob("*/package.json")]
-    PKG_CORE = SRC_JS / "core/package.json"
+    PKG_CORE = SRC_JS / "janki/package.json"
     PKG_META = SRC_JS / "_meta/package.json"
     TSCONFIGS = PU._clean(
         SRC_JS / "tsconfigbase.json",
@@ -320,6 +333,7 @@ class P:
         SRC_JS.glob("*/src/tsconfig.json"),
     )
     TSBUILDINFO = PKG_META.parent / ".src.tsbuildinfo"
+    ESLINTRC = SRC_JS / ".eslintrc.js"
     EXT_DIST = JANKI_PY / "labextensions"
     EXT_PKG_JSONS = [*EXT_DIST.glob("*/*/package.json")]
     TS_SRC = ROOT / "src"
@@ -332,14 +346,19 @@ class P:
     ALL_PY = PU._clean(ALL_PY_SRC, DODO)
     ALL_STYLE = PU._clean(SRC_JS.glob("*/style/*.css"), SRC_JS.glob("*/style/*.js"))
     ALL_JSON = PU._clean(
-        ROOT.glob("*.json"), BINDER.rglob("*.json"), PKG_JSONS, TSCONFIGS, ALL_SCHEMA
+        ROOT.glob("*.json"),
+        BINDER.rglob("*.json"),
+        PKG_JSONS,
+        TSCONFIGS,
+        ALL_SCHEMA,
+        ROOT_PKG_JSON,
     )
     README = ROOT / "README.md"
     LICENSE = ROOT / "LICENSE.txt"
     ALL_MD = sorted(ROOT.glob("*.md"))
     ALL_YAML = [*CI.rglob("*.yml"), *BINDER.glob("*.yml")]
     ALL_PRETTIER = PU._clean(
-        ALL_MD, ALL_STYLE, ALL_JSON, ALL_YAML, ALL_TS_SRC, ALL_STYLE
+        ALL_MD, ALL_STYLE, ALL_JSON, ALL_YAML, ALL_TS_SRC, ALL_STYLE, ESLINTRC
     )
     ALL_SHELL = [BINDER / "postBuild"]
     ALL_HEADERS = PU._clean(
@@ -351,11 +370,19 @@ class P:
         ALL_SHELL,
         LICENSE,
         SETUP_CFG,
+        ESLINTRC,
     )
 
     YARN_INTEGRITY = ROOT / "node_modules/.yarn-integrity"
     # WEBPACK_JS = ROOT / "webpack.config.js"
     SHA256SUMS = DIST / "SHA256SUMS"
+
+
+class B:
+    """built"""
+
+    OK_ESLINT = P.BUILD / "eslint.ok"
+    OK_PRETTIER = P.BUILD / "prettier.ok"
 
 
 class D:
@@ -397,7 +424,7 @@ class U:
     def _do(task, ok=None, **kwargs):
         cwd = kwargs.get("cwd", None)
         task["actions"] = [
-            U._act(act, cwd=cwd, **kwargs) if isinstance(act, list) else act
+            U._act(*act, cwd=cwd, **kwargs) if isinstance(act, list) else act
             for act in task["actions"]
         ]
 
