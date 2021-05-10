@@ -27,7 +27,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu]
-        python-version: ['3.8']
+        python-version: ['3.9']
     defaults:
       run:
         shell: bash -l {0}
@@ -123,11 +123,11 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu', 'macos', 'windows']
-        python-version: ['3.6', '3.8']
+        python-version: ['3.7', '3.9']
         include:
-          - python-version: '3.6'
+          - python-version: '3.7'
             CI_ARTIFACT: 'sdist'
-          - python-version: '3.8'
+          - python-version: '3.9'
             CI_ARTIFACT: 'wheel'
     env:
       TESTING_IN_CI: '1'
