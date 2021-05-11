@@ -19,6 +19,16 @@ def task_binder():
     yield dict(name="setup", file_dep=[B.OK_EXT_DEV], actions=[["echo", "ok"]])
 
 
+def task_release():
+    yield dict(
+        name="ok",
+        actions=[
+            lambda: print(B.SHA256SUMS.read_text(**C.ENC))
+        ],
+        file_dep=[B.OK_PYTEST, B.SHA256SUMS, B.OK_ESLINT]
+    )
+
+
 def task_setup():
     """ensure a working setup"""
     if C.TESTING_IN_CI:
@@ -84,7 +94,7 @@ def task_dist():
         yield dict(
             name=f"js:{pkg.name}",
             doc=f"build the npm distribution for {pkg}",
-            file_dep=file_dep,
+            file_dep=[*file_dep, B.TSBUILDINFO],
             actions=[
                 (tools.create_folder, [B.DIST]),
                 U._act(C.NPM, "pack", pkg, cwd=B.DIST),
@@ -162,7 +172,11 @@ def task_dev():
         dict(
             name="py",
             doc="install python for interactive development",
-            actions=[pip_args],
+            actions=[
+                pip_args,
+                [*C.PIP, "freeze"],
+                [*C.PIP, "check"],
+            ],
             file_dep=file_dep,
         ),
         ok=B.OK_PIP_DEV,
@@ -187,22 +201,28 @@ def task_dev():
 
 def task_test():
     """run tests"""
-    yield dict(
-        name="pytest",
-        actions=[
-            [
-                *C.PYM,
-                "pytest",
-                "--pyargs",
-                C.PY_NAME,
-                "--cov",
-                C.PY_NAME,
-                "--no-cov-on-fail",
-                "--cov-fail-under",
-                C.COV_THRESHOLD,
-            ]
-        ],
-        file_dep=[*P.ALL_PY_SRC, B.OK_EXT_DEV],
+    yield U._do(
+        dict(
+            name="pytest",
+            actions=[
+                [
+                    *C.PYM,
+                    "pytest",
+                    "--pyargs",
+                    C.PY_NAME,
+                    "--cov",
+                    C.PY_NAME,
+                    "--cov-report",
+                    "term-missing:skip-covered",
+                    "--no-cov-on-fail",
+                    "--cov-fail-under",
+                    C.COV_THRESHOLD,
+                ]
+            ],
+            file_dep=[*P.ALL_PY_SRC, B.OK_EXT_DEV],
+        ),
+        # TODO: use a report
+        B.OK_PYTEST
     )
 
 
@@ -465,6 +485,7 @@ class B:
     OK_PRETTIER = BUILD / "prettier.ok"
     OK_PIP_DEV = BUILD / "pip.dev.ok"
     OK_EXT_DEV = BUILD / "ext.dev.ok"
+    OK_PYTEST = BUILD / "pytest.ok"
     SDIST = DIST / ("{}-{}.tar.gz".format(C.PY_NAME, D.PKG_CORE["version"]))
     WHEEL = DIST / (
         "{}-{}-py3-none-any.whl".format(
