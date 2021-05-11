@@ -10,3 +10,11 @@ def test_version():
 
 def test_labextensions():
     assert len(janki._jupyter_labextension_paths()) == 1
+
+
+def test_serverextensions():
+    assert len(janki._jupyter_server_extension_points()) == 1
+
+
+def test_legacyextensions():
+    assert len(janki._jupyter_server_extension_paths()) == 1
