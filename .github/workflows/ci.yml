@@ -126,11 +126,12 @@ jobs:
         python-version: ['3.7', '3.9']
         include:
           - python-version: '3.7'
-            CI_ARTIFACT: 'sdist'
+            ci-artifact: 'sdist'
           - python-version: '3.9'
-            CI_ARTIFACT: 'wheel'
+            ci-artifact: 'wheel'
     env:
       TESTING_IN_CI: '1'
+      CI_ARTIFACT: ${{ matrix.ci-artifact }}
     steps:
       - name: configure line endings
         run: |
