@@ -2,28 +2,32 @@
 # Distributed under the terms of the BSD-3-Clause License.
 
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 from tornado.concurrent import run_on_executor
 from traitlets.config import LoggingConfigurable
 
-MAX_WORKERS = 4
 
+class JankiManager(LoggingConfigurable):
+    executor = ThreadPoolExecutor(max_workers=1)
 
-class CardManager(LoggingConfigurable):
-    executor = ThreadPoolExecutor(max_workers=MAX_WORKERS)
+    @property
+    def root_path(self):
+        # TODO: actually use contents manager API, see jupyter-starters
+        return Path(self.parent.contents_manager.root_dir)
 
     @run_on_executor
-    def _all_cards(self):
-        try:
-            import ankipandas
+    def _load(self, path):
+        from ankipandas import Collection
 
-            self.log.debug(ankipandas)
+        collection = Collection(str(self.root_path / path))
 
-            has_ankipandas = True
-        except:
-            has_ankipandas = False
+        return {
+            "path": path,
+            "cards": collection.cards.to_dict(orient="records"),
+            "notes": collection.notes.to_dict(orient="records"),
+            "revs": collection.revs.to_dict(orient="records"),
+        }
 
-        return {"decks": [], "ankipandas": has_ankipandas}
-
-    async def all_cards(self):
-        return await self._all_cards()
+    async def load(self, path):
+        return await self._load(path)

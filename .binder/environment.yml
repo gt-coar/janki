@@ -14,11 +14,10 @@ dependencies:
   - python >=3.7
   - twine
   # run
-  - genanki
   - jupyterlab >=3.0.14
+  - randomfiletree
   # - ankipandas  # TODO replace once available
   - pip:
-      - randomfiletree
       - ankipandas
   # extras
   - ipydrawio-export
@@ -33,6 +32,7 @@ dependencies:
   # unit test
   - pytest-cov
   - pytest-html
+  - pytest-tornasync
   - hypothesis-jsonschema
   # acceptance test
   - firefox =78

@@ -29,19 +29,19 @@ def _load_jupyter_server_extension(app):
     from jupyter_server.utils import url_path_join as ujoin
     from traitlets import Instance
 
-    from .handlers import CardsHandler
-    from .manager import CardManager
+    from .handlers import CollectionHandler
+    from .manager import JankiManager
 
-    card_manager = CardManager(parent=app)
+    manager = JankiManager(parent=app)
 
-    app.add_traits(card_manager=Instance(CardManager, default_value=card_manager))
+    app.add_traits(janki_manager=Instance(JankiManager, default_value=manager))
 
     ns = app.web_app.settings["base_url"], "janki"
 
     app.web_app.add_handlers(
         ".*$",
         [
-            (ujoin(*ns, "(.*)"), CardsHandler, dict(card_manager=card_manager)),
+            (ujoin(*ns, "(.*)"), CollectionHandler, dict(manager=manager)),
         ],
     )
 

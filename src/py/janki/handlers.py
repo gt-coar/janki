@@ -6,12 +6,12 @@ from tornado.web import authenticated
 
 
 class HandlerBase(APIHandler):
-    def initialize(self, card_manager):
-        self.card_manager = card_manager
+    def initialize(self, manager):
+        self.manager = manager
 
 
-class CardsHandler(HandlerBase):
+class CollectionHandler(HandlerBase):
     @authenticated
-    async def get(self, *bits):
-        response = await self.card_manager.all_cards()
+    async def get(self, path):
+        response = await self.manager.load(path)
         await self.finish(response)
