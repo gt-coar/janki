@@ -20,6 +20,10 @@ env:
   DOIT_N_BUILD: '-n4'
   DOIT_N_TEST: '-n4'
 
+defaults:
+  run:
+    shell: bash -l {0}
+
 jobs:
   build:
     name: build
@@ -28,9 +32,6 @@ jobs:
       matrix:
         os: [ubuntu]
         python-version: ['3.9']
-    defaults:
-      run:
-        shell: bash -l {0}
     env:
       BUILDING_IN_CI: '1'
     steps:
@@ -165,22 +166,6 @@ jobs:
           name: janki ${{ github.run_number }} dist
           path: ./dist
 
-      - name: test (linux)
-        if: ${{ contains(matrix.os, 'ubuntu') }}
-        shell: bash -l {0}
+      - name: test
         run: |
-          doit $DOIT_N_TEST test || doit test
-
-      - name: test (macos)
-        if: ${{ contains(matrix.os, 'macos') }}
-        shell: bash -l {0}
-        run: |
-          doit $DOIT_N_TEST test || doit test
-
-      - name: test (windows)
-        if: ${{ contains(matrix.os, 'windows') }}
-        shell: cmd /C CALL {0}
-        env:
-          DOIT_N_TEST: '-n1'
-        run: |
-          doit %DOIT_N_TEST% test || doit test
+          doit test
