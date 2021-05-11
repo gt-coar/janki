@@ -16,7 +16,7 @@ env:
 
   # our stuff
   ATEST_RETRIES: '3'
-  CACHE_EPOCH: '1'
+  CACHE_EPOCH: '2'
   DOIT_N_BUILD: '-n4'
   DOIT_N_TEST: '-n4'
 
