@@ -32,12 +32,17 @@ def task_setup():
     if C.TESTING_IN_CI:
         return
 
+    jlpm = [C.JLPM]
+
+    if C.BUILDING_IN_CI:
+        jlpm += ["--frozen-lockfile"]
+
     yield dict(
         name="js",
         doc="ensure local npm dependencies",
         file_dep=[*P.PKG_JSONS, P.ROOT_PKG_JSON],
         actions=[
-            [C.JLPM],
+            jlpm,
             [C.JLPM, "lerna", "bootstrap"],
         ],
         targets=[P.YARN_INTEGRITY],
@@ -410,6 +415,7 @@ class C:
         shutil.which("npm") or shutil.which("npm.cmd") or shutil.which("npm.exe")
     ).resolve()
     COV_THRESHOLD = "100"
+    BUILDING_IN_CI = bool(json.loads(os.environ.get("BUILDING_IN_CI", "0")))
     TESTING_IN_CI = bool(json.loads(os.environ.get("TESTING_IN_CI", "0")))
     CI_ARTIFACT = os.environ.get("CI_ARTIFACT")
 

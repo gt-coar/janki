@@ -67,7 +67,7 @@ jobs:
         with:
           path: '**/node_modules'
           key: |
-            ${{ env.CACHE_EPOCH }}-${{ runner.os }}-node-build-${{ hashFiles('yarn.lock', '.gitub/pip-build.txt') }}
+            ${{ env.CACHE_EPOCH }}-${{ runner.os }}-node-build-${{ hashFiles('yarn.lock', '.github/pip-build.txt') }}
 
       - name: cache (yarn)
         uses: actions/cache@v2
@@ -97,7 +97,7 @@ jobs:
       - name: upload (pip freeze)
         uses: actions/upload-artifact@v2
         with:
-          name: janki ${{ github.run_number }} build pip freeze
+          name: janki-${{ github.run_number }}-build-pip-freeze
           path: ./build/pip/
 
       - name: list
@@ -113,7 +113,7 @@ jobs:
       - name: upload (dist)
         uses: actions/upload-artifact@v2
         with:
-          name: janki ${{ github.run_number }} dist
+          name: janki-${{ github.run_number }}-dist
           path: ./dist
 
   test:
@@ -163,7 +163,7 @@ jobs:
       - name: download (dist)
         uses: actions/download-artifact@v2
         with:
-          name: janki ${{ github.run_number }} dist
+          name: janki-${{ github.run_number }}-dist
           path: ./dist
 
       - name: test
