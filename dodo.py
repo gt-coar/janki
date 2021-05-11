@@ -11,7 +11,7 @@ from datetime import datetime
 from hashlib import sha256
 from pathlib import Path
 
-from doit import tools
+import doit
 
 
 def task_binder():
@@ -94,7 +94,7 @@ def task_dist():
             doc=f"build the npm distribution for {pkg}",
             file_dep=[*file_dep, B.TSBUILDINFO],
             actions=[
-                (tools.create_folder, [B.DIST]),
+                (doit.tools.create_folder, [B.DIST]),
                 U._act(C.NPM, "pack", pkg, cwd=B.DIST),
             ],
             targets=targets,
@@ -237,14 +237,8 @@ def task_test():
 def task_lab():
     """start jupyterlab"""
 
-    if C.TESTING_IN_CI:
-        return
-
-    yield dict(
-        name="launch",
-        uptodate=[lambda: False],
-        file_dep=[B.OK_EXT_DEV],
-        actions=[
+    def _lab():
+        p = subprocess.Popen(
             [
                 *C.LAB,
                 "--no-browser",
@@ -252,7 +246,24 @@ def task_lab():
                 "--autoreload",
                 "--expose-app-in-browser",
             ]
-        ],
+        )
+
+        try:
+            p.wait()
+        except KeyboardInterrupt:
+            p.terminate()
+            p.terminate()
+        finally:
+            p.wait()
+
+    if C.TESTING_IN_CI:
+        return
+
+    yield dict(
+        name="launch",
+        uptodate=[lambda: False],
+        file_dep=[B.OK_EXT_DEV],
+        actions=[doit.tools.PythonInteractiveAction(_lab)],
     )
 
 
@@ -287,7 +298,7 @@ def task_watch():
         name="ts",
         uptodate=[lambda: False],
         file_dep=[B.OK_EXT_DEV],
-        actions=[tools.PythonInteractiveAction(_watch)],
+        actions=[doit.tools.PythonInteractiveAction(_watch)],
     )
 
 
@@ -519,7 +530,7 @@ class U:
             env = dict(**os.environ)
             env.update(**kwargs.pop("env"))
             kwargs["env"] = env
-        return tools.CmdAction([*cmd], cwd=cwd, shell=False, **kwargs)
+        return doit.tools.CmdAction([*cmd], cwd=cwd, shell=False, **kwargs)
 
     @staticmethod
     def _do(task, ok=None, **kwargs):

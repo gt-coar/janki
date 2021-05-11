@@ -5,4 +5,5 @@ from traitlets.config import LoggingConfigurable
 
 
 class CardManager(LoggingConfigurable):
-    pass
+    async def all_cards(self):
+        return {"decks": []}

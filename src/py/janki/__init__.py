@@ -26,13 +26,24 @@ def _jupyter_server_extension_points():
 
 
 def _load_jupyter_server_extension(app):
+    from jupyter_server.utils import url_path_join as ujoin
     from traitlets import Instance
 
+    from .handlers import CardsHandler
     from .manager import CardManager
 
     card_manager = CardManager(parent=app)
 
-    app.add_traits(dict(card_manager=Instance(CardManager, default_value=card_manager)))
+    app.add_traits(card_manager=Instance(CardManager, default_value=card_manager))
+
+    ns = app.web_app.settings["base_url"], "janki"
+
+    app.web_app.add_handlers(
+        ".*$",
+        [
+            (ujoin(*ns, "(.*)"), CardsHandler, dict(card_manager=card_manager)),
+        ],
+    )
 
 
 # legacy names
@@ -43,8 +54,8 @@ __all__ = [
     "__js__",
     "__version__",
     "_jupyter_labextension_paths",
+    "_jupyter_server_extension_paths",
     "_jupyter_server_extension_points",
     "_load_jupyter_server_extension",
     "load_jupyter_server_extension",
-    "_jupyter_server_extension_paths",
 ]
