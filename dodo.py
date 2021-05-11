@@ -106,13 +106,14 @@ def task_dist():
             doc=f"build the python {cmd}",
             actions=[[*C.SETUP, cmd], [*C.TWINE_CHECK, dist]],
             file_dep=[
-                *P.ALL_PY_SRC,
                 *B.EXT_PKG_JSON,
-                P.README,
+                *P.ALL_PY_SRC,
+                *P.JP_CONF_JSON,
                 P.LICENSE,
                 P.MANIFEST,
-                P.SETUP_PY,
+                P.README,
                 P.SETUP_CFG,
+                P.SETUP_PY,
             ],
             targets=[dist],
         )
@@ -432,6 +433,7 @@ class P:
     PKG_JSONS = [*SRC_JS.glob("*/package.json")]
     PKG_CORE = SRC_JS / "janki/package.json"
     PKG_META = SRC_JS / "_meta/package.json"
+    JP_CONF_JSON = sorted((SRC_PY / "jupyter-config").glob("*.json"))
     TSCONFIGS = PU._clean(
         SRC_JS / "tsconfigbase.json",
         SRC_JS.glob("*/tsconfig.json"),
@@ -448,6 +450,7 @@ class P:
     ALL_PY = PU._clean(ALL_PY_SRC, DODO)
     ALL_STYLE = PU._clean(SRC_JS.glob("*/style/*.css"), SRC_JS.glob("*/style/*.js"))
     ALL_JSON = PU._clean(
+        JP_CONF_JSON,
         ROOT.glob("*.json"),
         BINDER.rglob("*.json"),
         PKG_JSONS,

@@ -1,2 +1,3 @@
 include LICENSE.txt
 recursive-include src/janki/labextensions *.*
+recursive-include src/janki/jupyter-config *.json

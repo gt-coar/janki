@@ -9,25 +9,40 @@ import setuptools
 
 HERE = Path(__file__).parent
 MOD = "janki"
-EXT = HERE / "src/py" / MOD / "labextensions"
+MOD_ROOT = HERE / "src/py" / MOD
+EXT = MOD_ROOT / "labextensions"
 CORE_NAME = "@gt-coar/janki"
 CORE = EXT / CORE_NAME
 PKG_JSON = CORE / "package.json"
 PKG = json.loads(PKG_JSON.read_text(encoding="utf-8"))
+SHARE = "share/jupyter/labextensions"
+ETC = "etc/jupyter"
+JP_CONF = MOD_ROOT / f"jupyter-config"
+INSTALL_JSON = JP_CONF / "install.json"
+APP_CONF = JP_CONF / f"{MOD}.json"
+APPS = ["notebook", "server"]
+DATA_FILES = {}
 
-SHARE = f"""share/jupyter/labextensions"""
-EXT_FILES = {SHARE: ["install.json"]}
+def dataify(path):
+    return str(path.relative_to(HERE).as_posix())
 
 for ext_path in [EXT] + [d for d in EXT.rglob("*") if d.is_dir()]:
     if ext_path == EXT:
-        target = str(SHARE)
+        target = SHARE
     else:
         target = f"{SHARE}/{ext_path.relative_to(EXT)}"
-    EXT_FILES[target] = [
-        str(p.relative_to(HERE).as_posix())
+
+    DATA_FILES[target] = [
+        dataify(p)
         for p in ext_path.glob("*")
         if not p.is_dir()
     ]
+
+    if ext_path == CORE:
+        DATA_FILES[target] += [dataify(INSTALL_JSON)]
+
+for app in APPS:
+    DATA_FILES[f"{ETC}/jupyter_{app}_config.d"] = [dataify(APP_CONF)]
 
 SETUP_ARGS = dict(
     name=PKG["jupyterlab"]["discovery"]["server"]["base"]["name"],
@@ -35,7 +50,7 @@ SETUP_ARGS = dict(
     version=PKG["version"],
     url=PKG["homepage"],
     license=PKG["license"],
-    data_files=[(k, v) for k, v in EXT_FILES.items()],
+    data_files=[(k, v) for k, v in DATA_FILES.items()],
     project_urls={
         "Bug Tracker": PKG["bugs"]["url"],
         "Source Code": PKG["repository"]["url"]
