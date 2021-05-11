@@ -6,6 +6,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 from datetime import datetime
 from hashlib import sha256
 from pathlib import Path
@@ -265,9 +266,9 @@ def task_lint():
         doc="run basic python formatting/checking",
         file_dep=P.ALL_PY,
         actions=[
-            ["isort", *P.ALL_PY],
-            ["black", "--quiet", *P.ALL_PY],
-            ["pyflakes", *P.ALL_PY],
+            [*C.PYM, "isort", *P.ALL_PY],
+            [*C.PYM, "black", "--quiet", *P.ALL_PY],
+            [*C.PYM, "pyflakes", *P.ALL_PY],
         ],
     )
 
@@ -348,12 +349,13 @@ class C:
     PY_NAME = "janki"
     ENC = dict(encoding="utf-8")
     IGNORE = [".ipynb_checkpoints", "node_modules", ".egg-info"]
-    PYM = ["python", "-m"]
+    PY = Path(sys.executable)
+    PYM = [PY, "-m"]
     PIP = [*PYM, "pip"]
-    JP = ["jupyter"]
+    JP = [*PYM, "jupyter"]
     LAB_EXT = [*JP, "labextension"]
     LAB = [*JP, "lab"]
-    SETUP = ["python", "setup.py"]
+    SETUP = [PY, "setup.py"]
     TWINE_CHECK = [*PYM, "twine", "check"]
     JLPM = Path(shutil.which("jlpm")).resolve()
     NPM = Path(
