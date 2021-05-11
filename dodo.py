@@ -22,10 +22,8 @@ def task_binder():
 def task_release():
     yield dict(
         name="ok",
-        actions=[
-            lambda: print(B.SHA256SUMS.read_text(**C.ENC))
-        ],
-        file_dep=[B.OK_PYTEST, B.SHA256SUMS, B.OK_ESLINT]
+        actions=[lambda: print(B.SHA256SUMS.read_text(**C.ENC))],
+        file_dep=[B.OK_PYTEST, B.SHA256SUMS, B.OK_ESLINT],
     )
 
 
@@ -182,16 +180,26 @@ def task_dev():
         ok=B.OK_PIP_DEV,
     )
 
-    ext_actions = (
-        [] if C.TESTING_IN_CI else [[*C.LAB_EXT, "develop", "--overwrite", "."]]
-    )
+    ext_actions = []
 
-    ext_actions += [["jupyter", "labextension", "list"]]
+    if not C.TESTING_IN_CI:
+        ext_actions = [
+            [*C.LAB_EXT, "develop", "--overwrite", "."],
+            [*C.JP, "server", "extension", "enable", "--sys-prefix", "--py", C.PY_NAME],
+            [*C.JP, "serverextension", "enable", "--sys-prefix", "--py", C.PY_NAME],
+        ]
+
+    ext_actions += [
+        *ext_actions,
+        [*C.JP, "labextension", "list"],
+        [*C.JP, "serverextension", "list"],
+        [*C.JP, "server", "extension", "list"],
+    ]
 
     yield U._do(
         dict(
             name="ext",
-            doc="ensure labextension is available",
+            doc="ensure jupyter extensions are available",
             file_dep=[B.OK_PIP_DEV],
             actions=ext_actions,
         ),
@@ -222,7 +230,7 @@ def task_test():
             file_dep=[*P.ALL_PY_SRC, B.OK_EXT_DEV],
         ),
         # TODO: use a report
-        B.OK_PYTEST
+        B.OK_PYTEST,
     )
 
 
@@ -236,7 +244,15 @@ def task_lab():
         name="launch",
         uptodate=[lambda: False],
         file_dep=[B.OK_EXT_DEV],
-        actions=[[*C.LAB, "--no-browser", "--debug"]],
+        actions=[
+            [
+                *C.LAB,
+                "--no-browser",
+                "--debug",
+                "--autoreload",
+                "--expose-app-in-browser",
+            ]
+        ],
     )
 
 

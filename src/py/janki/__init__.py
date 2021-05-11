@@ -21,4 +21,30 @@ def _jupyter_labextension_paths():
     return exts
 
 
-__all__ = ["__version__", "__js__", "_jupyter_labextension_paths"]
+def _jupyter_server_extension_points():
+    return [{"module": "janki"}]
+
+
+def _load_jupyter_server_extension(app):
+    from traitlets import Instance
+
+    from .manager import CardManager
+
+    card_manager = CardManager(parent=app)
+
+    app.add_traits(dict(card_manager=Instance(CardManager, default_value=card_manager)))
+
+
+# legacy names
+load_jupyter_server_extension = _load_jupyter_server_extension
+_jupyter_server_extension_paths = _jupyter_server_extension_points
+
+__all__ = [
+    "__js__",
+    "__version__",
+    "_jupyter_labextension_paths",
+    "_jupyter_server_extension_points",
+    "_load_jupyter_server_extension",
+    "load_jupyter_server_extension",
+    "_jupyter_server_extension_paths",
+]

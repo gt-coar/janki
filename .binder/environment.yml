@@ -43,3 +43,4 @@ dependencies:
   - myst-nb
   - sphinx-jsonschema
   - pytest-check-links
+  - sqlalchemy <1.4
