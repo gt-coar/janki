@@ -155,7 +155,7 @@ def task_dev():
 
     pip_args = [*C.PIP, "install", "-v", "--no-deps", "--ignore-installed"]
 
-    pip_args += [C.CI_ARTIFACT] if C.TESTING_IN_CI else ["-e", "."]
+    pip_args += [B.PY_DIST_CMD[C.CI_ARTIFACT]] if C.TESTING_IN_CI else ["-e", "."]
 
     yield U._do(
         dict(

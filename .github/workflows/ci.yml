@@ -128,7 +128,7 @@ jobs:
           - python-version: '3.7'
             ci-artifact: 'sdist'
           - python-version: '3.9'
-            ci-artifact: 'wheel'
+            ci-artifact: 'bdist_wheel'
     env:
       TESTING_IN_CI: '1'
       CI_ARTIFACT: ${{ matrix.ci-artifact }}
