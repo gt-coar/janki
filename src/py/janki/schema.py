@@ -10,7 +10,9 @@ import jsonschema
 from ._version import __js__
 
 HERE = Path(__file__).parent
-SCHEMA = HERE / "labextensions" / __js__["name"] / "schemas/plugin.json"
+SCHEMA = (
+    HERE / "labextensions" / __js__["name"] / "schemas" / __js__["name"] / "plugin.json"
+)
 
 
 def make_validator(ref: Optional[Text] = None) -> jsonschema.Draft7Validator:
