@@ -1,25 +1,180 @@
 {
-  "$ref": "#/definitions/user-settings",
+  "$ref": "#/defintions/lab-user-settings",
   "$schema": "http://json-schema.org/draft-07/schema",
   "default": {},
   "definitions": {
-    "collection": {
+    "anki-card": {
+      "properties": {
+        "cdeck": {
+          "type": "string"
+        },
+        "cdue": {
+          "type": "integer"
+        },
+        "cfactor": {
+          "type": "integer"
+        },
+        "civl": {
+          "type": "integer"
+        },
+        "clapses": {
+          "type": "integer"
+        },
+        "cleft": {
+          "type": "integer"
+        },
+        "cmod": {
+          "type": "integer"
+        },
+        "codeck": {
+          "type": "string"
+        },
+        "codue": {
+          "type": "integer"
+        },
+        "cord": {
+          "type": "integer"
+        },
+        "cqueue": {
+          "type": "string"
+        },
+        "creps": {
+          "type": "integer"
+        },
+        "ctype": {
+          "type": "string"
+        },
+        "cusn": {
+          "type": "integer"
+        },
+        "nid": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "cdeck",
+        "cdue",
+        "cfactor",
+        "civl",
+        "clapses",
+        "cleft",
+        "cmod",
+        "codeck",
+        "codue",
+        "cord",
+        "cqueue",
+        "creps",
+        "ctype",
+        "cusn",
+        "nid"
+      ],
+      "type": "object"
+    },
+    "anki-note": {
+      "properties": {
+        "nflds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "nguid": {
+          "type": "string"
+        },
+        "nmod": {
+          "type": "integer"
+        },
+        "nmodel": {
+          "type": "string"
+        },
+        "ntags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "nusn": {
+          "type": "integer"
+        }
+      },
+      "required": ["nflds", "nguid", "nmod", "nmodel", "ntags", "nusn"],
+      "type": "object"
+    },
+    "anki-rev": {
+      "properties": {
+        "cid": {
+          "type": "integer"
+        },
+        "rease": {
+          "type": "integer"
+        },
+        "rfactor": {
+          "type": "integer"
+        },
+        "rivl": {
+          "type": "integer"
+        },
+        "rlastIvl": {
+          "type": "integer"
+        },
+        "rtime": {
+          "type": "integer"
+        },
+        "rtype": {
+          "type": "string"
+        },
+        "rusn": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "cid",
+        "rease",
+        "rfactor",
+        "rivl",
+        "rlastIvl",
+        "rtime",
+        "rtype",
+        "rusn"
+      ],
+      "type": "object"
+    },
+    "api-collection": {
       "additionalProperties": false,
       "description": "a full description of a collection of spaced-repetition cards, as returned by the server",
       "properties": {
+        "cards": {
+          "items": {
+            "$ref": "#/definitions/anki-card"
+          },
+          "type": "array"
+        },
+        "notes": {
+          "items": {
+            "$ref": "#/definitions/anki-note"
+          },
+          "type": "array"
+        },
         "path": {
-          "$ref": "#/definitions/contents-path",
+          "$ref": "#/definitions/api-contents-path",
           "description": "the contents path to the collection"
+        },
+        "required": ["cards", "notes", "path", "revs"],
+        "revs": {
+          "items": {
+            "$ref": "#/definitions/anki-rev"
+          },
+          "type": "array"
         }
       },
       "type": "object"
     },
-    "contents-path": {
+    "api-contents-path": {
       "description": "a contents API path as understood by `/api/contents/{:path}`",
       "format": "uri",
       "type": "string"
     },
-    "user-settings": {
+    "lab-user-settings": {
       "description": "user-configured settings",
       "type": "object"
     }

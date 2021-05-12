@@ -35,7 +35,7 @@ class JankiManager(LoggingConfigurable):
 
     @default("validator")
     def _default_validator(self):
-        return make_validator()
+        return make_validator("#/definitions/api-collection")
 
     @property
     def root_path(self):
