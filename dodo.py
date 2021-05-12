@@ -19,6 +19,23 @@ def task_binder():
     yield dict(name="setup", file_dep=[B.OK_EXT_DEV], actions=[["echo", "ok"]])
 
 
+def task_env():
+    """fix up environments"""
+    if C.TESTING_IN_CI or C.BUILDING_IN_CI:
+        return
+
+    for target, file_dep in P.ENV_DEPS.items():
+        yield dict(
+            name=f"{target.parent.name}",
+            file_dep=file_dep,
+            targets=[target],
+            actions=[
+                (U.sync_env, [target, file_dep]),
+                [C.JLPM, "prettier", "--list-different", "--write", target],
+            ],
+        )
+
+
 def task_release():
     yield dict(
         name="ok",
@@ -467,10 +484,14 @@ class P:
         ALL_SCHEMA,
         ROOT_PKG_JSON,
     )
+    ENV_DOCS = DOCS / "environment.yml"
+    ENV_CI = CI / "environment.yml"
+    ENV_DEMO = BINDER / "environment.yml"
+    ENV_DEPS = {ENV_DOCS: [ENV_CI], ENV_DEMO: [ENV_CI, ENV_DOCS]}
     README = ROOT / "README.md"
     LICENSE = ROOT / "LICENSE.txt"
     ALL_MD = PU._clean(ROOT.glob("*.md"), CI.rglob("*.md"), SRC_JS.glob("*/*.md"))
-    ALL_YAML = [*CI.rglob("*.yml"), *BINDER.glob("*.yml")]
+    ALL_YAML = [*CI.rglob("*.yml"), *BINDER.glob("*.yml"), ENV_DOCS, ENV_CI, ENV_DEMO]
     ALL_PRETTIER = PU._clean(
         ALL_MD, ALL_STYLE, ALL_JSON, ALL_YAML, ALL_TS_SRC, ALL_STYLE, ESLINTRC
     )
@@ -594,6 +615,25 @@ class U:
         )
 
         return [tgz], file_dep
+
+    @staticmethod
+    def sync_env(to_env, from_envs):
+        from yaml import safe_load
+
+        to_env_text = to_env.read_text(**C.ENC)
+
+        for from_env in from_envs:
+            from_env_text = from_env.read_text(**C.ENC)
+            from_env_obj = safe_load(from_env_text)
+            marker = f"""  ### {from_env_obj["name"]}"""
+
+            from_chunks = from_env_text.split(marker)
+            to_chunks = to_env_text.split(marker)
+            to_env_text = "".join(
+                [to_chunks[0], marker, from_chunks[1], marker, to_chunks[2]]
+            )
+
+        to_env.write_text(to_env_text)
 
 
 os.environ.update(
