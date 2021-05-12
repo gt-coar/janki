@@ -21,4 +21,41 @@ def _jupyter_labextension_paths():
     return exts
 
 
-__all__ = ["__version__", "__js__", "_jupyter_labextension_paths"]
+def _jupyter_server_extension_points():
+    return [{"module": "janki"}]
+
+
+def _load_jupyter_server_extension(app):
+    from jupyter_server.utils import url_path_join as ujoin
+    from traitlets import Instance
+
+    from .handlers import CollectionHandler
+    from .manager import JankiManager
+
+    manager = JankiManager(parent=app)
+
+    app.add_traits(janki_manager=Instance(JankiManager, default_value=manager))
+
+    ns = app.web_app.settings["base_url"], "janki"
+
+    app.web_app.add_handlers(
+        ".*$",
+        [
+            (ujoin(*ns, "(.*)"), CollectionHandler, dict(manager=manager)),
+        ],
+    )
+
+
+# legacy names
+load_jupyter_server_extension = _load_jupyter_server_extension
+_jupyter_server_extension_paths = _jupyter_server_extension_points
+
+__all__ = [
+    "__js__",
+    "__version__",
+    "_jupyter_labextension_paths",
+    "_jupyter_server_extension_paths",
+    "_jupyter_server_extension_points",
+    "_load_jupyter_server_extension",
+    "load_jupyter_server_extension",
+]

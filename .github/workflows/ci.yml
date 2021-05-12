@@ -16,7 +16,7 @@ env:
 
   # our stuff
   ATEST_RETRIES: '3'
-  CACHE_EPOCH: '1'
+  CACHE_EPOCH: '2'
   DOIT_N_BUILD: '-n4'
   DOIT_N_TEST: '-n4'
 
@@ -67,7 +67,7 @@ jobs:
         with:
           path: '**/node_modules'
           key: |
-            ${{ env.CACHE_EPOCH }}-${{ runner.os }}-node-build-${{ hashFiles('yarn.lock', '.gitub/pip-build.txt') }}
+            ${{ env.CACHE_EPOCH }}-${{ runner.os }}-node-build-${{ hashFiles('yarn.lock', '.github/pip-build.txt') }}
 
       - name: cache (yarn)
         uses: actions/cache@v2
@@ -97,7 +97,7 @@ jobs:
       - name: upload (pip freeze)
         uses: actions/upload-artifact@v2
         with:
-          name: janki ${{ github.run_number }} build pip freeze
+          name: janki-${{ github.run_number }}-build-pip-freeze
           path: ./build/pip/
 
       - name: list
@@ -113,7 +113,7 @@ jobs:
       - name: upload (dist)
         uses: actions/upload-artifact@v2
         with:
-          name: janki ${{ github.run_number }} dist
+          name: janki-${{ github.run_number }}-dist
           path: ./dist
 
   test:
@@ -146,7 +146,7 @@ jobs:
         with:
           path: ~/conda_pkgs_dir
           key: |
-            ${{ env.CACHE_EPOCH }}-${{ runner.os }}-conda-${{ matrix.python-version }}-${{ hashFiles('.binder/environment.yml') }}
+            ${{ env.CACHE_EPOCH }}-${{ runner.os }}-conda-${{ matrix.python-version }}-${{ hashFiles('.github/environment.yml') }}
           restore-keys: |
             ${{ env.CACHE_EPOCH }}-${{ runner.os }}-conda-${{ matrix.python-version }}-
 
@@ -156,16 +156,29 @@ jobs:
           condarc-file: .github/.condarc
           miniforge-variant: Mambaforge
           python-version: ${{ matrix.python-version }}
-          environment-file: .binder/environment.yml
+          environment-file: .github/environment.yml
           use-only-tar-bz2: true
           use-mamba: true
 
       - name: download (dist)
         uses: actions/download-artifact@v2
         with:
-          name: janki ${{ github.run_number }} dist
+          name: janki-${{ github.run_number }}-dist
           path: ./dist
 
       - name: test
         run: |
           doit test
+
+      - name: status
+        if: always()
+        run: doit list --all --status | sort
+
+      - name: upload (reports)
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name:
+            janki-${{ github.run_number }}-${{ matrix.os }}-${{ matrix.python-version
+            }}-reports
+          path: docs/_reports

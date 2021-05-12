@@ -11,7 +11,7 @@ from datetime import datetime
 from hashlib import sha256
 from pathlib import Path
 
-from doit import tools
+import doit
 
 
 def task_binder():
@@ -19,13 +19,28 @@ def task_binder():
     yield dict(name="setup", file_dep=[B.OK_EXT_DEV], actions=[["echo", "ok"]])
 
 
+def task_env():
+    """fix up environments"""
+    if C.TESTING_IN_CI or C.BUILDING_IN_CI:
+        return
+
+    for target, file_dep in P.ENV_DEPS.items():
+        yield dict(
+            name=f"{target.parent.name}",
+            file_dep=file_dep,
+            targets=[target],
+            actions=[
+                (U.sync_env, [target, file_dep]),
+                [C.JLPM, "prettier", "--list-different", "--write", target],
+            ],
+        )
+
+
 def task_release():
     yield dict(
         name="ok",
-        actions=[
-            lambda: print(B.SHA256SUMS.read_text(**C.ENC))
-        ],
-        file_dep=[B.OK_PYTEST, B.SHA256SUMS, B.OK_ESLINT]
+        actions=[lambda: print(B.SHA256SUMS.read_text(**C.ENC))],
+        file_dep=[B.OK_PYTEST, B.SHA256SUMS, B.OK_ESLINT],
     )
 
 
@@ -34,12 +49,17 @@ def task_setup():
     if C.TESTING_IN_CI:
         return
 
+    jlpm = [C.JLPM]
+
+    if C.BUILDING_IN_CI:
+        jlpm += ["--frozen-lockfile"]
+
     yield dict(
         name="js",
         doc="ensure local npm dependencies",
         file_dep=[*P.PKG_JSONS, P.ROOT_PKG_JSON],
         actions=[
-            [C.JLPM],
+            jlpm,
             [C.JLPM, "lerna", "bootstrap"],
         ],
         targets=[P.YARN_INTEGRITY],
@@ -96,7 +116,7 @@ def task_dist():
             doc=f"build the npm distribution for {pkg}",
             file_dep=[*file_dep, B.TSBUILDINFO],
             actions=[
-                (tools.create_folder, [B.DIST]),
+                (doit.tools.create_folder, [B.DIST]),
                 U._act(C.NPM, "pack", pkg, cwd=B.DIST),
             ],
             targets=targets,
@@ -108,13 +128,14 @@ def task_dist():
             doc=f"build the python {cmd}",
             actions=[[*C.SETUP, cmd], [*C.TWINE_CHECK, dist]],
             file_dep=[
-                *P.ALL_PY_SRC,
                 *B.EXT_PKG_JSON,
-                P.README,
+                *P.ALL_PY_SRC,
+                *P.JP_CONF_JSON,
                 P.LICENSE,
                 P.MANIFEST,
-                P.SETUP_PY,
+                P.README,
                 P.SETUP_CFG,
+                P.SETUP_PY,
             ],
             targets=[dist],
         )
@@ -182,16 +203,26 @@ def task_dev():
         ok=B.OK_PIP_DEV,
     )
 
-    ext_actions = (
-        [] if C.TESTING_IN_CI else [[*C.LAB_EXT, "develop", "--overwrite", "."]]
-    )
+    ext_actions = []
 
-    ext_actions += [["jupyter", "labextension", "list"]]
+    if not C.TESTING_IN_CI:
+        ext_actions = [
+            [*C.LAB_EXT, "develop", "--overwrite", "."],
+            [*C.JP, "server", "extension", "enable", "--sys-prefix", "--py", C.PY_NAME],
+            [*C.JP, "serverextension", "enable", "--sys-prefix", "--py", C.PY_NAME],
+        ]
+
+    ext_actions += [
+        *ext_actions,
+        [*C.JP, "labextension", "list"],
+        [*C.JP, "serverextension", "list"],
+        [*C.JP, "server", "extension", "list"],
+    ]
 
     yield U._do(
         dict(
             name="ext",
-            doc="ensure labextension is available",
+            doc="ensure jupyter extensions are available",
             file_dep=[B.OK_PIP_DEV],
             actions=ext_actions,
         ),
@@ -208,26 +239,46 @@ def task_test():
                 [
                     *C.PYM,
                     "pytest",
-                    "--pyargs",
-                    C.PY_NAME,
-                    "--cov",
-                    C.PY_NAME,
-                    "--cov-report",
-                    "term-missing:skip-covered",
+                    "--cov-branch",
+                    "--cov-report=term-missing:skip-covered",
                     "--no-cov-on-fail",
-                    "--cov-fail-under",
-                    C.COV_THRESHOLD,
+                    "--pyargs",
+                    f"--cov-fail-under={C.COV_THRESHOLD}",
+                    f"--cov-report=html:{B.DOCS_REPORT_COV}",
+                    f"--cov={C.PY_NAME}",
+                    f"--html={B.DOCS_REPORT_TEST_INDEX}",
+                    C.PY_NAME,
                 ]
             ],
             file_dep=[*P.ALL_PY_SRC, B.OK_EXT_DEV],
+            targets=[B.DOCS_REPORT_TEST_INDEX, B.DOCS_REPORT_COV_STATUS],
         ),
         # TODO: use a report
-        B.OK_PYTEST
+        B.OK_PYTEST,
     )
 
 
 def task_lab():
     """start jupyterlab"""
+
+    def _lab():
+        p = subprocess.Popen(
+            [
+                *C.LAB,
+                "--no-browser",
+                "--debug",
+                "--autoreload",
+                "--expose-app-in-browser",
+            ]
+        )
+
+        try:
+            p.wait()
+        except KeyboardInterrupt:
+            p.terminate()
+            p.terminate()
+        finally:
+            p.wait()
 
     if C.TESTING_IN_CI:
         return
@@ -236,7 +287,7 @@ def task_lab():
         name="launch",
         uptodate=[lambda: False],
         file_dep=[B.OK_EXT_DEV],
-        actions=[[*C.LAB, "--no-browser", "--debug"]],
+        actions=[doit.tools.PythonInteractiveAction(_lab)],
     )
 
 
@@ -271,7 +322,7 @@ def task_watch():
         name="ts",
         uptodate=[lambda: False],
         file_dep=[B.OK_EXT_DEV],
-        actions=[tools.PythonInteractiveAction(_watch)],
+        actions=[doit.tools.PythonInteractiveAction(_watch)],
     )
 
 
@@ -382,6 +433,7 @@ class C:
         shutil.which("npm") or shutil.which("npm.cmd") or shutil.which("npm.exe")
     ).resolve()
     COV_THRESHOLD = "100"
+    BUILDING_IN_CI = bool(json.loads(os.environ.get("BUILDING_IN_CI", "0")))
     TESTING_IN_CI = bool(json.loads(os.environ.get("TESTING_IN_CI", "0")))
     CI_ARTIFACT = os.environ.get("CI_ARTIFACT")
 
@@ -391,6 +443,8 @@ class P:
 
     DODO = Path(__file__)
     ROOT = DODO.parent
+
+    DOCS = ROOT / "docs"
 
     BINDER = ROOT / ".binder"
     CI = ROOT / ".github"
@@ -405,6 +459,7 @@ class P:
     PKG_JSONS = [*SRC_JS.glob("*/package.json")]
     PKG_CORE = SRC_JS / "janki/package.json"
     PKG_META = SRC_JS / "_meta/package.json"
+    JP_CONF_JSON = sorted((SRC_PY / "jupyter-config").glob("*.json"))
     TSCONFIGS = PU._clean(
         SRC_JS / "tsconfigbase.json",
         SRC_JS.glob("*/tsconfig.json"),
@@ -421,6 +476,7 @@ class P:
     ALL_PY = PU._clean(ALL_PY_SRC, DODO)
     ALL_STYLE = PU._clean(SRC_JS.glob("*/style/*.css"), SRC_JS.glob("*/style/*.js"))
     ALL_JSON = PU._clean(
+        JP_CONF_JSON,
         ROOT.glob("*.json"),
         BINDER.rglob("*.json"),
         PKG_JSONS,
@@ -428,10 +484,14 @@ class P:
         ALL_SCHEMA,
         ROOT_PKG_JSON,
     )
+    ENV_DOCS = DOCS / "environment.yml"
+    ENV_CI = CI / "environment.yml"
+    ENV_DEMO = BINDER / "environment.yml"
+    ENV_DEPS = {ENV_DOCS: [ENV_CI], ENV_DEMO: [ENV_CI, ENV_DOCS]}
     README = ROOT / "README.md"
     LICENSE = ROOT / "LICENSE.txt"
     ALL_MD = PU._clean(ROOT.glob("*.md"), CI.rglob("*.md"), SRC_JS.glob("*/*.md"))
-    ALL_YAML = [*CI.rglob("*.yml"), *BINDER.glob("*.yml")]
+    ALL_YAML = [*CI.rglob("*.yml"), *BINDER.glob("*.yml"), ENV_DOCS, ENV_CI, ENV_DEMO]
     ALL_PRETTIER = PU._clean(
         ALL_MD, ALL_STYLE, ALL_JSON, ALL_YAML, ALL_TS_SRC, ALL_STYLE, ESLINTRC
     )
@@ -474,6 +534,13 @@ class B:
 
     DIST = P.ROOT / "dist"
     BUILD = P.ROOT / "build"
+    DOCS_REPORT = P.DOCS / "_reports"
+    DOCS_REPORT_COV = DOCS_REPORT / "coverage"
+    DOCS_REPORT_COV_INDEX = DOCS_REPORT_COV / "index.html"
+    DOCS_REPORT_COV_STATUS = DOCS_REPORT_COV / "status.json"
+    DOCS_REPORT_TEST = DOCS_REPORT / "pytest"
+    DOCS_REPORT_TEST_INDEX = DOCS_REPORT_TEST / "index.html"
+
     EXT_DIST = P.JANKI_PY / "labextensions"
     EXT_PKG_JSON = [
         P.JANKI_PY / "labextensions" / data["name"] / "package.json"
@@ -503,7 +570,7 @@ class U:
             env = dict(**os.environ)
             env.update(**kwargs.pop("env"))
             kwargs["env"] = env
-        return tools.CmdAction([*cmd], cwd=cwd, shell=False, **kwargs)
+        return doit.tools.CmdAction([*cmd], cwd=cwd, shell=False, **kwargs)
 
     @staticmethod
     def _do(task, ok=None, **kwargs):
@@ -548,6 +615,25 @@ class U:
         )
 
         return [tgz], file_dep
+
+    @staticmethod
+    def sync_env(to_env, from_envs):
+        from yaml import safe_load
+
+        to_env_text = to_env.read_text(**C.ENC)
+
+        for from_env in from_envs:
+            from_env_text = from_env.read_text(**C.ENC)
+            from_env_obj = safe_load(from_env_text)
+            marker = f"""  ### {from_env_obj["name"]}"""
+
+            from_chunks = from_env_text.split(marker)
+            to_chunks = to_env_text.split(marker)
+            to_env_text = "".join(
+                [to_chunks[0], marker, from_chunks[1], marker, to_chunks[2]]
+            )
+
+        to_env.write_text(to_env_text)
 
 
 os.environ.update(

@@ -1,25 +1,20 @@
-# a full development, test, and documentation environment for janki
+# a docs environment for janki
+
 # Copyright (c) 2021 University System of Georgia and janki contributors
 # Distributed under the terms of the BSD-3-Clause License.
-name: janki-dev
+name: janki-docs
 
 channels:
   - https://conda.anaconda.org/conda-forge
 
 dependencies:
-  # branding
-  - jupyterlab-gt-coar-theme
-  # extras
-  - ipydrawio-export
-  - jupyterlab-markup
-  - jupyterlab-tour
-  # lint
-  - isort
-  - black
-  - pyflakes
-  # extra dev
-  - nodejs >=14,<15
-  - twine
+  ### janki-docs
+  - pydata-sphinx-theme >=0.6.2
+  - myst-nb
+  - sphinx-jsonschema
+  - pytest-check-links
+  - sqlalchemy <1.4
+  ### janki-docs
   ### janki-test
   # build
   - doit
@@ -37,10 +32,3 @@ dependencies:
   - pytest-html
   - pytest-tornasync
   ### janki-test
-  ### janki-docs
-  - pydata-sphinx-theme >=0.6.2
-  - myst-nb
-  - sphinx-jsonschema
-  - pytest-check-links
-  - sqlalchemy <1.4
-  ### janki-docs

@@ -12,12 +12,14 @@
     "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-react": "^7.21.5",
     "lerna": "^3.22.1",
-    "prettier": "^2.2.1"
+    "prettier": "^2.2.1",
+    "prettier-plugin-sort-json": "^0.0.2"
   },
   "prettier": {
     "singleQuote": true,
     "proseWrap": "always",
-    "printWidth": 88
+    "printWidth": 88,
+    "jsonRecursiveSort": true
   },
   "scripts": {
     "bootstrap": "jlpm --prefer-offline && lerna bootstrap",

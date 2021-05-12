@@ -1,0 +1,12 @@
+{
+  "NotebookApp": {
+    "nbserver_extensions": {
+      "janki": true
+    }
+  },
+  "ServerApp": {
+    "jpserver_extensions": {
+      "janki": true
+    }
+  }
+}
