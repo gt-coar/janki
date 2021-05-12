@@ -222,19 +222,19 @@ def task_test():
                 [
                     *C.PYM,
                     "pytest",
-                    "--pyargs",
-                    C.PY_NAME,
-                    "--cov",
-                    C.PY_NAME,
                     "--cov-branch",
-                    "--cov-report",
-                    "term-missing:skip-covered",
+                    "--cov-report=term-missing:skip-covered",
                     "--no-cov-on-fail",
-                    "--cov-fail-under",
-                    C.COV_THRESHOLD,
+                    "--pyargs",
+                    f"--cov-fail-under={C.COV_THRESHOLD}",
+                    f"--cov-report=html:{B.DOCS_REPORT_COV}",
+                    f"--cov={C.PY_NAME}",
+                    f"--html={B.DOCS_REPORT_TEST_INDEX}",
+                    C.PY_NAME,
                 ]
             ],
             file_dep=[*P.ALL_PY_SRC, B.OK_EXT_DEV],
+            targets=[B.DOCS_REPORT_TEST_INDEX, B.DOCS_REPORT_COV_STATUS],
         ),
         # TODO: use a report
         B.OK_PYTEST,
@@ -427,6 +427,8 @@ class P:
     DODO = Path(__file__)
     ROOT = DODO.parent
 
+    DOCS = ROOT / "docs"
+
     BINDER = ROOT / ".binder"
     CI = ROOT / ".github"
     SETUP_PY = ROOT / "setup.py"
@@ -511,6 +513,13 @@ class B:
 
     DIST = P.ROOT / "dist"
     BUILD = P.ROOT / "build"
+    DOCS_REPORT = P.DOCS / "_reports"
+    DOCS_REPORT_COV = DOCS_REPORT / "coverage"
+    DOCS_REPORT_COV_INDEX = DOCS_REPORT_COV / "index.html"
+    DOCS_REPORT_COV_STATUS = DOCS_REPORT_COV / "status.json"
+    DOCS_REPORT_TEST = DOCS_REPORT / "pytest"
+    DOCS_REPORT_TEST_INDEX = DOCS_REPORT_TEST / "index.html"
+
     EXT_DIST = P.JANKI_PY / "labextensions"
     EXT_PKG_JSON = [
         P.JANKI_PY / "labextensions" / data["name"] / "package.json"

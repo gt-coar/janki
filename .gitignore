@@ -10,6 +10,7 @@ __pycache__
 *.tsbuildinfo
 build/
 dist/
+docs/_reports/
 lib/
 node_modules/
 src/py/janki/labextensions/
