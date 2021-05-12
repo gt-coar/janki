@@ -14,3 +14,7 @@ async def test_good_collection(db_path, jk_manager, jk_collection, jp_fetch):
     assert db.exists()
     response = await jp_fetch("janki", db_path)
     assert response.code == 200
+
+    # TODO: check again with ankipandas >=0.3.11
+    # for ext in ["shm", "wal"]:
+    #     assert not (db.parent / f"{db.name}-{ext}").exists()

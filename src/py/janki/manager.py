@@ -48,12 +48,19 @@ class JankiManager(LoggingConfigurable):
 
         collection = Collection(str(self.root_path / path))
 
-        return {
-            "path": path,
-            "cards": collection.cards.to_dict(orient="records"),
-            "notes": collection.notes.to_dict(orient="records"),
-            "revs": collection.revs.to_dict(orient="records"),
-        }
+        result = {}
+
+        try:
+            result = {
+                "path": path,
+                "cards": collection.cards.to_dict(orient="records"),
+                "notes": collection.notes.to_dict(orient="records"),
+                "revs": collection.revs.to_dict(orient="records"),
+            }
+        finally:
+            del collection
+
+        return result
 
     async def load(self, path):
         response = await self._load(path)
