@@ -169,3 +169,16 @@ jobs:
       - name: test
         run: |
           doit test
+
+      - name: status
+        if: always()
+        run: doit list --all --status | sort
+
+      - name: upload (reports)
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name:
+            janki-${{ github.run_number }}-${{ matrix.os }}-${{ matrix.python-version
+            }}-reports
+          path: docs/_reports
