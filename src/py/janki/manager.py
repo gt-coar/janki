@@ -26,7 +26,7 @@ class JankiManager(LoggingConfigurable):
     validator = Instance(jsonschema.Draft7Validator)
 
     @default("strict")
-    def _default_strict(self):
+    def _default_strict(self):  # pragma: no cover
         return self.parent.log_level == "DEBUG"
 
     @default("root_dir")
@@ -58,8 +58,7 @@ class JankiManager(LoggingConfigurable):
     async def load(self, path):
         response = await self._load(path)
 
-        if self.strict:
-            self.validate(response)
+        self.strict and self.validate(response)
 
         return response
 

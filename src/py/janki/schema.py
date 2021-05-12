@@ -14,12 +14,13 @@ SCHEMA = (
     HERE / "labextensions" / __js__["name"] / "schemas" / __js__["name"] / "plugin.json"
 )
 
+REF = "$ref"
+
 
 def make_validator(ref: Optional[Text] = None) -> jsonschema.Draft7Validator:
     """return a schema from the source-of-truth, with an optional $ref"""
     schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
 
-    if ref is not None:
-        schema["$ref"] = ref
+    schema[REF] = ref or schema.get(REF)
 
     return jsonschema.Draft7Validator(schema)
