@@ -1,9 +1,32 @@
 {
+  "$ref": "#/definitions/user-settings",
   "$schema": "http://json-schema.org/draft-07/schema",
-  "jupyter.lab.setting-icon-label": "Janki",
-  "jupyter.lab.setting-icon": "janki:janki",
-  "title": "Janki",
+  "default": {},
+  "definitions": {
+    "collection": {
+      "additionalProperties": false,
+      "description": "a full description of a collection of spaced-repetition cards, as returned by the server",
+      "properties": {
+        "path": {
+          "$ref": "#/definitions/contents-path",
+          "description": "the contents path to the collection"
+        }
+      },
+      "type": "object"
+    },
+    "contents-path": {
+      "description": "a contents API path as understood by `/api/contents/{:path}`",
+      "format": "uri",
+      "type": "string"
+    },
+    "user-settings": {
+      "description": "user-configured settings",
+      "type": "object"
+    }
+  },
   "description": "Configure Janki spaced-repetition cards",
-  "type": "object",
-  "default": {}
+  "jupyter.lab.setting-icon": "janki:janki",
+  "jupyter.lab.setting-icon-label": "Janki",
+  "title": "Janki",
+  "type": "object"
 }

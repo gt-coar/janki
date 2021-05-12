@@ -14,9 +14,9 @@
     "noUnusedLocals": true,
     "preserveWatchOutput": true,
     "resolveJsonModule": true,
+    "skipLibCheck": true,
     "sourceMap": true,
     "strictNullChecks": true,
-    "skipLibCheck": true,
     "target": "es2017",
     "types": []
   }

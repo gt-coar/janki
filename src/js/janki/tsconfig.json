@@ -1,10 +1,10 @@
 {
   "$schema": "http://json.schemastore.org/tsconfig",
-  "extends": "../tsconfigbase",
   "compilerOptions": {
-    "rootDir": ".",
     "outDir": ".",
+    "rootDir": ".",
     "tsBuildInfoFile": ".root.tsbuildinfo"
   },
+  "extends": "../tsconfigbase",
   "files": ["package.json"]
 }

@@ -226,6 +226,7 @@ def task_test():
                     C.PY_NAME,
                     "--cov",
                     C.PY_NAME,
+                    "--cov-branch",
                     "--cov-report",
                     "term-missing:skip-covered",
                     "--no-cov-on-fail",
