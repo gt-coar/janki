@@ -1,2 +1,33 @@
 /* Copyright (c) 2021 University System of Georgia and janki contributors */
 /* Distributed under the terms of the BSD-3-Clause License. */
+
+.jp-JankiCollection {
+  padding: var(--jp-notebook-padding);
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-JankiBar h1 {
+  flex: 0;
+}
+
+.jp-JankiCards {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.jp-JankiCards ul {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.jp-JankiCard {
+  flex: 1;
+  max-width: 40em;
+  max-height: 20em;
+  min-width: 20em;
+  min-height: 10em;
+  text-align: center;
+  margin: 0 var(--jp-notebook-padding) var(--jp-notebook-padding) 0;
+}

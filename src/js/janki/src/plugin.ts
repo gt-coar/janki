@@ -14,7 +14,7 @@ import { IDocumentWidget, DocumentRegistry } from '@jupyterlab/docregistry';
 import { CardCollectionFactory } from './factory';
 import { jankiIcon } from './icons';
 import { CardManager } from './manager';
-import { NS, PLUGIN_ID, ICardManager, PACKAGE, FACTORY, FILE_TYPES } from './tokens';
+import { NS, PLUGIN_ID, ICardManager, FACTORY, FILE_TYPES } from './tokens';
 import { CardCollection } from './widgets';
 
 /**
@@ -23,7 +23,6 @@ import { CardCollection } from './widgets';
 const corePlugin: JupyterFrontEndPlugin<ICardManager> = {
   activate: (app: JupyterLab, restorer?: ILayoutRestorer) => {
     const manager = new CardManager();
-    console.log(`${PLUGIN_ID} ${PACKAGE.version} activated`);
 
     app.docRegistry.addFileType({
       name: 'anki2',
@@ -41,6 +40,8 @@ const corePlugin: JupyterFrontEndPlugin<ICardManager> = {
       defaultFor: FILE_TYPES,
       readOnly: true,
     });
+
+    factory.manager = manager;
 
     function onWidgetCreated(
       sender: any,
@@ -72,10 +73,7 @@ const corePlugin: JupyterFrontEndPlugin<ICardManager> = {
       // Handle state restoration.
       void restorer.restore(tracker, {
         command: 'docmanager:open',
-        args: (widget) => ({
-          path: widget.context.path,
-          factory: FACTORY,
-        }),
+        args: (widget) => ({ path: widget.context.path, factory: FACTORY }),
         name: (widget) => widget.context.path,
       });
     }
