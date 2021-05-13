@@ -27,7 +27,7 @@ def task_env():
     for target, file_dep in P.ENV_DEPS.items():
         yield dict(
             name=f"{target.parent.name}",
-            file_dep=file_dep,
+            file_dep=[*file_dep, B.YARN_INTEGRITY],
             targets=[target],
             actions=[
                 (U.sync_env, [target, file_dep]),
@@ -62,7 +62,7 @@ def task_setup():
             jlpm,
             [C.JLPM, "lerna", "bootstrap"],
         ],
-        targets=[P.YARN_INTEGRITY],
+        targets=[B.YARN_INTEGRITY],
     )
 
 
@@ -73,7 +73,7 @@ def task_build():
 
     yield dict(
         name="schema",
-        file_dep=[P.PLUGIN_SCHEMA, P.YARN_INTEGRITY],
+        file_dep=[P.PLUGIN_SCHEMA, B.YARN_INTEGRITY],
         targets=[P.PLUGIN_SCHEMA_DTS],
         actions=[
             (U.schema_to_ts, [P.PLUGIN_SCHEMA, P.PLUGIN_SCHEMA_DTS]),
@@ -365,7 +365,7 @@ def task_lint():
         dict(
             name="prettier",
             doc="format things with prettier",
-            file_dep=[*P.ALL_PRETTIER, P.YARN_INTEGRITY],
+            file_dep=[*P.ALL_PRETTIER, B.YARN_INTEGRITY],
             actions=[
                 [
                     C.JLPM,
@@ -537,8 +537,6 @@ class P:
         ESLINTRC,
     )
 
-    YARN_INTEGRITY = ROOT / "node_modules/.yarn-integrity"
-
 
 class D:
     """data"""
@@ -552,6 +550,7 @@ class D:
 class B:
     """built"""
 
+    YARN_INTEGRITY = P.ROOT / "node_modules/.yarn-integrity"
     DIST = P.ROOT / "dist"
     BUILD = P.ROOT / "build"
     DOCS_REPORT = P.DOCS / "_reports"
