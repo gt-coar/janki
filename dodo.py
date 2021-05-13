@@ -252,12 +252,11 @@ def task_test():
                     "run",
                     "-m",
                     "pytest",
-                    "--pyargs",
+                    *("--pyargs", C.PY_NAME),
                     "-vv",
                     "--hypothesis-show-statistics",
-                    f"--html={B.DOCS_REPORT_TEST_INDEX}",
+                    *("--html", B.DOCS_REPORT_TEST_INDEX),
                     *C.PYTEST_ARGS,
-                    C.PY_NAME,
                 ],
                 [*C.PYM, "coverage", "html", "-d", B.DOCS_REPORT_COV],
                 [
@@ -271,8 +270,9 @@ def task_test():
             file_dep=[*P.ALL_PY_SRC, B.OK_EXT_DEV, *P.ALL_SCHEMA],
             targets=[B.DOCS_REPORT_TEST_INDEX, B.DOCS_REPORT_COV_STATUS],
         ),
-        # TODO: use a report
-        B.OK_PYTEST,
+        ok=B.OK_PYTEST,
+        # cwd=B.BUILD,
+        # env=dict(COVERAGE_FILE=B.BUILD / ".coverage"),
     )
 
 
@@ -586,15 +586,17 @@ class B:
 class U:
     @staticmethod
     def _act(*cmd, cwd=P.ROOT, **kwargs):
+        if callable(cmd[0]):
+            return cmd
         if "env" in kwargs:
             env = dict(**os.environ)
-            env.update(**kwargs.pop("env"))
+            env.update(**{k: f"{v}" for k, v in kwargs.pop("env").items()})
             kwargs["env"] = env
         return doit.tools.CmdAction([*cmd], cwd=cwd, shell=False, **kwargs)
 
     @staticmethod
     def _do(task, ok=None, **kwargs):
-        cwd = kwargs.get("cwd", None)
+        cwd = kwargs.pop("cwd", None)
         task["actions"] = [
             U._act(*act, cwd=cwd, **kwargs) if isinstance(act, list) else act
             for act in task["actions"]
@@ -607,7 +609,6 @@ class U:
                 lambda: [ok.parent.mkdir(exist_ok=True), ok.write_text("ok"), True][-1],
             ]
             task["targets"] = [*task.get("targets", []), ok]
-
         return task
 
     @staticmethod

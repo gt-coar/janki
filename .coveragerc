@@ -1,0 +1,13 @@
+[run]
+branch = True
+source =
+    janki
+
+[report]
+skip_covered = True
+fail_under = 100
+show_missing = True
+sort = Cover
+
+[html]
+directory = docs/_reports/coverage
