@@ -19,8 +19,8 @@ dependencies:
   - pip:
       - ankipandas
   # unit test
+  - coverage
   - hypothesis-jsonschema
-  - pytest-cov
   - pytest-html
   - pytest-tornasync
   ### janki-test

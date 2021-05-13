@@ -13,7 +13,8 @@
     "eslint-plugin-react": "^7.21.5",
     "lerna": "^3.22.1",
     "prettier": "^2.2.1",
-    "prettier-plugin-sort-json": "^0.0.2"
+    "prettier-plugin-sort-json": "^0.0.2",
+    "json-schema-to-typescript": "^10.1.4"
   },
   "prettier": {
     "singleQuote": true,

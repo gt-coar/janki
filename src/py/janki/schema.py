@@ -15,13 +15,14 @@ SCHEMA = (
 )
 
 REF = "$ref"
+ONE_OF = "oneOf"
 
 
 def make_validator(ref: Optional[Text] = None) -> jsonschema.Draft7Validator:
     """return a schema from the source-of-truth, with an optional $ref"""
     schema = load_schema()
 
-    schema[REF] = ref or schema.get(REF)
+    schema[ONE_OF] = [{"$ref": ref}] if ref else schema.get(ONE_OF)
 
     return jsonschema.Draft7Validator(schema)
 

@@ -11,7 +11,9 @@ FIXTURES = HERE / "fixtures"
 # TODO: once packaged, use the one from ankipandas
 TEST_COLLECTION = FIXTURES / "collection_v1.anki2"
 
-pytest_plugins = ["jupyter_server.pytest_plugin"]
+pytest_plugins = [
+    "jupyter_server.pytest_plugin",
+]
 
 
 @pytest.fixture

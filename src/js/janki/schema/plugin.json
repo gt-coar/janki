@@ -1,9 +1,9 @@
 {
-  "$ref": "#/definitions/lab-user-settings",
   "$schema": "http://json-schema.org/draft-07/schema",
   "default": {},
   "definitions": {
     "anki-card": {
+      "additionalProperties": false,
       "properties": {
         "cdeck": {
           "type": "string"
@@ -68,9 +68,11 @@
         "cusn",
         "nid"
       ],
+      "title": "Card",
       "type": "object"
     },
     "anki-note": {
+      "additionalProperties": false,
       "properties": {
         "nflds": {
           "items": {
@@ -98,9 +100,11 @@
         }
       },
       "required": ["nflds", "nguid", "nmod", "nmodel", "ntags", "nusn"],
+      "title": "Note",
       "type": "object"
     },
     "anki-rev": {
+      "additionalProperties": false,
       "properties": {
         "cid": {
           "type": "integer"
@@ -137,6 +141,7 @@
         "rtype",
         "rusn"
       ],
+      "title": "Rev",
       "type": "object"
     },
     "api-collection": {
@@ -167,6 +172,7 @@
         }
       },
       "required": ["cards", "notes", "path", "revs"],
+      "title": "Collection",
       "type": "object"
     },
     "api-contents-path": {
@@ -175,13 +181,29 @@
       "type": "string"
     },
     "lab-user-settings": {
+      "default": {},
       "description": "user-configured settings",
+      "properties": {
+        "collections": {
+          "description": "Ephemeral collections not saved in files",
+          "items": {
+            "$ref": "#/definitions/api-collection"
+          },
+          "type": "array"
+        }
+      },
+      "title": "Janki Settings",
       "type": "object"
     }
   },
   "description": "Configure Janki spaced-repetition cards",
   "jupyter.lab.setting-icon": "janki:janki",
   "jupyter.lab.setting-icon-label": "Janki",
+  "oneOf": [
+    {
+      "$ref": "#/definitions/lab-user-settings"
+    }
+  ],
   "title": "Janki",
   "type": "object"
 }

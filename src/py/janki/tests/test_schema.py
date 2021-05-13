@@ -3,16 +3,16 @@
 
 import jsonschema
 import pytest
-from hypothesis import given
+from hypothesis import HealthCheck, given, settings
 from hypothesis_jsonschema import from_schema
 
 from janki.schema import make_validator
 
-validator = make_validator()
+validator = make_validator("#/definitions/api-collection")
 
-not_schema = dict(validator.schema)
-_ref = not_schema.pop("$ref")
-not_schema["not"] = {"$ref": _ref}
+schema = dict(**validator.schema)
+schema["$ref"] = schema["oneOf"][0]["$ref"]
+schema.pop("oneOf")
 
 
 @pytest.mark.parametrize("bad_example", [[None], [False], ["a"], [1]])
@@ -21,6 +21,7 @@ def test_validator(bad_example):
         validator.validate(bad_example)
 
 
-@given(example=from_schema(validator.schema))
+@settings(suppress_health_check=[HealthCheck.too_slow])
+@given(example=from_schema(schema))
 def test_validator_hypothesis(example):
     validator.validate(example)

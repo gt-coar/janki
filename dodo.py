@@ -72,14 +72,24 @@ def task_build():
         return
 
     yield dict(
+        name="schema",
+        file_dep=[P.PLUGIN_SCHEMA, P.YARN_INTEGRITY],
+        targets=[P.PLUGIN_SCHEMA_DTS],
+        actions=[
+            (U.schema_to_ts, [P.PLUGIN_SCHEMA, P.PLUGIN_SCHEMA_DTS]),
+            [C.JLPM, "prettier", "--list-different", "--write", P.PLUGIN_SCHEMA_DTS],
+        ],
+    )
+
+    yield dict(
         name="js:lib",
         doc="build the js libs",
         file_dep=[
-            P.YARN_INTEGRITY,
+            *P.ALL_SCHEMA,
             *P.ALL_TS_SRC,
             *P.PKG_JSONS,
-            *P.ALL_SCHEMA,
             *P.TSCONFIGS,
+            P.PLUGIN_SCHEMA_DTS,
         ],
         actions=[[C.JLPM, "build:lib"]],
         targets=[B.TSBUILDINFO],
@@ -238,21 +248,27 @@ def task_test():
             actions=[
                 [
                     *C.PYM,
+                    "coverage",
+                    "run",
+                    "-m",
                     "pytest",
-                    "--cov-branch",
-                    "--cov-report=term-missing:skip-covered",
-                    "--hypothesis-show-statistics",
-                    "--no-cov-on-fail",
                     "--pyargs",
                     "-vv",
-                    f"--cov-fail-under={C.COV_THRESHOLD}",
-                    f"--cov-report=html:{B.DOCS_REPORT_COV}",
-                    f"--cov={C.PY_NAME}",
+                    "--hypothesis-show-statistics",
                     f"--html={B.DOCS_REPORT_TEST_INDEX}",
+                    *C.PYTEST_ARGS,
                     C.PY_NAME,
-                ]
+                ],
+                [*C.PYM, "coverage", "html", "-d", B.DOCS_REPORT_COV],
+                [
+                    *C.PYM,
+                    "coverage",
+                    "report",
+                    "--skip-covered",
+                    f"--fail-under={C.COV_THRESHOLD}",
+                ],
             ],
-            file_dep=[*P.ALL_PY_SRC, B.OK_EXT_DEV],
+            file_dep=[*P.ALL_PY_SRC, B.OK_EXT_DEV, *P.ALL_SCHEMA],
             targets=[B.DOCS_REPORT_TEST_INDEX, B.DOCS_REPORT_COV_STATUS],
         ),
         # TODO: use a report
@@ -376,9 +392,9 @@ def task_lint():
         def _check():
             any_text = path.read_text()
             problems = []
-            if D.COPYRIGHT not in any_text:
+            if C.COPYRIGHT not in any_text:
                 problems += [f"{path.relative_to(P.ROOT)} missing copyright info"]
-            if path != P.LICENSE and D.LICENSE not in any_text:
+            if path != P.LICENSE and C.LICENSE not in any_text:
                 problems += [f"{path.relative_to(P.ROOT)} missing license info"]
             if problems:
                 print("\n".join(problems))
@@ -438,6 +454,15 @@ class C:
     BUILDING_IN_CI = bool(json.loads(os.environ.get("BUILDING_IN_CI", "0")))
     TESTING_IN_CI = bool(json.loads(os.environ.get("TESTING_IN_CI", "0")))
     CI_ARTIFACT = os.environ.get("CI_ARTIFACT")
+    PYTEST_ARGS = json.loads(os.environ.get("PYTEST_ARGS", "[]"))
+    # this line is very long, should end with "contributors," but close enough
+    COPYRIGHT = (
+        "Copyright (c) {} "
+        "University System of Georgia and janki contributors".format(
+            datetime.now().year
+        )
+    )
+    LICENSE = "Distributed under the terms of the BSD-3-Clause License."
 
 
 class P:
@@ -469,6 +494,8 @@ class P:
     )
     ESLINTRC = SRC_JS / ".eslintrc.js"
     TS_SRC = ROOT / "src"
+    PLUGIN_SCHEMA = PKG_CORE.parent / "schema/plugin.json"
+    PLUGIN_SCHEMA_DTS = PKG_CORE.parent / "src/_schema.d.ts"
 
     ALL_SCHEMA = PU._clean(SRC_JS.rglob("*/schema/*.json"))
     ALL_TS_SRC = PU._clean(
@@ -520,15 +547,6 @@ class D:
         pkg_json: json.loads(pkg_json.read_text(**C.ENC)) for pkg_json in P.PKG_JSONS
     }
     PKG_CORE = PKG_JSONS[P.PKG_CORE]
-
-    # this line is very long, should end with "contributors," but close enough
-    COPYRIGHT = (
-        "Copyright (c) {} "
-        "University System of Georgia and janki contributors".format(
-            datetime.now().year
-        )
-    )
-    LICENSE = "Distributed under the terms of the BSD-3-Clause License."
 
 
 class B:
@@ -636,6 +654,21 @@ class U:
             )
 
         to_env.write_text(to_env_text)
+
+    @staticmethod
+    def schema_to_ts(source, target):
+        args = [
+            C.JLPM,
+            "--silent",
+            "json2ts",
+            "--unreachableDefinitions=true",
+            "--format=false",
+            source,
+        ]
+        dts = subprocess.check_output([*map(str, args)]).decode(C.ENC["encoding"])
+        target.write_text(
+            "\n".join([f"// {C.COPYRIGHT}", f"// {C.LICENSE}", dts]), **C.ENC
+        )
 
 
 os.environ.update(
