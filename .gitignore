@@ -2,6 +2,7 @@ __pycache__
 .coverage
 .doit*
 .env/
+.hypothesis/
 .ipynb_checkpoints/
 .yarn-packages/
 *-shm

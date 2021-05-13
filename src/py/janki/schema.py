@@ -19,8 +19,12 @@ REF = "$ref"
 
 def make_validator(ref: Optional[Text] = None) -> jsonschema.Draft7Validator:
     """return a schema from the source-of-truth, with an optional $ref"""
-    schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
+    schema = load_schema()
 
     schema[REF] = ref or schema.get(REF)
 
     return jsonschema.Draft7Validator(schema)
+
+
+def load_schema():
+    return json.loads(SCHEMA.read_text(encoding="utf-8"))
