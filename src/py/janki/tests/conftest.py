@@ -44,3 +44,10 @@ def jk_collection(jp_root_dir):
         return dest
 
     return inner
+
+
+@pytest.fixture
+def jk_validator():
+    import janki.schema
+
+    return janki.schema.make_validator()

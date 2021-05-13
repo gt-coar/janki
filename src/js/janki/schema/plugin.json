@@ -1,5 +1,5 @@
 {
-  "$ref": "#/defintions/lab-user-settings",
+  "$ref": "#/definitions/lab-user-settings",
   "$schema": "http://json-schema.org/draft-07/schema",
   "default": {},
   "definitions": {
