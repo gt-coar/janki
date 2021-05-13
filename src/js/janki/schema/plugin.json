@@ -197,13 +197,13 @@
     }
   },
   "description": "Configure Janki spaced-repetition cards",
-  "jupyter.lab.setting-icon": "janki:janki",
-  "jupyter.lab.setting-icon-label": "Janki",
+  "jupyter.lab.setting-icon": "@gt-coar/janki:janki",
+  "jupyter.lab.setting-icon-label": "Card Collections",
   "oneOf": [
     {
       "$ref": "#/definitions/lab-user-settings"
     }
   ],
-  "title": "Janki",
+  "title": "Card Collections",
   "type": "object"
 }

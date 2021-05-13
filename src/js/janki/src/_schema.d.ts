@@ -10,7 +10,7 @@
 /**
  * Configure Janki spaced-repetition cards
  */
-export type Janki = JankiSettings;
+export type CardCollections = JankiSettings;
 
 /**
  * user-configured settings
