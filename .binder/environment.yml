@@ -13,6 +13,7 @@ dependencies:
   - ipydrawio-export
   - jupyterlab-markup
   - jupyterlab-tour
+  - genson
   # lint
   - isort
   - black

@@ -27,6 +27,7 @@ export interface JankiSettings {
  */
 export interface Collection {
   cards: Card[];
+  collections: CollectionMetadata[];
   notes: Note[];
   /**
    * the contents path to the collection
@@ -52,20 +53,163 @@ export interface Card {
   cusn: number;
   nid: number;
 }
+export interface CollectionMetadata {
+  conf: {
+    activeDecks?: number[];
+    addToCur?: boolean;
+    collapseTime?: number;
+    curDeck?: number;
+    curModel?: string;
+    dueCounts?: boolean;
+    estTimes?: boolean;
+    newBury?: boolean;
+    newSpread?: number;
+    nextPos?: number;
+    sortBackwards?: boolean;
+    sortType?: string;
+    timeLim?: number;
+    [k: string]: unknown;
+  };
+  crt: number;
+  dconf: {
+    [k: string]: DeckConfiguration;
+  };
+  decks: {
+    [k: string]: Deck;
+  };
+  dty: number;
+  id: number;
+  ls: number;
+  mod: number;
+  models: {
+    [k: string]: Model;
+  };
+  scm: number;
+  tags: {
+    [k: string]: unknown;
+  };
+  usn: number;
+  ver: number;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `undefined`'s JSON-Schema definition
+ * via the `patternProperty` ".*".
+ */
+export interface DeckConfiguration {
+  autoplay: boolean;
+  id: number;
+  lapse: {
+    delays: number[];
+    leechAction: number;
+    leechFails: number;
+    minInt: number;
+    mult: number;
+    [k: string]: unknown;
+  };
+  maxTaken: number;
+  mod: number;
+  name: string;
+  new: {
+    bury: boolean;
+    delays: number[];
+    initialFactor: number;
+    ints: number[];
+    order: number;
+    perDay: number;
+    separate: boolean;
+    [k: string]: unknown;
+  };
+  replayq: boolean;
+  rev: {
+    bury: boolean;
+    ease4: number;
+    fuzz: number;
+    ivlFct: number;
+    maxIvl: number;
+    minSpace: number;
+    perDay: number;
+    [k: string]: unknown;
+  };
+  timer: number;
+  usn: number;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `undefined`'s JSON-Schema definition
+ * via the `patternProperty` ".*".
+ */
+export interface Deck {
+  collapsed: boolean;
+  conf: number;
+  desc: string;
+  dyn: number;
+  extendNew: number;
+  extendRev: number;
+  id: number;
+  lrnToday: number[];
+  mod: number;
+  name: string;
+  newToday: number[];
+  revToday: number[];
+  timeToday: number[];
+  usn: number;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `undefined`'s JSON-Schema definition
+ * via the `patternProperty` ".*".
+ */
+export interface Model {
+  css: string;
+  did: number;
+  flds: {
+    font: string;
+    media: unknown[];
+    name: string;
+    ord: number;
+    rtl: boolean;
+    size: number;
+    sticky: boolean;
+    [k: string]: unknown;
+  }[];
+  id: number;
+  latexPost: string;
+  latexPre: string;
+  mod: number;
+  name: string;
+  req: ((number | string) | number[])[][];
+  sortf: number;
+  tags: unknown[];
+  tmpls: {
+    afmt: string;
+    bafmt: string;
+    bqfmt: string;
+    did: null;
+    name: string;
+    ord: number;
+    qfmt: string;
+    [k: string]: unknown;
+  }[];
+  type: number;
+  usn: number;
+  vers: unknown[];
+  [k: string]: unknown;
+}
 export interface Note {
-  nid?: number;
   nflds: string[];
   nguid: string;
+  nid: number;
   nmod: number;
   nmodel: string;
   ntags: string[];
   nusn: number;
 }
 export interface Rev {
-  rid: number;
   cid: number;
   rease: number;
   rfactor: number;
+  rid: number;
   rivl: number;
   rlastIvl: number;
   rtime: number;

@@ -8,11 +8,9 @@ from hypothesis_jsonschema import from_schema
 
 from janki.schema import make_validator
 
-validator = make_validator("#/definitions/api-collection")
+validator = make_validator()
 
 schema = dict(**validator.schema)
-schema["$ref"] = schema["oneOf"][0]["$ref"]
-schema.pop("oneOf")
 
 
 @pytest.mark.parametrize("bad_example", [[None], [False], ["a"], [1]])

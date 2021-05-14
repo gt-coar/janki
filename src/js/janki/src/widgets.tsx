@@ -13,8 +13,12 @@ import * as React from 'react';
 import * as SCHEMA from './_schema';
 import { ICardCollection, ICardManager, CSS } from './tokens';
 
+export type TGroupedCards = Map<string, SCHEMA.Card[]>;
+export type TGroupedNotes = Map<number, SCHEMA.Note[]>;
+
 export class CollectionModel extends VDomModel {
   private _collection: SCHEMA.Collection;
+  private _groupCardsBy: string[] = ['cdeck'];
 
   set collection(collection: SCHEMA.Collection) {
     this._collection = collection;
@@ -24,6 +28,28 @@ export class CollectionModel extends VDomModel {
   get collection(): SCHEMA.Collection {
     return this._collection;
   }
+
+  get groupCardsBy(): string[] {
+    return this._groupCardsBy || [];
+  }
+
+  set groupCardsBy(groupCardsBy: string[]) {
+    this._groupCardsBy = groupCardsBy;
+    this.stateChanged.emit(void 0);
+  }
+
+  get groupedCards(): TGroupedCards {
+    const groups: TGroupedCards = new Map();
+    for (const card of this._collection?.cards || []) {
+      const key = `${this._groupCardsBy.map((key) => (card as any)[key])}`;
+      groups.set(key, [...(groups.get(key) || []), card]);
+    }
+    return groups;
+  }
+
+  // get groupedNotes(): TGroupedNotes {
+  //   const groups: TGroupedNotes = new Map();
+  // }
 }
 
 export class CollectionBar extends VDomRenderer<CollectionModel> {
@@ -42,25 +68,45 @@ export class CollectionBar extends VDomRenderer<CollectionModel> {
 /**
  *
  */
-export class Cards extends VDomRenderer<CollectionModel> {
+export class CardGroups extends VDomRenderer<CollectionModel> {
   constructor(model: CollectionModel) {
     super(model);
     this.addClass(CSS.cards);
   }
   protected render() {
-    const { collection } = this.model;
-    const cards = collection?.cards || [];
-    const cardNodes = cards.map((card) => this.renderCard(card));
-    return <ul>{cardNodes}</ul>;
+    const { groupedCards } = this.model;
+    const groupNodes = [] as JSX.Element[];
+    for (const [key, cards] of groupedCards.entries()) {
+      groupNodes.push(this.renderCardGroup(key, cards));
+    }
+    return <ul>{groupNodes}</ul>;
   }
 
-  renderCard(card: SCHEMA.Card) {
+  renderCard = (card: SCHEMA.Card) => {
     return (
       <li className={[CSS.card, CSS.LAB.card].join(' ')} key={card.nid}>
         {card.nid}
       </li>
     );
-  }
+  };
+
+  renderCardGroup = (key: string, cards: SCHEMA.Card[]) => {
+    const cardNodes = cards.map(this.renderCard);
+    return (
+      <li key={key}>
+        {this.renderGroupLabel(key)}
+        <ul>{cardNodes}</ul>
+      </li>
+    );
+  };
+
+  renderGroupLabel = (key: string) => {
+    return <label>{key}</label>;
+  };
+
+  // renderNotes = (card: SCHEMA.card) {
+
+  // }
 }
 
 export class CardCollection extends Panel {
@@ -95,7 +141,7 @@ export class CardCollection extends Panel {
     const layout = this.layout as PanelLayout;
 
     const bar = new CollectionBar(model);
-    const cards = new Cards(model);
+    const cards = new CardGroups(model);
 
     layout.addWidget(bar);
     layout.addWidget(cards);

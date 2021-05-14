@@ -4,3 +4,4 @@
 API_NS = ["janki"]
 EXTENSIONS = ["anki2", "apkg"]
 RE_EXT = f"\.({'|'.join(EXTENSIONS)})"
+COLLECTION_JSON_FIELDS = ["conf", "dconf", "decks", "tags", "models"]

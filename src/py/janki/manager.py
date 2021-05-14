@@ -1,6 +1,7 @@
 # Copyright (c) 2021 University System of Georgia and janki contributors
 # Distributed under the terms of the BSD-3-Clause License.
 
+import json
 import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -10,6 +11,7 @@ from tornado.concurrent import run_on_executor
 from traitlets import Bool, Instance, Unicode, default
 from traitlets.config import LoggingConfigurable
 
+from .constants import COLLECTION_JSON_FIELDS
 from .schema import make_validator
 
 
@@ -40,7 +42,7 @@ class JankiManager(LoggingConfigurable):
 
     @default("validator")
     def _default_validator(self):
-        return make_validator("#/definitions/api-collection")
+        return make_validator()
 
     @property
     def root_path(self):
@@ -85,11 +87,19 @@ class JankiManager(LoggingConfigurable):
         result = {}
 
         try:
+            cur = collection.db.cursor()
+            meta = []
+            for row in cur.execute("SELECT * from col;"):
+                col_full = dict(zip([d[0] for d in cur.description], row))
+                for field in COLLECTION_JSON_FIELDS:
+                    col_full[field] = json.loads(col_full.get(field) or "{}")
+                meta += [col_full]
             result = {
                 "path": contents_path,
                 "cards": self.json_normalize(collection.cards),
                 "notes": self.json_normalize(collection.notes),
                 "revs": self.json_normalize(collection.revs),
+                "collections": meta,
             }
         finally:
             del collection
