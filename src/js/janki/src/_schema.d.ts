@@ -22,36 +22,42 @@ export interface JankiSettings {
   collections?: Collection[];
   [k: string]: unknown;
 }
-/**
- * a full description of a collection of spaced-repetition cards, as returned by the server
- */
 export interface Collection {
-  cards: Card[];
-  collections: CollectionMetadata[];
-  notes: Note[];
-  /**
-   * the contents path to the collection
-   */
+  cards: {
+    [k: string]: Card;
+  };
+  col: {
+    [k: string]: CollectionMetadata;
+  };
+  notes: {
+    [k: string]: Note;
+  };
   path: string;
-  revs: Rev[];
+  revlog?: {
+    [k: string]: Rev;
+  };
+  [k: string]: unknown;
 }
 export interface Card {
-  cdeck: string;
-  cdue: number;
-  cfactor: number;
-  cid: number;
-  civl: number;
-  clapses: number;
-  cleft: number;
-  cmod: number;
-  codeck: string;
-  codue: number;
-  cord: number;
-  cqueue: string;
-  creps: number;
-  ctype: string;
-  cusn: number;
+  data: string;
+  did: number;
+  due: number;
+  factor: number;
+  flags: number;
+  id: number;
+  ivl: number;
+  lapses: number;
+  left: number;
+  mod: number;
   nid: number;
+  odid: number;
+  odue: number;
+  ord: number;
+  queue: number;
+  reps: number;
+  type: number;
+  usn: number;
+  [k: string]: unknown;
 }
 export interface CollectionMetadata {
   conf: {
@@ -92,10 +98,6 @@ export interface CollectionMetadata {
   ver: number;
   [k: string]: unknown;
 }
-/**
- * This interface was referenced by `undefined`'s JSON-Schema definition
- * via the `patternProperty` ".*".
- */
 export interface DeckConfiguration {
   autoplay: boolean;
   id: number;
@@ -135,10 +137,6 @@ export interface DeckConfiguration {
   usn: number;
   [k: string]: unknown;
 }
-/**
- * This interface was referenced by `undefined`'s JSON-Schema definition
- * via the `patternProperty` ".*".
- */
 export interface Deck {
   collapsed: boolean;
   conf: number;
@@ -156,10 +154,6 @@ export interface Deck {
   usn: number;
   [k: string]: unknown;
 }
-/**
- * This interface was referenced by `undefined`'s JSON-Schema definition
- * via the `patternProperty` ".*".
- */
 export interface Model {
   css: string;
   did: number;
@@ -197,22 +191,28 @@ export interface Model {
   [k: string]: unknown;
 }
 export interface Note {
-  nflds: string[];
-  nguid: string;
-  nid: number;
-  nmod: number;
-  nmodel: string;
-  ntags: string[];
-  nusn: number;
+  csum: number;
+  data: string;
+  flags: number;
+  flds: string;
+  guid: string;
+  id: number;
+  mid: number;
+  mod: number;
+  sfld: string;
+  tags: string;
+  usn: number;
+  [k: string]: unknown;
 }
 export interface Rev {
   cid: number;
-  rease: number;
-  rfactor: number;
-  rid: number;
-  rivl: number;
-  rlastIvl: number;
-  rtime: number;
-  rtype: string;
-  rusn: number;
+  ease: number;
+  factor: number;
+  id: number;
+  ivl: number;
+  lastIvl: number;
+  time: number;
+  type: number;
+  usn: number;
+  [k: string]: unknown;
 }

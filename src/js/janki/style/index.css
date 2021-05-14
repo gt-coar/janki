@@ -16,7 +16,7 @@
   overflow-y: auto;
 }
 
-.jp-JankiCards ul {
+.jp-JankiCards > ul {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -28,6 +28,11 @@
   max-height: 20em;
   min-width: 20em;
   min-height: 10em;
-  text-align: center;
+  margin: 0 var(--jp-notebook-padding) var(--jp-notebook-padding) 0;
+}
+
+.jp-JankiField {
+  border: 1px solid var(--jp-border-color2);
+  padding: var(--jp-notebook-padding);
   margin: 0 var(--jp-notebook-padding) var(--jp-notebook-padding) 0;
 }

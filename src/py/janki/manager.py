@@ -2,6 +2,7 @@
 # Distributed under the terms of the BSD-3-Clause License.
 
 import json
+import sqlite3
 import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -11,7 +12,7 @@ from tornado.concurrent import run_on_executor
 from traitlets import Bool, Instance, Unicode, default
 from traitlets.config import LoggingConfigurable
 
-from .constants import COLLECTION_JSON_FIELDS
+from .constants import JSON_FIELDS, TABLE_NAMES
 from .schema import make_validator
 
 
@@ -80,34 +81,33 @@ class JankiManager(LoggingConfigurable):
         raise ValueError(f"{contents_path} was not recognized")
 
     def _get_api_response(self, db_path, contents_path):
-        from ankipandas import Collection
+        db = sqlite3.connect(db_path)
 
-        collection = Collection(str(db_path))
-
-        result = {}
+        result = {"path": contents_path}
 
         try:
-            cur = collection.db.cursor()
-            meta = []
-            for row in cur.execute("SELECT * from col;"):
-                col_full = dict(zip([d[0] for d in cur.description], row))
-                for field in COLLECTION_JSON_FIELDS:
-                    col_full[field] = json.loads(col_full.get(field) or "{}")
-                meta += [col_full]
-            result = {
-                "path": contents_path,
-                "cards": self.json_normalize(collection.cards),
-                "notes": self.json_normalize(collection.notes),
-                "revs": self.json_normalize(collection.revs),
-                "collections": meta,
-            }
+            for table_name in TABLE_NAMES:
+                self.log_(table_name)
+                cur = db.cursor()
+
+                for values in cur.execute(f"SELECT * from {table_name};"):
+                    row = dict(zip([d[0] for d in cur.description], values))
+                    has_id = "id" in row
+
+                    if table_name not in result:
+                        result[table_name] = {} if has_id else []
+
+                    for json_field in JSON_FIELDS.get(table_name, []):
+                        row[json_field] = json.loads(row.get(json_field) or "{}")
+
+                    if has_id:
+                        result[table_name][row["id"]] = row
+                    else:
+                        result[table_name] += [row]
         finally:
-            del collection
+            db.close()
 
         return result
-
-    def json_normalize(self, df):
-        return df.reset_index().to_dict(orient="records")
 
     @property
     def contents_manager(self):
@@ -125,7 +125,7 @@ class JankiManager(LoggingConfigurable):
 
     def initialize(self):
         self.log_("initializing...")
-        if self.add_self_to_parent:
+        if self.add_self_to_parent:  # pragma: no cover
             self.parent.add_traits(
                 janki_manager=Instance(JankiManager, default_value=self)
             )

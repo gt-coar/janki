@@ -23,6 +23,7 @@ export const CSS = {
   card: 'jp-JankiCard',
   cards: 'jp-JankiCards',
   bar: 'jp-JankiBar',
+  field: 'jp-JankiField',
   LAB: {
     html: 'jp-RenderedHTMLCommon',
     card: 'jp-LauncherCard',
