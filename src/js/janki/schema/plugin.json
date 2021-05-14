@@ -180,6 +180,14 @@
       "format": "uri",
       "type": "string"
     },
+    "api-extensions": {
+      "default": ["anki2", "apkg"],
+      "type": "array"
+    },
+    "api-url-root": {
+      "default": ["janki"],
+      "type": "array"
+    },
     "lab-user-settings": {
       "default": {},
       "description": "user-configured settings",

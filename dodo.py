@@ -283,6 +283,7 @@ def task_lab():
         p = subprocess.Popen(
             [
                 *C.LAB,
+                "--ServerApp.base_url='/jk/'",
                 "--no-browser",
                 "--debug",
                 "--autoreload",
@@ -580,6 +581,8 @@ class B:
     )
     PY_DIST_CMD = {"sdist": SDIST, "bdist_wheel": WHEEL}
     SHA256SUMS = DIST / "SHA256SUMS"
+
+    FIXTURES = BUILD / "fixtures"
 
 
 class U:

@@ -26,24 +26,12 @@ def _jupyter_server_extension_points():
 
 
 def _load_jupyter_server_extension(app):
-    from jupyter_server.utils import url_path_join as ujoin
-    from traitlets import Instance
-
-    from .handlers import CollectionHandler
+    from .handlers import add_handlers
     from .manager import JankiManager
 
     manager = JankiManager(parent=app)
-
-    app.add_traits(janki_manager=Instance(JankiManager, default_value=manager))
-
-    ns = app.web_app.settings["base_url"], "janki"
-
-    app.web_app.add_handlers(
-        ".*$",
-        [
-            (ujoin(*ns, "(.*)"), CollectionHandler, dict(manager=manager)),
-        ],
-    )
+    manager.initialize()
+    add_handlers(manager)
 
 
 # legacy names

@@ -26,7 +26,7 @@
     "bootstrap": "jlpm --prefer-offline && lerna bootstrap",
     "build:lib": "lerna run --stream --parallel build:lib",
     "build:ext": "lerna run --stream --parallel build:ext",
-    "eslint:fix": "cd src/js && eslint --ext .js,.ts,.tsx --fix .",
+    "eslint:fix": "cd src/js && eslint --cache-location=../../build/.eslintcache --ext .js,.ts,.tsx --fix .",
     "eslint:check": "cd src/js && eslint --ext .js,.ts,.tsx .",
     "watch": "lerna run --stream --parallel watch"
   },

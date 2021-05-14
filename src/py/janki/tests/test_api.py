@@ -8,11 +8,13 @@ def test_trait(jp_serverapp, jk_manager):
     assert "janki_manager" in jp_serverapp.trait_names()
 
 
-@pytest.mark.parametrize("db_path", ["foo.anki2", "foo/bar.anki2"])
-async def test_good_collection(db_path, jk_manager, jk_collection, jp_fetch):
-    db = jk_collection(db_path)
+@pytest.mark.parametrize(
+    "contents_path", ["foo.anki2", "foo/bar.anki2", "foo/baz.apkg"]
+)
+async def test_good_collection(contents_path, jk_manager, jk_collection, jp_fetch):
+    db = jk_collection(contents_path)
     assert db.exists()
-    response = await jp_fetch("janki", db_path)
+    response = await jp_fetch("janki", "collection", contents_path)
     assert response.code == 200
 
     # TODO: check again with ankipandas >=0.3.11

@@ -14,8 +14,10 @@ dependencies:
   - python >=3.7
   # run
   - jupyterlab >=3.0.14
-  - randomfiletree
+  - genanki
+  - zipp
   # - ankipandas  # TODO replace once available
+  - randomfiletree
   - pip:
       - ankipandas
   # unit test

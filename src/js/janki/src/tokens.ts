@@ -15,7 +15,7 @@ export const ICardManager = new Token<ICardManager>(PLUGIN_ID);
 
 export interface ICardManager {
   ready: Promise<void>;
-  collection(path: string): Promise<SCHEMA.Collection>;
+  collection(...path: string[]): Promise<SCHEMA.Collection>;
 }
 
 export const CSS = {

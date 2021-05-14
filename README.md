@@ -66,7 +66,7 @@ _Import Cards_.
 
 #### In Markdown
 
-Create a
+> TBD: Markdown can be
 
 #### In PDF
 
@@ -75,7 +75,7 @@ Create a
 ## Import/Export
 
 > both mechanisms support a `-j/--jmespath` argument, allowing for rich filtering of the
-> _Cards_ imported or exported. See the
+> _Cards_ imported or exported. See the [full CLI documentation][cli-docs].
 
 [jmespath]: https://jmespath.org
 
@@ -93,7 +93,7 @@ jupyter janki export -o my-janki.anki2.json -f anki2
 
 [contributing guide]: https://github.com/gt-coar/janki/blob/main/CONTRIBUTING.md
 
----
+## [cli-docs]: https://janki.rtfd.io/cli
 
 > Copyright (c) 2021 University System of Georgia and janki contributors
 >

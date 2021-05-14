@@ -7,6 +7,7 @@ import { ServerConnection } from '@jupyterlab/services';
 import { PromiseDelegate } from '@lumino/coreutils';
 
 import * as SCHEMA from './_schema';
+import { API_NS } from './constants';
 import { ICardManager } from './tokens';
 
 export class CardManager implements ICardManager {
@@ -20,9 +21,13 @@ export class CardManager implements ICardManager {
     return this._ready.promise;
   }
 
-  async collection(path: string): Promise<SCHEMA.Collection> {
+  async collection(...path: string[]): Promise<SCHEMA.Collection> {
+    return await this._fetch<SCHEMA.Collection>('collection', ...path);
+  }
+
+  protected async _fetch<T>(...path: string[]): Promise<T> {
     const settings = ServerConnection.makeSettings();
-    const requestUrl = URLExt.join(settings.baseUrl, 'janki', path);
+    const requestUrl = URLExt.join(settings.baseUrl, ...API_NS, ...path);
 
     let response: Response;
 
@@ -46,6 +51,6 @@ export class CardManager implements ICardManager {
       throw new ServerConnection.ResponseError(response, data.message || data);
     }
 
-    return data as SCHEMA.Collection;
+    return data as T;
   }
 }

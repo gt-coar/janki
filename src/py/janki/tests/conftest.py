@@ -2,6 +2,7 @@
 # Distributed under the terms of the BSD-3-Clause License.
 
 import shutil
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -37,12 +38,16 @@ def jk_collection(jp_root_dir):
 
     def inner(db_path):
         db_path = jp_root_dir.joinpath(db_path)
-        # Check that the notebook has the correct file extension.
-        if db_path.suffix != ".anki2":  # pragma: no cover
-            raise NotImplementedError("File extension for notebook must be .anki2")
         db_path.parent.mkdir(parents=True, exist_ok=True)
+
         dest = db_path.parent / db_path.name
-        shutil.copy2(TEST_COLLECTION, dest)
+
+        if dest.suffix == ".anki2":
+            shutil.copy2(TEST_COLLECTION, dest)
+        elif dest.suffix == ".apkg":
+            with zipfile.ZipFile(dest, "w") as zip_file:
+                with zip_file.open("collection.anki2", "w") as collection:
+                    collection.write(TEST_COLLECTION.read_bytes())
         return dest
 
     return inner
