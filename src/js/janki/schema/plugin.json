@@ -14,6 +14,9 @@
         "cfactor": {
           "type": "integer"
         },
+        "cid": {
+          "type": "integer"
+        },
         "civl": {
           "type": "integer"
         },
@@ -52,6 +55,7 @@
         }
       },
       "required": [
+        "cid",
         "cdeck",
         "cdue",
         "cfactor",
@@ -83,6 +87,9 @@
         "nguid": {
           "type": "string"
         },
+        "nid": {
+          "type": "integer"
+        },
         "nmod": {
           "type": "integer"
         },
@@ -99,7 +106,7 @@
           "type": "integer"
         }
       },
-      "required": ["nflds", "nguid", "nmod", "nmodel", "ntags", "nusn"],
+      "required": ["nflds", "nguid", "nmod", "nmodel", "ntags", "nusn", "nid"],
       "title": "Note",
       "type": "object"
     },
@@ -113,6 +120,9 @@
           "type": "integer"
         },
         "rfactor": {
+          "type": "integer"
+        },
+        "rid": {
           "type": "integer"
         },
         "rivl": {
@@ -132,6 +142,7 @@
         }
       },
       "required": [
+        "rid",
         "cid",
         "rease",
         "rfactor",

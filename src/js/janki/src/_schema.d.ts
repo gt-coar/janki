@@ -38,6 +38,7 @@ export interface Card {
   cdeck: string;
   cdue: number;
   cfactor: number;
+  cid: number;
   civl: number;
   clapses: number;
   cleft: number;
@@ -52,6 +53,7 @@ export interface Card {
   nid: number;
 }
 export interface Note {
+  nid?: number;
   nflds: string[];
   nguid: string;
   nmod: number;
@@ -60,6 +62,7 @@ export interface Note {
   nusn: number;
 }
 export interface Rev {
+  rid: number;
   cid: number;
   rease: number;
   rfactor: number;

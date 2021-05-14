@@ -87,14 +87,17 @@ class JankiManager(LoggingConfigurable):
         try:
             result = {
                 "path": contents_path,
-                "cards": collection.cards.to_dict(orient="records"),
-                "notes": collection.notes.to_dict(orient="records"),
-                "revs": collection.revs.to_dict(orient="records"),
+                "cards": self.json_normalize(collection.cards),
+                "notes": self.json_normalize(collection.notes),
+                "revs": self.json_normalize(collection.revs),
             }
         finally:
             del collection
 
         return result
+
+    def json_normalize(self, df):
+        return df.reset_index().to_dict(orient="records")
 
     @property
     def contents_manager(self):
