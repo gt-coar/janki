@@ -10,15 +10,6 @@
   "references": [
     {
       "path": ".."
-    },
-    {
-      "path": "../../janki/src"
-    },
-    {
-      "path": "../../jupyterlab-sqlite3/src"
-    },
-    {
-      "path": "../../jupyterlab-libarchive/src"
     }
   ]
 }

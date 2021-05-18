@@ -1,18 +1,16 @@
 {
-  "name": "@gt-coar/janki",
+  "name": "@gt-coar/jupyterlab-libarchive",
   "version": "0.1.0",
-  "description": "create, review, and manage your spaced-repetition journey in JupyterLab",
+  "description": "basic model for working with archive files in JupyterLab",
   "dependencies": {
-    "@jupyterlab/application": "3",
-    "@gt-coar/jupyterlab-sqlite3": "^0.1.0",
-    "@gt-coar/jupyterlab-libarchive": "^0.1.0"
+    "libarchive.js": "~1.3.0"
   },
   "keywords": [
     "jupyter",
     "jupyterlab",
     "jupyterlab-extension",
     "georgia-tech",
-    "spaced-repetition"
+    "libarchive"
   ],
   "homepage": "https://github.com/gt-coar/janki",
   "bugs": {
@@ -39,10 +37,7 @@
     "type": "git",
     "url": "https://github.com/gt-coar/janki"
   },
-  "scripts": {
-    "build:ext": "jupyter labextension build .",
-    "watch": "jupyter labextension watch ."
-  },
+  "scripts": {},
   "sideEffects": true,
   "jupyterlab": {
     "extension": "lib/plugin.js",
