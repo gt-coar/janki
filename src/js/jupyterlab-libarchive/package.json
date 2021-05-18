@@ -37,10 +37,12 @@
     "type": "git",
     "url": "https://github.com/gt-coar/janki"
   },
-  "scripts": {},
+  "scripts": {
+    "build:ext": "jupyter labextension build ."
+  },
   "sideEffects": true,
   "jupyterlab": {
-    "extension": "lib/plugin.js",
+    "mimeExtension": "lib/plugin.js",
     "discovery": {
       "server": {
         "base": {
@@ -51,8 +53,7 @@
         ]
       }
     },
-    "outputDir": "../../py/janki/labextensions/@gt-coar/janki",
-    "schemaDir": "schema"
+    "outputDir": "../../py/janki/labextensions/@gt-coar/jupyterlab-libarchive"
   },
   "styleModule": "style/index.js"
 }
