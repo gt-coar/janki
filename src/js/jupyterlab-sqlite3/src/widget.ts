@@ -4,6 +4,7 @@
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Widget } from '@lumino/widgets';
 
+import { ensureSQLite } from './sqlite';
 import { FILE_TYPE } from './tokens';
 
 /**
@@ -27,10 +28,10 @@ export class SQLite3 extends Widget implements IRenderMime.IRenderer {
   /**
    * Render sqlite into this widget's node.
    */
-  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+  async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     const data = model.data[this._mimeType] as string;
-    console.log(data);
-    return Promise.resolve();
+    const SQL = await ensureSQLite();
+    console.log(data, SQL);
   }
 
   private _mimeType: string;

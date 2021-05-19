@@ -17,6 +17,7 @@ const extension: IRenderMime.IExtension = {
   fileTypes: [FILE_TYPE],
   documentWidgetFactoryOptions: {
     name: FILE_TYPE.name,
+    modelName: 'base64',
     primaryFileType: FILE_TYPE.name,
     fileTypes: [FILE_TYPE.name],
     defaultFor: [FILE_TYPE.name],

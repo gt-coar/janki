@@ -4,6 +4,7 @@
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Widget } from '@lumino/widgets';
 
+import { ensureLibArchive } from './libarchive';
 import { FILE_TYPES } from './tokens';
 
 /**
@@ -27,10 +28,10 @@ export class Archive extends Widget implements IRenderMime.IRenderer {
   /**
    * Render archive into this widget's node.
    */
-  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+  async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     const data = model.data[this._mimeType] as string;
-    console.log(data);
-    return Promise.resolve();
+    const Archive = await ensureLibArchive();
+    console.log(Archive, data);
   }
 
   private _mimeType: string;

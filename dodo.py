@@ -502,6 +502,7 @@ class P:
     ALL_TS_SRC = PU._clean(
         SRC_JS.rglob("*/src/**/*.ts"), SRC_JS.rglob("*/src/**/*.tsx")
     )
+    ALL_PKG_JS = PU._clean(SRC_JS.rglob("*/*.js"))
     ALL_PY_SRC = PU._clean(SRC_PY.rglob("*.py"))
     ALL_PY = PU._clean(ALL_PY_SRC, DODO)
     ALL_STYLE = PU._clean(SRC_JS.glob("*/style/*.css"), SRC_JS.glob("*/style/*.js"))
@@ -523,7 +524,14 @@ class P:
     ALL_MD = PU._clean(ROOT.glob("*.md"), CI.rglob("*.md"), SRC_JS.glob("*/*.md"))
     ALL_YAML = [*CI.rglob("*.yml"), *BINDER.glob("*.yml"), ENV_DOCS, ENV_CI, ENV_DEMO]
     ALL_PRETTIER = PU._clean(
-        ALL_MD, ALL_STYLE, ALL_JSON, ALL_YAML, ALL_TS_SRC, ALL_STYLE, ESLINTRC
+        ALL_MD,
+        ALL_STYLE,
+        ALL_JSON,
+        ALL_YAML,
+        ALL_TS_SRC,
+        ALL_STYLE,
+        ESLINTRC,
+        ALL_PKG_JS,
     )
     ALL_SHELL = [BINDER / "postBuild"]
     ALL_HEADERS = PU._clean(
