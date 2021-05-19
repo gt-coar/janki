@@ -9,7 +9,7 @@ def test_version():
 
 
 def test_labextensions():
-    assert len(janki._jupyter_labextension_paths()) == 1
+    assert len(janki._jupyter_labextension_paths()) == 3
 
 
 def test_serverextensions():

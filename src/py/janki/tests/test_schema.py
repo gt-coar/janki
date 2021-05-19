@@ -19,7 +19,7 @@ def test_validator(bad_example):
         validator.validate(bad_example)
 
 
-@settings(suppress_health_check=[HealthCheck.too_slow])
+@settings(suppress_health_check=[HealthCheck.too_slow, HealthCheck.filter_too_much])
 @given(example=from_schema(schema))
 def test_validator_hypothesis(example):
     validator.validate(example)

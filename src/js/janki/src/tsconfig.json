@@ -10,6 +10,12 @@
   "references": [
     {
       "path": ".."
+    },
+    {
+      "path": "../../jupyterlab-sqlite3/src"
+    },
+    {
+      "path": "../../jupyterlab-libarchive/src"
     }
   ]
 }

@@ -142,7 +142,6 @@
               },
               "dconf": {
                 "additionalProperties": {
-                  "$schema": "http://json-schema.org/schema#",
                   "properties": {
                     "autoplay": {
                       "type": "boolean"
@@ -295,7 +294,6 @@
               },
               "decks": {
                 "additionalProperties": {
-                  "$schema": "http://json-schema.org/schema#",
                   "properties": {
                     "collapsed": {
                       "type": "boolean"
@@ -387,7 +385,6 @@
               },
               "models": {
                 "additionalProperties": {
-                  "$schema": "http://json-schema.org/schema#",
                   "properties": {
                     "css": {
                       "type": "string"

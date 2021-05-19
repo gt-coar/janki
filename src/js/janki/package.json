@@ -56,6 +56,16 @@
         ]
       }
     },
+    "sharedPackages": {
+      "@gt-coar/jupyterlab-sqlite3": {
+        "bundled": false,
+        "singleton": true
+      },
+      "@gt-coar/jupyterlab-libarchive": {
+        "bundled": false,
+        "singleton": true
+      }
+    },
     "outputDir": "../../py/janki/labextensions/@gt-coar/janki",
     "schemaDir": "schema",
     "webpackConfig": "./webpack.config.js"
