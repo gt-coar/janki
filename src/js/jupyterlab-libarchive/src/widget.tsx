@@ -1,8 +1,6 @@
 // Copyright (c) 2021 University System of Georgia and janki contributors
 // Distributed under the terms of the BSD-3-Clause License.
 
-
-
 import { VDomRenderer } from '@jupyterlab/apputils';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Panel, PanelLayout } from '@lumino/widgets';
@@ -64,15 +62,29 @@ export class Archive extends Panel implements IRenderMime.IRenderer {
     (this.layout as PanelLayout).addWidget(this._renderer);
   }
 
+  dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+    this._renderer.dispose();
+    this._archiveModel?.dispose();
+    if (this._archiveModel) {
+      this._archiveModel = null;
+    }
+    super.dispose();
+  }
+
   /**
    * Render archive into this widget's node.
    */
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    this._archiveModel.data = model.data[this._mimeType] as string;
+    if (this._archiveModel) {
+      this._archiveModel.data = model.data[this._mimeType] as string;
+    }
   }
 
   private _mimeType: string;
-  private _archiveModel: Model;
+  private _archiveModel: Model | null;
   private _renderer: ArchiveRenderer;
 }
 

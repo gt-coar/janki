@@ -1,7 +1,6 @@
 // Copyright (c) 2021 University System of Georgia and janki contributors
 // Distributed under the terms of the BSD-3-Clause License.
 
-
 import { VDomRenderer } from '@jupyterlab/apputils';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Panel, PanelLayout } from '@lumino/widgets';
@@ -73,15 +72,29 @@ export class SQLite3 extends Panel implements IRenderMime.IRenderer {
     (this.layout as PanelLayout).addWidget(this._renderer);
   }
 
+  dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+    this._renderer.dispose();
+    if (this._dbModel) {
+      this._dbModel.dispose();
+      this._dbModel = null;
+    }
+    super.dispose();
+  }
+
   /**
    * Render sqlite into this widget's node.
    */
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    this._dbModel.data = model.data[this._mimeType] as string;
+    if (this._dbModel) {
+      this._dbModel.data = model.data[this._mimeType] as string;
+    }
   }
 
   private _mimeType: string;
-  private _dbModel: Model;
+  private _dbModel: Model | null;
   private _renderer: DBRenderer;
 }
 

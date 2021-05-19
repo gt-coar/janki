@@ -14,11 +14,12 @@ declare module '*.svg' {
 declare module 'libarchive.js' {
   export interface IArchive {
     close(): void;
+    extractFiles(): Promise<IFileTree>;
+    getFilesArray(): Promise<ICompressedFileEntry[]>;
+    getFilesObject(): Promise<ICompressedFileTree>;
     hasEncryptedData(): Promise<boolean | null>;
     usePassword(archivePassword: string): Promise<void>;
-    extractFiles(): Promise<IFileTree>;
-    getFilesObject(): Promise<ICompressedFileTree>;
-    getFilesArray(): Promise<ICompressedFileEntry[]>;
+    _worker: Worker | null;
   }
 
   export interface IFileTree {

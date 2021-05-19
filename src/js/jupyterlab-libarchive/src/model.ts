@@ -6,7 +6,6 @@ import type { IArchive, ICompressedFileEntry } from 'libarchive.js';
 
 import { ensureLibArchive } from './libarchive';
 
-
 export class Model extends VDomModel {
   private _data: string;
   private _archive: IArchive;
@@ -56,6 +55,18 @@ export class Model extends VDomModel {
     }
     this._members = members;
     this.stateChanged.emit(void 0);
+  }
+
+  dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+    const { _worker } = this._archive;
+    if (_worker) {
+      _worker.terminate();
+      this._archive._worker = null;
+    }
+    super.dispose();
   }
 }
 

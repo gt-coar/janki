@@ -18,8 +18,19 @@ order by tableName, p.name;
 
 export class Model extends VDomModel {
   private _data: string;
-  private _db: Database;
+  private _db: Database | null;
   private _tables: Model.TTableMap = new Map();
+
+  dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+    if (this._db) {
+      this._db.close();
+      this._db = null;
+    }
+    super.dispose();
+  }
 
   set data(data: string) {
     this._data = data;
@@ -51,20 +62,21 @@ export class Model extends VDomModel {
   }
 
   protected async updateTables(): Promise<void> {
-    const stmt = this._db.prepare(Q_TABLE_COLUMNS);
     const tables: Model.TTableMap = new Map();
-    while (stmt.step()) {
-      //
-      const { tableName, ...column } =
-        stmt.getAsObject() as unknown as Model.IColumnWithTableName;
-      let table = tables.get(tableName);
-      if (!table) {
-        table = { name: tableName, columns: new Map() };
-        tables.set(tableName, table);
+    if (this._db) {
+      const stmt = this._db.prepare(Q_TABLE_COLUMNS);
+      while (stmt.step()) {
+        //
+        const { tableName, ...column } =
+          stmt.getAsObject() as unknown as Model.IColumnWithTableName;
+        let table = tables.get(tableName);
+        if (!table) {
+          table = { name: tableName, columns: new Map() };
+          tables.set(tableName, table);
+        }
+        table.columns.set(column.name, column);
       }
-      table.columns.set(column.name, column);
     }
-
     this._tables = tables;
     this.stateChanged.emit(void 0);
   }
