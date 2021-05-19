@@ -7,3 +7,9 @@ const { definitions } = SCHEMA;
 
 export const API_NS = definitions['api-url-root'].default;
 export const EXTENSIONS = definitions['api-extensions'].default;
+
+export const DEBUG = window.location.href.indexOf('JANKI_DEBUG') > -1;
+
+if (DEBUG) {
+  console.warn('JANKI_DEBUG is activated');
+}

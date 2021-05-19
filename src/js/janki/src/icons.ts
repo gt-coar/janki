@@ -8,3 +8,7 @@ import JANKI_SVG from '../style/img/janki.svg';
 import { NS } from './tokens';
 
 export const jankiIcon = new LabIcon({ name: `${NS}:janki`, svgstr: JANKI_SVG });
+export const jankiPkgIcon = new LabIcon({
+  name: `${NS}:janki-pkg`,
+  svgstr: JANKI_SVG.replace('jp-icon-warn0', 'jp-icon-brand0'),
+});

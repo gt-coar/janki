@@ -56,6 +56,14 @@ doit release
 [mambaforge]: https://github.com/conda-forge/miniforge/releases
 [doit]: https://pydoit.org/cmd_run.html
 
+## Further Reading
+
+### Anki Formats
+
+- Some notes in
+  [slavetto/anki-cards-web-browser](https://github.com/slavetto/anki-cards-web-browser/blob/master/documentation/Processing%20Anki%27s%20.apkg%20files.md)
+  - includes information about media, etc.
+
 ---
 
 > Copyright (c) 2021 University System of Georgia and janki contributors

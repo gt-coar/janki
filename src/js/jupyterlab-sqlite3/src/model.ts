@@ -20,6 +20,7 @@ export class Model extends VDomModel {
   private _data: string;
   private _db: Database | null;
   private _tables: Model.TTableMap = new Map();
+  private _array: Uint8Array;
 
   dispose() {
     if (this.isDisposed) {
@@ -34,30 +35,55 @@ export class Model extends VDomModel {
 
   set data(data: string) {
     this._data = data;
-    this.updateDb().catch(console.error);
+    this.updateArray().catch(console.error);
   }
 
   get data() {
     return this._data;
   }
 
+  get array() {
+    return this._array;
+  }
+
+  set array(array: Uint8Array) {
+    this._array = array;
+    this.updateDb().catch(console.error);
+  }
+
   get db() {
     return this._db;
+  }
+
+  query<T = any>(sqlString: string, bindings?: Record<string, any>): T[] {
+    const result: T[] = [];
+    if (this._db) {
+      const stmt = this._db.prepare(sqlString);
+      while (stmt.step()) {
+        result.push(stmt.getAsObject() as unknown as T);
+      }
+    }
+    return result;
   }
 
   get tables() {
     return this._tables;
   }
 
-  protected async updateDb(): Promise<void> {
+  protected async updateArray(): Promise<void> {
     const bs = atob(this._data);
     const ab = new ArrayBuffer(bs.length);
     const ia = new Uint8Array(ab);
     for (let i = 0; i < bs.length; i++) {
       ia[i] = bs.charCodeAt(i);
     }
+    this._array = ia;
+    await this.updateDb();
+  }
+
+  protected async updateDb(): Promise<void> {
     const SQL = await ensureSQLite();
-    this._db = new SQL.Database(ia);
+    this._db = new SQL.Database(this._array);
     await this.updateTables();
   }
 

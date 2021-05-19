@@ -33,7 +33,7 @@ export const CSS = {
 /**
  * The list of file types for card collections.
  */
-export const FILE_TYPES = ['anki2'];
+export const FILE_TYPES = ['anki2', 'apkg'];
 
 /**
  * The name of the factory that creates card collections.

@@ -12,7 +12,7 @@ import { WidgetTracker } from '@jupyterlab/apputils';
 import { IDocumentWidget, DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { CardCollectionFactory } from './factory';
-import { jankiIcon } from './icons';
+import { jankiIcon, jankiPkgIcon } from './icons';
 import { CardManager } from './manager';
 import { NS, PLUGIN_ID, ICardManager, FACTORY, FILE_TYPES } from './tokens';
 import { CardCollection } from './widgets';
@@ -30,6 +30,15 @@ const corePlugin: JupyterFrontEndPlugin<ICardManager> = {
       mimeTypes: ['application/octet-stream'],
       extensions: ['.anki2'],
       icon: jankiIcon,
+      fileFormat: 'base64',
+    });
+
+    app.docRegistry.addFileType({
+      name: 'apkg',
+      displayName: 'Card Collection (Archive)',
+      mimeTypes: ['application/octet-stream'],
+      extensions: ['.apkg'],
+      icon: jankiPkgIcon,
       fileFormat: 'base64',
     });
 

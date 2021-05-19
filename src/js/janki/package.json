@@ -57,7 +57,8 @@
       }
     },
     "outputDir": "../../py/janki/labextensions/@gt-coar/janki",
-    "schemaDir": "schema"
+    "schemaDir": "schema",
+    "webpackConfig": "./webpack.config.js"
   },
   "styleModule": "style/index.js"
 }
