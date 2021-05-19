@@ -9,8 +9,6 @@ export const PACKAGE = PACKAGE_;
 export const NS = PACKAGE['name'];
 export const PLUGIN_ID = `${NS}:plugin`;
 
-console.log(SQLITE_ICON_SVG);
-
 export const sqliteIcon = new LabIcon({
   name: `${NS}:icon`,
   svgstr: SQLITE_ICON_SVG,

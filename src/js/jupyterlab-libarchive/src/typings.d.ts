@@ -6,6 +6,11 @@ declare module '!!file-loader*' {
   export default script;
 }
 
+declare module '*.svg' {
+  const script: string;
+  export default script;
+}
+
 declare module 'libarchive.js' {
   export interface IArchive {
     close(): void;

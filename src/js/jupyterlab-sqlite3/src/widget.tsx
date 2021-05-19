@@ -1,6 +1,7 @@
 // Copyright (c) 2021 University System of Georgia and janki contributors
 // Distributed under the terms of the BSD-3-Clause License.
 
+
 import { VDomRenderer } from '@jupyterlab/apputils';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Panel, PanelLayout } from '@lumino/widgets';
@@ -77,7 +78,6 @@ export class SQLite3 extends Panel implements IRenderMime.IRenderer {
    */
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     this._dbModel.data = model.data[this._mimeType] as string;
-    console.log(this._dbModel);
   }
 
   private _mimeType: string;
