@@ -635,14 +635,15 @@ class U:
             )
         )
         file_dep = PU._clean(
+            path / "LICENSE.txt",
+            path / "README.md",
+            path.glob("*.js"),
+            path.glob("*.tsbuildinfo"),
+            pkg_json,
+            schema.rglob("*"),
             src.rglob("*.ts"),
             src.rglob("*.tsx"),
             style.rglob("*"),
-            schema.rglob("*"),
-            path / "LICENSE.txt",
-            path / "README.md",
-            path.glob("*.tsbuildinfo"),
-            pkg_json,
         )
 
         return [tgz], file_dep

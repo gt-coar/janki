@@ -31,7 +31,17 @@ export class Archive extends Widget implements IRenderMime.IRenderer {
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     const data = model.data[this._mimeType] as string;
     const Archive = await ensureLibArchive();
-    console.log(Archive, data);
+    const bs = atob(data);
+    let ab = new ArrayBuffer(bs.length);
+    let ia = new Uint8Array(ab);
+    for (let i = 0; i < bs.length; i++) {
+      ia[i] = bs.charCodeAt(i);
+    }
+    const file = new File([ab], 'a.zip', { type: this._mimeType });
+
+    const archive = await Archive.open(file);
+    const files = await archive.getFilesArray();
+    console.log(archive, files);
   }
 
   private _mimeType: string;

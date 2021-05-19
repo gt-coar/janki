@@ -4,8 +4,9 @@
 import { PromiseDelegate } from '@lumino/coreutils';
 import type { IArchiveJsStatic } from 'libarchive.js';
 
-let LIB_ARCHIVE: IArchiveJsStatic;
+import * as WORKER_URL from '!!file-loader!libarchive.js/dist/worker-bundle.js';
 
+let LIB_ARCHIVE: IArchiveJsStatic;
 let LOADING: PromiseDelegate<IArchiveJsStatic>;
 
 export async function ensureLibArchive(): Promise<IArchiveJsStatic> {
@@ -18,12 +19,12 @@ export async function ensureLibArchive(): Promise<IArchiveJsStatic> {
 
   LOADING = new PromiseDelegate();
 
-  const ArchiveJS = await import('libarchive.js');
+  const ArchiveJS: any = await import('libarchive.js');
 
-  ArchiveJS.default.init();
+  ArchiveJS.Archive.init({ workerUrl: WORKER_URL.default });
 
-  LIB_ARCHIVE = ArchiveJS.default;
-  LOADING.resolve(ArchiveJS.default);
+  LIB_ARCHIVE = ArchiveJS.Archive;
+  LOADING.resolve(ArchiveJS.Archive);
 
   return LIB_ARCHIVE;
 }
