@@ -37,7 +37,6 @@ export class Card extends VDomRenderer<Model> {
     super(model);
     this.cardId = cardId;
     this.addClass(CSS.card);
-    this.addClass(CSS.LAB.card);
   }
 
   protected render() {
@@ -49,7 +48,7 @@ export class Card extends VDomRenderer<Model> {
 
     if (template) {
       return (
-        <div className={`${CSS.model}-${note.mid}`}>
+        <div className={`${CSS.model} ${CSS.model}-${note.mid}`}>
           {this.renderWithTemplate(card, note, model, template)}
         </div>
       );
@@ -80,10 +79,23 @@ export class Card extends VDomRenderer<Model> {
       ...context,
     });
     const className = `card${template.ord ? template.ord : ''}`;
+    const radioName = `name-${card.id}`;
+    const frontId = `id-front-${card.id}`;
+    const backId = `id-back-${card.id}`;
     return (
-      <div>
-        <div className={className} dangerouslySetInnerHTML={{ __html: front }}></div>
-        <div className={className} dangerouslySetInnerHTML={{ __html: back }}></div>
+      <div className={CSS.template}>
+        <input type="radio" name={radioName} id={frontId} defaultChecked={true} />
+        <label
+          htmlFor={backId}
+          className={className}
+          dangerouslySetInnerHTML={{ __html: front }}
+        ></label>
+        <input type="radio" name={radioName} id={backId} />
+        <label
+          htmlFor={frontId}
+          className={className}
+          dangerouslySetInnerHTML={{ __html: back }}
+        ></label>
       </div>
     );
   }
