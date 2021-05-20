@@ -175,19 +175,20 @@ export interface Model {
   req: ((number | string) | number[])[][];
   sortf: number;
   tags: unknown[];
-  tmpls: {
-    afmt: string;
-    bafmt: string;
-    bqfmt: string;
-    did: null;
-    name: string;
-    ord: number;
-    qfmt: string;
-    [k: string]: unknown;
-  }[];
+  tmpls: Template[];
   type: number;
   usn: number;
   vers: unknown[];
+  [k: string]: unknown;
+}
+export interface Template {
+  afmt: string;
+  bafmt: string;
+  bqfmt: string;
+  did: null;
+  name: string;
+  ord: number;
+  qfmt: string;
   [k: string]: unknown;
 }
 export interface Note {

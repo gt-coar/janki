@@ -2,6 +2,34 @@
   "$schema": "http://json-schema.org/draft-07/schema",
   "default": {},
   "definitions": {
+    "anki-template": {
+      "properties": {
+        "afmt": {
+          "type": "string"
+        },
+        "bafmt": {
+          "type": "string"
+        },
+        "bqfmt": {
+          "type": "string"
+        },
+        "did": {
+          "type": "null"
+        },
+        "name": {
+          "type": "string"
+        },
+        "ord": {
+          "type": "integer"
+        },
+        "qfmt": {
+          "type": "string"
+        }
+      },
+      "required": ["afmt", "bafmt", "bqfmt", "did", "name", "ord", "qfmt"],
+      "title": "Template",
+      "type": "object"
+    },
     "api-collection": {
       "properties": {
         "cards": {
@@ -472,39 +500,7 @@
                     },
                     "tmpls": {
                       "items": {
-                        "properties": {
-                          "afmt": {
-                            "type": "string"
-                          },
-                          "bafmt": {
-                            "type": "string"
-                          },
-                          "bqfmt": {
-                            "type": "string"
-                          },
-                          "did": {
-                            "type": "null"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "ord": {
-                            "type": "integer"
-                          },
-                          "qfmt": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "afmt",
-                          "bafmt",
-                          "bqfmt",
-                          "did",
-                          "name",
-                          "ord",
-                          "qfmt"
-                        ],
-                        "type": "object"
+                        "$ref": "#/definitions/anki-template"
                       },
                       "type": "array"
                     },
