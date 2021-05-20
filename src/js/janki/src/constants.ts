@@ -13,3 +13,10 @@ export const DEBUG = window.location.href.indexOf('JANKI_DEBUG') > -1;
 if (DEBUG) {
   console.warn('JANKI_DEBUG is activated');
 }
+
+/**
+ * BLOB fields that secretly contain JSON, keyed by table name
+ */
+export const JSON_FIELDS: Record<string, string[]> = {
+  col: ['conf', 'dconf', 'decks', 'tags', 'models'],
+};

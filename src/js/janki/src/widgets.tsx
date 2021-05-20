@@ -9,8 +9,9 @@ import { Panel, PanelLayout } from '@lumino/widgets';
 import * as React from 'react';
 
 import * as SCHEMA from './_schema';
-import { ICardCollection, ICardManager, CSS } from './tokens';
+import { DEBUG } from './constants';
 import { Model } from './model';
+import { ICardCollection, ICardManager, CSS } from './tokens';
 
 export class CollectionBar extends VDomRenderer<Model> {
   constructor(model: Model) {
@@ -25,29 +26,25 @@ export class CollectionBar extends VDomRenderer<Model> {
   }
 }
 
-export class CardGroups extends VDomRenderer<Model> {
-  constructor(model: Model) {
+export class Card extends VDomRenderer<Model> {
+  readonly cardId: string;
+  constructor(model: Model, cardId: string) {
     super(model);
-    this.addClass(CSS.cards);
+    this.cardId = cardId;
+    this.addClass(CSS.card);
+    this.addClass(CSS.LAB.card);
   }
+
   protected render() {
-    const cards = this.model?.collection?.cards || {};
-    return <ul>{Object.values(cards).map(this.renderCard)}</ul>;
-  }
-
-  renderCard = (card: SCHEMA.Card) => {
-    const note = this.model.collection.notes[`${card.nid}`];
-
-    if (!card || !note) {
-      return <></>;
-    }
+    const { notes, cards } = this.model.collection;
+    const card = cards[this.cardId];
+    const note = notes[`${card.nid}`];
+    // const model = (col["1"].models || {})[`${note.mid}`];
 
     return (
-      <li className={[CSS.card, CSS.LAB.card].join(' ')} key={`${card.id}`}>
-        {this.renderFields(note, card)}
-      </li>
+      <div className={`jp-JankiModel-${note.mid}`}>{this.renderFields(note, card)}</div>
     );
-  };
+  }
 
   renderFields = (note: SCHEMA.Note, card: SCHEMA.Card) => {
     const flds = note.flds.split('\u001f');
@@ -57,6 +54,121 @@ export class CardGroups extends VDomRenderer<Model> {
   renderField = (field: string) => {
     return <div className={[CSS.field].join(' ')}>{field}</div>;
   };
+}
+
+export class Cards extends Panel {
+  readonly model: Model;
+  readonly cards: Map<string, Card>;
+  readonly style: HTMLStyleElement;
+  readonly frame: HTMLIFrameElement;
+
+  constructor(model: Model) {
+    super();
+    this.style = document.createElement('style');
+    this.frame = document.createElement('iframe');
+    this.frame.src = 'about:blank';
+    this.cards = new Map();
+    this.model = model;
+    this.addClass(CSS.cards);
+    this.model.stateChanged.connect(this.updateCards, this);
+    // finally wire up dom
+    this.node.appendChild(this.style);
+    this.node.appendChild(this.frame);
+  }
+
+  dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+    this.model.stateChanged.disconnect(this.updateCards, this);
+  }
+
+  updateCards() {
+    const { collection } = this.model;
+
+    DEBUG && console.info('updateCards', collection);
+
+    if (!collection) {
+      return;
+    }
+
+    this.updateStyle();
+    const panelLayout = this.layout as PanelLayout;
+    for (const [cardId, widget] of this.cards.entries()) {
+      if (!collection.cards[cardId]) {
+        panelLayout.removeWidget(widget);
+      }
+    }
+    for (const cardId of Object.keys(collection.cards)) {
+      if (!this.cards.has(cardId)) {
+        const widget = new Card(this.model, cardId);
+        this.cards.set(cardId, widget);
+        panelLayout.addWidget(widget);
+      }
+    }
+  }
+
+  /**
+   * Update the style with all the models for this collection
+   */
+  updateStyle() {
+    const { models } = this.model.collection.col['1'];
+    if (!models) {
+      return;
+    }
+
+    const oldStyle = this.style.textContent;
+    const modelCSS: string[] = [];
+
+    for (const [mid, model] of Object.entries(models)) {
+      const modelStyle = this.prefixedModelStyle(mid, model);
+      if (modelStyle) {
+        modelCSS.push(modelStyle);
+      }
+    }
+
+    let styleText = modelCSS.join('\n\n');
+
+    if (styleText !== oldStyle) {
+      this.style.textContent = styleText;
+    }
+  }
+
+  prefixedModelStyle(mid: string, model: SCHEMA.Model): string {
+    if (!this.frame.contentDocument) {
+      return '';
+    }
+    const doc = this.frame.contentDocument;
+    const styleId = `_${mid}`;
+    let modelStyle: HTMLStyleElement | null = doc.getElementById(
+      styleId
+    ) as HTMLStyleElement;
+    if (!modelStyle) {
+      modelStyle = doc.createElement('style');
+      modelStyle.id = styleId;
+      doc.body.appendChild(modelStyle);
+    }
+    modelStyle.textContent = model.css;
+    const sheet = modelStyle.sheet;
+    if (!sheet) {
+      return '';
+    }
+    let newStyles: string[] = [];
+    for (let i = 0; i < sheet.rules.length; i++) {
+      const rule = sheet.rules[i];
+      const selectorText = (rule as any).selectorText;
+      const innerText = rule.cssText.replace(/[^}]+\{(.*)\}/gm, '$1');
+      if (!(innerText && selectorText)) {
+        continue;
+      }
+      let newSelectors: string[] = [];
+      for (const sel of selectorText.split(',')) {
+        newSelectors.push(`.jp-JankiModel-${mid} ${sel}`);
+      }
+      newStyles.push(`${newSelectors.join(', ')} { ${innerText} }`);
+    }
+    return newStyles.join('\n');
+  }
 }
 
 export class CardCollection extends Panel {
@@ -86,22 +198,20 @@ export class CardCollection extends Panel {
     const { context, manager } = options;
     this.context = context;
     this.manager = manager;
-    [CSS.collection, CSS.LAB.html].forEach((cls) => this.addClass(cls));
+    [CSS.collection, CSS.LAB.html, ...(DEBUG ? [CSS.debug] : [])].forEach((cls) =>
+      this.addClass(cls)
+    );
     const model = (this.model = new Model());
     const layout = this.layout as PanelLayout;
 
     const bar = new CollectionBar(model);
-    const cards = new CardGroups(model);
+    const cards = new Cards(model);
 
     layout.addWidget(bar);
     layout.addWidget(cards);
 
     context.pathChanged.connect(this._onPathChanged, this);
-    model.stateChanged.connect(() => {
-      if (model.collection) {
-        this._ready.resolve(void 0);
-      }
-    });
+    model.stateChanged.connect(this._onModelStateChanged, this);
 
     void context.ready.then(async () => {
       if (this.isDisposed) {
@@ -113,6 +223,24 @@ export class CardCollection extends Panel {
 
     // initialize
     this._onPathChanged().catch(console.warn);
+  }
+
+  dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+    this.context.model.contentChanged.disconnect(this.update, this);
+    this.context.fileChanged.disconnect(this.update, this);
+    this.model.stateChanged.disconnect(this._onModelStateChanged, this);
+    this.model.dispose();
+    super.dispose();
+  }
+
+  private _onModelStateChanged() {
+    if (this.model.collection) {
+      this._ready.resolve(void 0);
+      this.model.stateChanged.disconnect(this._onModelStateChanged, this);
+    }
   }
 
   /**

@@ -16,7 +16,7 @@
   overflow-y: auto;
 }
 
-.jp-JankiCards > ul {
+.jp-JankiCards {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -35,4 +35,8 @@
   border: 1px solid var(--jp-border-color2);
   padding: var(--jp-notebook-padding);
   margin: 0 var(--jp-notebook-padding) var(--jp-notebook-padding) 0;
+}
+
+.jp-JankiCollection:not(.jp-JANKI-DEBUG) iframe {
+  display: none;
 }

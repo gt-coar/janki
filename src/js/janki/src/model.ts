@@ -1,13 +1,12 @@
 // Copyright (c) 2021 University System of Georgia and janki contributors
 // Distributed under the terms of the BSD-3-Clause License.
 
-import { VDomModel } from '@jupyterlab/apputils';
-
 import { Model as ArchiveModel } from '@gt-coar/jupyterlab-libarchive';
 import { Model as DBModel } from '@gt-coar/jupyterlab-sqlite3';
+import { VDomModel } from '@jupyterlab/apputils';
 
 import * as SCHEMA from './_schema';
-import { DEBUG } from './constants';
+import { DEBUG, JSON_FIELDS } from './constants';
 
 export const Q_CARDS = `SELECT * from cards;`;
 export const Q_COLL_META = `SELECT * from col;`;
@@ -111,7 +110,7 @@ export class Model extends VDomModel {
     let cols: { [k: string]: SCHEMA.CollectionMetadata } = {};
     if (this._dbModel) {
       for (const col of this._dbModel.query<SCHEMA.CollectionMetadata>(Q_COLL_META)) {
-        cols[col.id] = col;
+        cols[col.id] = this.blobToJSON('col', col) as SCHEMA.CollectionMetadata;
       }
     }
     return cols;
@@ -135,5 +134,15 @@ export class Model extends VDomModel {
       }
     }
     return revs;
+  }
+
+  /**
+   * Transform blob fields
+   */
+  protected blobToJSON(table: string, row: Record<string, any>): Record<string, any> {
+    for (const column of JSON_FIELDS[table] || []) {
+      row[column] = row[column] ? JSON.parse(row[column]) : null;
+    }
+    return row;
   }
 }
