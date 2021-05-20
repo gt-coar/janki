@@ -6,7 +6,7 @@ import { Model as DBModel } from '@gt-coar/jupyterlab-sqlite3';
 import { VDomModel } from '@jupyterlab/apputils';
 
 import * as SCHEMA from './_schema';
-import { DEBUG, JSON_FIELDS } from './constants';
+import { DEBUG, JSON_FIELDS, APKG_MEDIA_JSON, APKG_COLLECTION } from './constants';
 
 export const Q_CARDS = `SELECT * from cards;`;
 export const Q_COLL_META = `SELECT * from col;`;
@@ -19,6 +19,7 @@ export class Model extends VDomModel {
   private _path: string;
   private _archiveModel: ArchiveModel | null;
   private _dbModel: DBModel | null;
+  private _media: Record<string, string>;
 
   set collection(collection: SCHEMA.Collection) {
     this._collection = collection;
@@ -27,6 +28,10 @@ export class Model extends VDomModel {
 
   get collection(): SCHEMA.Collection {
     return this._collection;
+  }
+
+  get media(): Record<string, string> {
+    return this._media || {};
   }
 
   get path() {
@@ -85,13 +90,35 @@ export class Model extends VDomModel {
     }
 
     DEBUG && console.info('archive members', this._archiveModel.members);
+    let file: File;
+    let buf: ArrayBuffer;
+    let mediaMap: Record<string, string> = {};
     for (const [path, member] of this._archiveModel.members.entries()) {
-      if (path.match(/\.anki2$/)) {
-        const file = await member.file.extract();
-        const buf = await file.arrayBuffer();
-        this._dbModel.array = new Uint8Array(buf);
-        break;
+      switch (path) {
+        case APKG_COLLECTION:
+          file = await member.file.extract();
+          buf = await file.arrayBuffer();
+          this._dbModel.array = new Uint8Array(buf);
+          break;
+        case APKG_MEDIA_JSON:
+          file = await member.file.extract();
+          mediaMap = JSON.parse(await file.text());
+          break;
+        default:
+          break;
       }
+    }
+
+    if (Object.keys(mediaMap).length) {
+      const media: Record<string, string> = {};
+      // iterate again for media
+      for (const [path, member] of this._archiveModel.members.entries()) {
+        if (mediaMap[path]) {
+          media[mediaMap[path]] = URL.createObjectURL(await member.file.extract());
+        }
+      }
+      DEBUG && console.info(media);
+      this._media = media;
     }
     this.stateChanged.emit(void 0);
   }

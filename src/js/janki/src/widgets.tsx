@@ -103,7 +103,13 @@ export class Card extends VDomRenderer<Model> {
   }
 
   renderNoteTemplate(tmpl: string, context: Record<string, string>): string {
-    return Mustache.render(tmpl, context);
+    let html = Mustache.render(tmpl, context);
+
+    for (const [name, url] of Object.entries(this.model.media)) {
+      html = html.replace(name, url);
+    }
+
+    return html;
   }
 }
 

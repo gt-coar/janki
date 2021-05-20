@@ -22,3 +22,7 @@ export const JSON_FIELDS: Record<string, string[]> = {
 };
 
 export const FIELD_DELIMITER = '\u001f';
+
+export const APKG_COLLECTION = 'collection.anki2';
+
+export const APKG_MEDIA_JSON = 'media';
