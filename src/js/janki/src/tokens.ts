@@ -24,6 +24,7 @@ export const CSS = {
   cards: 'jp-JankiCards',
   bar: 'jp-JankiBar',
   field: 'jp-JankiField',
+  model: 'jp-JankiModel',
   debug: 'jp-JANKI-DEBUG',
   LAB: {
     html: 'jp-RenderedHTMLCommon',

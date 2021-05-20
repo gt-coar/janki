@@ -6,12 +6,17 @@ import { PathExt } from '@jupyterlab/coreutils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Panel, PanelLayout } from '@lumino/widgets';
+import Mustache from 'mustache';
 import * as React from 'react';
 
 import * as SCHEMA from './_schema';
-import { DEBUG } from './constants';
+import { DEBUG, FIELD_DELIMITER } from './constants';
 import { Model } from './model';
 import { ICardCollection, ICardManager, CSS } from './tokens';
+
+Mustache.escape = function (text) {
+  return text;
+};
 
 export class CollectionBar extends VDomRenderer<Model> {
   constructor(model: Model) {
@@ -36,24 +41,70 @@ export class Card extends VDomRenderer<Model> {
   }
 
   protected render() {
-    const { notes, cards } = this.model.collection;
+    const { notes, cards, col } = this.model.collection;
     const card = cards[this.cardId];
     const note = notes[`${card.nid}`];
-    // const model = (col["1"].models || {})[`${note.mid}`];
+    const model = (col['1'].models || {})[`${note.mid}`];
+    const template = model?.tmpls[card.ord];
 
+    if (template) {
+      return (
+        <div className={`${CSS.model}-${note.mid}`}>
+          {this.renderWithTemplate(card, note, model, template)}
+        </div>
+      );
+    }
+
+    return <div>{this.renderRawFields(card, note)}</div>;
+  }
+
+  renderRawFields = (card: SCHEMA.Card, note: SCHEMA.Note) => {
+    const flds = note.flds.split(FIELD_DELIMITER);
+    return <ul>{flds.map(this.renderRawField)}</ul>;
+  };
+
+  renderRawField = (field: string) => {
+    return <div className={[CSS.field].join(' ')}>{field}</div>;
+  };
+
+  renderWithTemplate(
+    card: SCHEMA.Card,
+    note: SCHEMA.Note,
+    model: SCHEMA.Model,
+    template: SCHEMA.Template
+  ) {
+    const context = this.noteContext(note, model);
+    const front = this.renderNoteTemplate(template.qfmt, context);
+    const back = this.renderNoteTemplate(template.afmt, {
+      FrontSide: front,
+      ...context,
+    });
+    const className = `card${template.ord ? template.ord : ''}`;
     return (
-      <div className={`jp-JankiModel-${note.mid}`}>{this.renderFields(note, card)}</div>
+      <div>
+        <div className={className} dangerouslySetInnerHTML={{ __html: front }}></div>
+        <div className={className} dangerouslySetInnerHTML={{ __html: back }}></div>
+      </div>
     );
   }
 
-  renderFields = (note: SCHEMA.Note, card: SCHEMA.Card) => {
-    const flds = note.flds.split('\u001f');
-    return <ul>{flds.map(this.renderField)}</ul>;
-  };
+  noteContext(note: SCHEMA.Note, model: SCHEMA.Model): Record<string, string> {
+    const fields = note.flds.split(FIELD_DELIMITER);
+    const context: Record<string, string> = {};
+    for (let i = 0; i < fields.length; i++) {
+      for (const fld of model.flds) {
+        if (fld.ord === i) {
+          context[fld.name] = fields[i];
+          break;
+        }
+      }
+    }
+    return context;
+  }
 
-  renderField = (field: string) => {
-    return <div className={[CSS.field].join(' ')}>{field}</div>;
-  };
+  renderNoteTemplate(tmpl: string, context: Record<string, string>): string {
+    return Mustache.render(tmpl, context);
+  }
 }
 
 export class Cards extends Panel {
@@ -163,7 +214,7 @@ export class Cards extends Panel {
       }
       let newSelectors: string[] = [];
       for (const sel of selectorText.split(',')) {
-        newSelectors.push(`.jp-JankiModel-${mid} ${sel}`);
+        newSelectors.push(`.${CSS.model}-${mid} ${sel}`);
       }
       newStyles.push(`${newSelectors.join(', ')} { ${innerText} }`);
     }
