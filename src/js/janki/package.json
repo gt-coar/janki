@@ -5,7 +5,8 @@
   "dependencies": {
     "@jupyterlab/application": "3",
     "@gt-coar/jupyterlab-sqlite3": "^0.1.0",
-    "@gt-coar/jupyterlab-libarchive": "^0.1.0"
+    "@gt-coar/jupyterlab-libarchive": "^0.1.0",
+    "mustache": "^4.2.0"
   },
   "keywords": [
     "jupyter",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@jupyterlab/builder": "^3.0.8",
+    "@types/mustache": "^4.1.1",
     "typescript": "~4.2.4",
     "react": "^17.0.1"
   },

@@ -20,3 +20,5 @@ if (DEBUG) {
 export const JSON_FIELDS: Record<string, string[]> = {
   col: ['conf', 'dconf', 'decks', 'tags', 'models'],
 };
+
+export const FIELD_DELIMITER = '\u001f';
