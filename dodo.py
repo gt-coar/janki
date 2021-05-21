@@ -481,8 +481,8 @@ class P:
     SETUP_CFG = ROOT / "setup.cfg"
     MANIFEST = ROOT / "MANIFEST.in"
 
-    SRC_PY = ROOT / "src/py"
-    SRC_JS = ROOT / "src/js"
+    SRC_PY = ROOT / "packages/py"
+    SRC_JS = ROOT / "packages/js"
     JANKI_PY = SRC_PY / C.PY_NAME
     ROOT_PKG_JSON = ROOT / "package.json"
     PKG_JSONS = [*SRC_JS.glob("*/package.json")]
@@ -495,7 +495,6 @@ class P:
         SRC_JS.glob("*/src/tsconfig.json"),
     )
     ESLINTRC = SRC_JS / ".eslintrc.js"
-    TS_SRC = ROOT / "src"
     PLUGIN_SCHEMA = PKG_CORE.parent / "schema/plugin.json"
     PLUGIN_SCHEMA_DTS = PKG_CORE.parent / "src/_schema.d.ts"
 

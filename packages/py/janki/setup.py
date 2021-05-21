@@ -9,7 +9,7 @@ import setuptools
 
 HERE = Path(__file__).parent
 MOD = "janki"
-MOD_ROOT = HERE / "src/py" / MOD
+MOD_ROOT = HERE / "src" / MOD
 EXT = MOD_ROOT / "labextensions"
 CORE_NAME = "@gt-coar/janki"
 CORE = EXT / CORE_NAME
