@@ -147,9 +147,10 @@ def task_dist():
         py_name = path.name
         py_src = path / "src" / py_name.replace("-", "_")
         file_dep = [
+            *B.EXT_PKG_JSON[py_name],
+            *py_src.glob("jupyter-config/*.json"),
             *py_src.rglob("*.json"),
             *py_src.rglob("*.py"),
-            *py_src.glob("jupyter-config/*.json"),
             path / "LICENSE.txt",
             path / "MANIFEST.in",
             path / "README.md",
