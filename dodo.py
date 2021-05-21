@@ -224,7 +224,7 @@ def task_dev():
         pip_args = [*C.PIP, "install", "-v", "--no-deps", "--ignore-installed"]
 
         pip_args += (
-            [B.PY_DIST_CMD[py_name][C.CI_ARTIFACT]] if C.TESTING_IN_CI else ["-e", "."]
+            [B.PY_DIST_CMD[C.CI_ARTIFACT][py_name]] if C.TESTING_IN_CI else ["-e", "."]
         )
 
         task_name = f"py:{py_name}"
