@@ -99,6 +99,8 @@ def task_build():
         if not data.get("jupyterlab"):
             continue
 
+        py_name = data["jupyterlab"]["discovery"]["server"]["base"]["name"]
+
         file_dep = U._tgz_for(pkg_json)[1]
 
         yield dict(
@@ -106,7 +108,15 @@ def task_build():
             doc="build the federated labextension",
             actions=[[C.JLPM, "build:ext", "--scope", data["name"]]],
             file_dep=[B.TSBUILDINFO, *file_dep],
-            targets=[B.EXT_DIST / data["name"] / "package.json"],
+            targets=[
+                P.SRC_PY
+                / py_name
+                / "src"
+                / py_name.replace("-", "_")
+                / "labextensions"
+                / data["name"]
+                / "package.json"
+            ],
         )
 
 
@@ -132,25 +142,33 @@ def task_dist():
             targets=targets,
         )
 
-    for cmd, dist in B.PY_DIST_CMD.items():
-        yield dict(
-            name=cmd,
-            doc=f"build the python {cmd}",
-            actions=[[*C.SETUP, cmd], [*C.TWINE_CHECK, dist]],
-            file_dep=[
-                *B.EXT_PKG_JSON,
-                *P.ALL_PY_SRC,
-                *P.JP_CONF_JSON,
-                P.LICENSE,
-                P.MANIFEST,
-                P.README,
-                P.SETUP_CFG,
-                P.SETUP_PY,
-            ],
-            targets=[dist],
-        )
+    for setup_py in P.SETUP_PYS:
+        path = setup_py.parent
+        py_name = path.name
+        file_dep = [
+            *path.glob("src/*/jupyter-config/*.json"),
+            path / "LICENSE.txt",
+            path / "MANIFEST.in",
+            path / "README.md",
+            path / "setup.cfg",
+            setup_py,
+        ]
 
-    hash_deps = [B.SDIST, B.WHEEL] + sum(
+        dists = {"sdist": B.SDISTS[py_name], "bdist_wheel": B.WHEELS[py_name]}
+
+        for cmd, dist in dists.items():
+            yield U._do(
+                dict(
+                    name=f"{py_name}:{cmd}",
+                    doc=f"build the {path} {cmd}",
+                    actions=[[*C.SETUP, cmd], [*C.TWINE_CHECK, dist]],
+                    file_dep=file_dep,
+                    targets=[dist],
+                ),
+                cwd=path,
+            )
+
+    hash_deps = [*B.SDISTS.values(), *B.WHEELS.values()] + sum(
         [
             U._tgz_for(pkg_json)[0]
             for pkg_json, data in D.PKG_JSONS.items()
@@ -185,56 +203,105 @@ def task_dist():
 def task_dev():
     """prepare for interactive development"""
 
+    py_tasks = []
+    ext_tasks = []
     file_dep = (
         []
         if C.TESTING_IN_CI
         else [
             *B.EXT_PKG_JSON,
-            P.SETUP_PY,
-            P.SETUP_CFG,
+            *P.SETUP_PYS,
+            *P.SETUP_CFGS,
         ]
     )
 
-    pip_args = [*C.PIP, "install", "-v", "--no-deps", "--ignore-installed"]
+    for py_name in C.PY_NAMES:
 
-    pip_args += [B.PY_DIST_CMD[C.CI_ARTIFACT]] if C.TESTING_IN_CI else ["-e", "."]
+        pip_args = [*C.PIP, "install", "-v", "--no-deps", "--ignore-installed"]
+
+        pip_args += (
+            [B.PY_DIST_CMD[py_name][C.CI_ARTIFACT]] if C.TESTING_IN_CI else ["-e", "."]
+        )
+
+        task_name = f"py:{py_name}"
+
+        yield U._do(
+            dict(
+                name=task_name,
+                doc=f"install {py_name} for interactive development",
+                actions=[
+                    pip_args,
+                ],
+                file_dep=file_dep,
+            ),
+            cwd=P.SRC_PY / py_name,
+        )
+
+        py_tasks += [f"dev:{task_name}"]
+
+        ext_actions = []
+
+        if not C.TESTING_IN_CI:
+            ext_actions = [
+                [*C.LAB_EXT, "develop", "--overwrite", "."],
+            ]
+
+            if py_name in C.HAS_SERVER_EXT:
+                ext_actions += [
+                    [
+                        *C.JP,
+                        "server",
+                        "extension",
+                        "enable",
+                        "--sys-prefix",
+                        "--py",
+                        py_name,
+                    ],
+                    [
+                        *C.JP,
+                        "serverextension",
+                        "enable",
+                        "--sys-prefix",
+                        "--py",
+                        py_name,
+                    ],
+                ]
+
+        ext_actions += [
+            *ext_actions,
+        ]
+
+        ext_task_name = f"ext:{py_name}"
+        ext_tasks += [f"dev:{ext_task_name}"]
+        yield U._do(
+            dict(
+                name=ext_task_name,
+                doc="ensure jupyter extensions are available",
+                file_dep=[B.OK_PIP_DEV],
+                actions=ext_actions,
+            ),
+        )
 
     yield U._do(
         dict(
-            name="py",
-            doc="install python for interactive development",
-            actions=[
-                pip_args,
-                [*C.PIP, "freeze"],
-                [*C.PIP, "check"],
-            ],
+            name="py:CHECK",
+            actions=[[*C.PIP, "freeze"], [*C.PIP, "check"]],
+            task_dep=py_tasks,
             file_dep=file_dep,
         ),
         ok=B.OK_PIP_DEV,
     )
 
-    ext_actions = []
-
-    if not C.TESTING_IN_CI:
-        ext_actions = [
-            [*C.LAB_EXT, "develop", "--overwrite", "."],
-            [*C.JP, "server", "extension", "enable", "--sys-prefix", "--py", C.PY_NAME],
-            [*C.JP, "serverextension", "enable", "--sys-prefix", "--py", C.PY_NAME],
-        ]
-
-    ext_actions += [
-        *ext_actions,
-        [*C.JP, "labextension", "list"],
-        [*C.JP, "serverextension", "list"],
-        [*C.JP, "server", "extension", "list"],
-    ]
-
     yield U._do(
         dict(
-            name="ext",
-            doc="ensure jupyter extensions are available",
-            file_dep=[B.OK_PIP_DEV],
-            actions=ext_actions,
+            name="ext:CHECK",
+            file_dep=file_dep,
+            task_dep=ext_tasks,
+            actions=[
+                [*C.JP, "labextension", "list"],
+                [*C.JP, "serverextension", "list"],
+                [*C.JP, "server", "extension", "list"],
+            ],
         ),
         ok=B.OK_EXT_DEV,
     )
@@ -242,38 +309,40 @@ def task_dev():
 
 def task_test():
     """run tests"""
-    yield U._do(
-        dict(
-            name="pytest",
-            actions=[
-                [
-                    *C.PYM,
-                    "coverage",
-                    "run",
-                    "-m",
-                    "pytest",
-                    *("--pyargs", C.PY_NAME),
-                    "-vv",
-                    "--hypothesis-show-statistics",
-                    *("--html", B.DOCS_REPORT_TEST_INDEX),
-                    *C.PYTEST_ARGS,
+    for py_name in C.PY_NAMES:
+        yield U._do(
+            dict(
+                name=f"pytest:{py_name}",
+                actions=[
+                    [
+                        *C.PYM,
+                        "coverage",
+                        "run",
+                        "-m",
+                        "pytest",
+                        *("--pyargs", py_name.replace("-", "_")),
+                        "-vv",
+                        "--hypothesis-show-statistics",
+                        *("--html", B.DOCS_REPORT_TEST / py_name),
+                        *C.PYTEST_ARGS,
+                    ],
+                    [*C.PYM, "coverage", "html", "-d", B.DOCS_REPORT_COV / py_name],
+                    [
+                        *C.PYM,
+                        "coverage",
+                        "report",
+                        "--skip-covered",
+                        f"--fail-under={C.COV_THRESHOLD}",
+                    ],
                 ],
-                [*C.PYM, "coverage", "html", "-d", B.DOCS_REPORT_COV],
-                [
-                    *C.PYM,
-                    "coverage",
-                    "report",
-                    "--skip-covered",
-                    f"--fail-under={C.COV_THRESHOLD}",
+                file_dep=[*P.ALL_PY_SRC, B.OK_EXT_DEV, *P.ALL_SCHEMA],
+                targets=[
+                    B.DOCS_REPORT_TEST / py_name / "index.html",
+                    B.DOCS_REPORT_COV / py_name / "status.json",
                 ],
-            ],
-            file_dep=[*P.ALL_PY_SRC, B.OK_EXT_DEV, *P.ALL_SCHEMA],
-            targets=[B.DOCS_REPORT_TEST_INDEX, B.DOCS_REPORT_COV_STATUS],
-        ),
-        ok=B.OK_PYTEST,
-        # cwd=B.BUILD,
-        # env=dict(COVERAGE_FILE=B.BUILD / ".coverage"),
-    )
+            ),
+            ok=B.OK_PYTEST / f"{py_name}.ok",
+        )
 
 
 def task_lab():
@@ -436,7 +505,8 @@ class PU:
 
 class C:
     # constants and commands
-    PY_NAME = "janki"
+    PY_NAMES = ["janki", "jupyterlab-sqlite3", "jupyterlab-libarchive"]
+    HAS_SERVER_EXT = ["janki"]
     ENC = dict(encoding="utf-8")
     IGNORE = [".ipynb_checkpoints", "node_modules", ".egg-info"]
     PY = Path(sys.executable)
@@ -477,18 +547,20 @@ class P:
 
     BINDER = ROOT / ".binder"
     CI = ROOT / ".github"
-    SETUP_PY = ROOT / "setup.py"
-    SETUP_CFG = ROOT / "setup.cfg"
+
     MANIFEST = ROOT / "MANIFEST.in"
 
     SRC_PY = ROOT / "packages/py"
     SRC_JS = ROOT / "packages/js"
-    JANKI_PY = SRC_PY / C.PY_NAME
+
+    SETUP_PYS = SRC_PY.glob("*/setup.py")
+    SETUP_CFGS = SRC_PY.glob("*/setup.cfg")
+
     ROOT_PKG_JSON = ROOT / "package.json"
     PKG_JSONS = [*SRC_JS.glob("*/package.json")]
     PKG_CORE = SRC_JS / "janki/package.json"
     PKG_META = SRC_JS / "_meta/package.json"
-    JP_CONF_JSON = sorted((SRC_PY / "jupyter-config").glob("*.json"))
+    JP_CONF_JSON = sorted(SRC_PY.glob("*/src/*/jupyter-config/*.json"))
     TSCONFIGS = PU._clean(
         SRC_JS / "tsconfigbase.json",
         SRC_JS.glob("*/tsconfig.json"),
@@ -542,7 +614,7 @@ class P:
         ALL_YAML,
         ALL_SHELL,
         LICENSE,
-        SETUP_CFG,
+        SETUP_CFGS,
         ESLINTRC,
     )
 
@@ -564,30 +636,41 @@ class B:
     BUILD = P.ROOT / "build"
     DOCS_REPORT = P.DOCS / "_reports"
     DOCS_REPORT_COV = DOCS_REPORT / "coverage"
-    DOCS_REPORT_COV_INDEX = DOCS_REPORT_COV / "index.html"
-    DOCS_REPORT_COV_STATUS = DOCS_REPORT_COV / "status.json"
     DOCS_REPORT_TEST = DOCS_REPORT / "pytest"
-    DOCS_REPORT_TEST_INDEX = DOCS_REPORT_TEST / "index.html"
 
-    EXT_DIST = P.JANKI_PY / "labextensions"
-    EXT_PKG_JSON = [
-        P.JANKI_PY / "labextensions" / data["name"] / "package.json"
-        for pkg_json, data in D.PKG_JSONS.items()
-        if "jupyterlab" in data
-    ]
+    EXT_PKG_JSON = {
+        py_name: [
+            P.SRC_PY / py_name / "src" / "labextensions" / data["name"] / "package.json"
+            for pkg_json, data in D.PKG_JSONS.items()
+            if "jupyterlab" in data
+            and data["jupyterlab"]["discovery"]["server"]["base"]["name"] == py_name
+        ]
+        for py_name in C.PY_NAMES
+    }
     TSBUILDINFO = P.PKG_META.parent / ".src.tsbuildinfo"
     OK_ESLINT = BUILD / "eslint.ok"
     OK_PRETTIER = BUILD / "prettier.ok"
     OK_PIP_DEV = BUILD / "pip.dev.ok"
     OK_EXT_DEV = BUILD / "ext.dev.ok"
     OK_PYTEST = BUILD / "pytest.ok"
-    SDIST = DIST / ("{}-{}.tar.gz".format(C.PY_NAME, D.PKG_CORE["version"]))
-    WHEEL = DIST / (
-        "{}-{}-py3-none-any.whl".format(
-            C.PY_NAME.replace("-", "_"), D.PKG_CORE["version"]
+
+    SDISTS = {
+        py_name: P.ROOT
+        / "dist"
+        / ("{}-{}.tar.gz".format(py_name, D.PKG_CORE["version"]))
+        for py_name in C.PY_NAMES
+    }
+    WHEELS = {
+        py_name: P.ROOT
+        / "dist"
+        / (
+            "{}-{}-py3-none-any.whl".format(
+                py_name.replace("-", "_"), D.PKG_CORE["version"]
+            )
         )
-    )
-    PY_DIST_CMD = {"sdist": SDIST, "bdist_wheel": WHEEL}
+        for py_name in C.PY_NAMES
+    }
+    PY_DIST_CMD = {"sdist": SDISTS, "bdist_wheel": WHEELS}
     SHA256SUMS = DIST / "SHA256SUMS"
 
     FIXTURES = BUILD / "fixtures"

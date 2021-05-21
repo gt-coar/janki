@@ -68,7 +68,7 @@
         "singleton": true
       }
     },
-    "outputDir": "../../py/janki/labextensions/@gt-coar/janki",
+    "outputDir": "../../py/janki/src/janki/labextensions/@gt-coar/janki",
     "schemaDir": "schema",
     "webpackConfig": "./webpack.config.js"
   },
