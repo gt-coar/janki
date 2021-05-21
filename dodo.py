@@ -314,29 +314,23 @@ def task_dev():
 def task_test():
     """run tests"""
     for py_name in C.PY_NAMES:
+        py_mod = py_name.replace("-", "_")
         yield U._do(
             dict(
-                name=f"pytest:{py_name}",
+                name=f"py:{py_name}",
                 actions=[
                     [
-                        *C.PYM,
-                        "coverage",
-                        "run",
+                        C.PY,
                         "-m",
                         "pytest",
-                        *("--pyargs", py_name.replace("-", "_")),
+                        "--pyargs",
+                        py_mod,
                         "-vv",
                         "--hypothesis-show-statistics",
-                        *("--html", B.DOCS_REPORT_TEST / py_name),
+                        "--html",
+                        B.DOCS_REPORT_TEST / py_name,
                         *C.PYTEST_ARGS,
-                    ],
-                    [*C.PYM, "coverage", "html", "-d", B.DOCS_REPORT_COV / py_name],
-                    [
-                        *C.PYM,
-                        "coverage",
-                        "report",
-                        "--skip-covered",
-                    ],
+                    ]
                 ],
                 file_dep=[*P.ALL_PY_SRC, B.OK_EXT_DEV, *P.ALL_SCHEMA],
                 targets=[
@@ -345,6 +339,7 @@ def task_test():
                 ],
             ),
             ok=B.OK_PYTEST / f"{py_name}.ok",
+            cwd=P.SRC_PY / py_name,
         )
 
 
@@ -573,7 +568,7 @@ class P:
     PLUGIN_SCHEMA = PKG_CORE.parent / "schema/plugin.json"
     PLUGIN_SCHEMA_DTS = PKG_CORE.parent / "src/_schema.d.ts"
 
-    ALL_SCHEMA = PU._clean(SRC_JS.rglob("*/schema/*.json"))
+    ALL_SCHEMA = PU._clean(SRC_JS.glob("*/schema/*.json"))
     ALL_TS_SRC = PU._clean(
         SRC_JS.rglob("*/src/**/*.ts"), SRC_JS.rglob("*/src/**/*.tsx")
     )
