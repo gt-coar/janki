@@ -12,7 +12,7 @@ import { Card } from './card';
 
 export class Cards extends Panel {
   readonly model: CollectionModel;
-  readonly cards: Map<string, Card>;
+  readonly cards: Map<number, Card>;
   readonly style: HTMLStyleElement;
   readonly frame: HTMLIFrameElement;
 
@@ -46,14 +46,18 @@ export class Cards extends Panel {
       return;
     }
 
+    const deckCardIds = Object.values(collection.cards)
+      .filter((card) => card.did == this.model.currentDeck)
+      .map((card) => card.id);
+
     this.updateStyle();
     const panelLayout = this.layout as PanelLayout;
     for (const [cardId, widget] of this.cards.entries()) {
-      if (!collection.cards[cardId]) {
+      if (deckCardIds.indexOf(cardId) === -1) {
         panelLayout.removeWidget(widget);
       }
     }
-    for (const cardId of Object.keys(collection.cards)) {
+    for (const cardId of deckCardIds) {
       if (!this.cards.has(cardId)) {
         const widget = new Card(this.model, cardId);
         this.cards.set(cardId, widget);

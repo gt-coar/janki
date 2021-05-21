@@ -25,6 +25,7 @@ export const CSS = {
   bar: 'jp-JankiBar',
   field: 'jp-JankiField',
   model: 'jp-JankiModel',
+  decks: 'jp-JankiDecks',
   template: 'jp-JankiTemplate',
   debug: 'jp-JANKI-DEBUG',
   front: 'jk-mod-front',
@@ -32,6 +33,8 @@ export const CSS = {
   LAB: {
     html: 'jp-RenderedHTMLCommon',
     card: 'jp-LauncherCard',
+    styled: 'jp-mod-styled',
+    accept: 'jp-mod-accept',
   },
 };
 

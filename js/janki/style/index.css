@@ -11,6 +11,14 @@
   flex: 0;
 }
 
+.jp-JankiCollection > .lm-SplitPanel {
+  flex: 1;
+}
+
+.jp-JankiDecks {
+  flex: 1;
+}
+
 .jp-JankiCards {
   flex: 1;
   overflow-y: auto;

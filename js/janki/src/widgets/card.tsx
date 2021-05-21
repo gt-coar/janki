@@ -15,8 +15,8 @@ Mustache.escape = function (text) {
 };
 
 export class Card extends VDomRenderer<CollectionModel> {
-  readonly cardId: string;
-  constructor(model: CollectionModel, cardId: string) {
+  readonly cardId: number;
+  constructor(model: CollectionModel, cardId: number) {
     super(model);
     this.cardId = cardId;
     this.addClass(CSS.card);
@@ -24,7 +24,7 @@ export class Card extends VDomRenderer<CollectionModel> {
 
   protected render() {
     const { notes, cards, col } = this.model.collection;
-    const card = cards[this.cardId];
+    const card = cards[`${this.cardId}`];
     const note = notes[`${card.nid}`];
     const model = (col['1'].models || {})[`${note.mid}`];
     const template = model?.tmpls[card.ord];

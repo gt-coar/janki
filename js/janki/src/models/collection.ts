@@ -20,6 +20,7 @@ export class CollectionModel extends VDomModel {
   private _archiveModel: ArchiveModel | null;
   private _dbModel: DBModel | null;
   private _media: Record<string, string>;
+  private _currentDeck: number;
 
   set collection(collection: SCHEMA.Collection) {
     this._collection = collection;
@@ -40,6 +41,15 @@ export class CollectionModel extends VDomModel {
 
   set path(path: string) {
     this._path = path;
+    this.stateChanged.emit(void 0);
+  }
+
+  get currentDeck() {
+    return this._currentDeck;
+  }
+
+  set currentDeck(currentDeck: number) {
+    this._currentDeck = currentDeck;
     this.stateChanged.emit(void 0);
   }
 
