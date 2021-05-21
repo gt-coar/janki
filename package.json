@@ -31,6 +31,6 @@
     "watch": "lerna run --stream --parallel watch"
   },
   "workspaces": [
-    "packages/js/*"
+    "js/*"
   ]
 }

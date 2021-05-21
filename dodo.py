@@ -550,8 +550,8 @@ class P:
 
     MANIFEST = ROOT / "MANIFEST.in"
 
-    SRC_PY = ROOT / "packages/py"
-    SRC_JS = ROOT / "packages/js"
+    SRC_PY = ROOT / "py"
+    SRC_JS = ROOT / "js"
 
     SETUP_PYS = SRC_PY.glob("*/setup.py")
     SETUP_CFGS = SRC_PY.glob("*/setup.cfg")
