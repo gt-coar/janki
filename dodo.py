@@ -161,7 +161,7 @@ def task_dist():
                 dict(
                     name=f"{py_name}:{cmd}",
                     doc=f"build the {path} {cmd}",
-                    actions=[[*C.SETUP, cmd], [*C.TWINE_CHECK, dist]],
+                    actions=[[*C.SETUP, cmd, "--dist-dir", B.DIST]],
                     file_dep=file_dep,
                     targets=[dist],
                 ),
@@ -209,7 +209,7 @@ def task_dev():
         []
         if C.TESTING_IN_CI
         else [
-            *B.EXT_PKG_JSON,
+            *sum([*B.EXT_PKG_JSON.values()], []),
             *P.SETUP_PYS,
             *P.SETUP_CFGS,
         ]
@@ -280,6 +280,7 @@ def task_dev():
                 file_dep=[B.OK_PIP_DEV],
                 actions=ext_actions,
             ),
+            cwd=P.SRC_PY / py_name,
         )
 
     yield U._do(
@@ -553,8 +554,8 @@ class P:
     SRC_PY = ROOT / "py"
     SRC_JS = ROOT / "js"
 
-    SETUP_PYS = SRC_PY.glob("*/setup.py")
-    SETUP_CFGS = SRC_PY.glob("*/setup.cfg")
+    SETUP_PYS = [*SRC_PY.glob("*/setup.py")]
+    SETUP_CFGS = [*SRC_PY.glob("*/setup.cfg")]
 
     ROOT_PKG_JSON = ROOT / "package.json"
     PKG_JSONS = [*SRC_JS.glob("*/package.json")]
@@ -640,7 +641,13 @@ class B:
 
     EXT_PKG_JSON = {
         py_name: [
-            P.SRC_PY / py_name / "src" / "labextensions" / data["name"] / "package.json"
+            P.SRC_PY
+            / py_name
+            / "src"
+            / py_name.replace("-", "_")
+            / "labextensions"
+            / data["name"]
+            / "package.json"
             for pkg_json, data in D.PKG_JSONS.items()
             if "jupyterlab" in data
             and data["jupyterlab"]["discovery"]["server"]["base"]["name"] == py_name
