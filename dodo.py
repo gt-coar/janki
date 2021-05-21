@@ -145,8 +145,11 @@ def task_dist():
     for setup_py in P.SETUP_PYS:
         path = setup_py.parent
         py_name = path.name
+        py_src = path / "src" / py_name.replace("-", "_")
         file_dep = [
-            *path.glob("src/*/jupyter-config/*.json"),
+            *py_src.rglob("*.json"),
+            *py_src.rglob("*.py"),
+            *py_src.glob("jupyter-config/*.json"),
             path / "LICENSE.txt",
             path / "MANIFEST.in",
             path / "README.md",
@@ -333,7 +336,6 @@ def task_test():
                         "coverage",
                         "report",
                         "--skip-covered",
-                        f"--fail-under={C.COV_THRESHOLD}",
                     ],
                 ],
                 file_dep=[*P.ALL_PY_SRC, B.OK_EXT_DEV, *P.ALL_SCHEMA],
