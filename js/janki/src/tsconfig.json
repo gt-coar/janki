@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "outDir": "../lib",
+    "rootDir": ".",
+    "tsBuildInfoFile": "../.src.tsbuildinfo"
+  },
+  "extends": "../../tsconfigbase",
+  "include": ["./**/*"],
+  "references": [
+    {
+      "path": ".."
+    },
+    {
+      "path": "../../jupyterlab-sqlite3/src"
+    },
+    {
+      "path": "../../jupyterlab-libarchive/src"
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+include LICENSE.txt
+recursive-include src/jupyterlab_sqlite3/labextensions *.*

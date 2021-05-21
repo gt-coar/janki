@@ -1,0 +1,17 @@
+{
+  "name": "@gt-coar/janki-meta",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "@gt-coar/janki": "file:../janki",
+    "@gt-coar/jupyterlab-sqlite3": "file:../jupyterlab-sqlite3",
+    "@gt-coar/jupyterlab-libarchive": "file:../jupyterlab-libarchive"
+  },
+  "devDependencies": {
+    "typescript": "~4.2.4"
+  },
+  "scripts": {
+    "build:lib": "tsc --build src",
+    "watch": "jlpm build:lib --watch --preserveWatchOutput"
+  }
+}

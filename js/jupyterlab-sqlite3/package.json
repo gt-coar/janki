@@ -1,0 +1,62 @@
+{
+  "name": "@gt-coar/jupyterlab-sqlite3",
+  "version": "0.1.0",
+  "description": "basic model for working with sqlite3 files in JupyterLab",
+  "dependencies": {
+    "sql.js": "~1.5.0"
+  },
+  "keywords": [
+    "jupyter",
+    "jupyterlab",
+    "jupyterlab-extension",
+    "georgia-tech",
+    "sqlite"
+  ],
+  "homepage": "https://github.com/gt-coar/janki",
+  "bugs": {
+    "url": "https://github.com/gt-coar/janki/issues"
+  },
+  "license": "BSD-3-Clause",
+  "author": {
+    "name": "University System of Georgia and janki contributors",
+    "email": "coar@gatech.edu"
+  },
+  "devDependencies": {
+    "@jupyterlab/builder": "^3.0.8",
+    "typescript": "~4.2.4",
+    "react": "^17.0.1",
+    "@types/sql.js": "^1.4.2"
+  },
+  "files": [
+    "{lib,style,src}/**/*.{.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf,css}",
+    "LICENSE.txt"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "style": "style/index.css",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gt-coar/janki"
+  },
+  "scripts": {
+    "build:ext": "jupyter labextension build .",
+    "watch": "jupyter labextension watch ."
+  },
+  "sideEffects": true,
+  "jupyterlab": {
+    "webpackConfig": "./webpack.config.js",
+    "mimeExtension": "lib/plugin.js",
+    "discovery": {
+      "server": {
+        "base": {
+          "name": "jupyterlab-sqlite3"
+        },
+        "managers": [
+          "pip"
+        ]
+      }
+    },
+    "outputDir": "../../py/jupyterlab-sqlite3/src/jupyterlab_sqlite3/labextensions/@gt-coar/jupyterlab-sqlite3"
+  },
+  "styleModule": "style/index.js"
+}

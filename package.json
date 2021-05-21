@@ -13,7 +13,8 @@
     "eslint-plugin-react": "^7.21.5",
     "lerna": "^3.22.1",
     "prettier": "^2.2.1",
-    "prettier-plugin-sort-json": "^0.0.2"
+    "prettier-plugin-sort-json": "^0.0.2",
+    "json-schema-to-typescript": "^10.1.4"
   },
   "prettier": {
     "singleQuote": true,
@@ -25,11 +26,11 @@
     "bootstrap": "jlpm --prefer-offline && lerna bootstrap",
     "build:lib": "lerna run --stream --parallel build:lib",
     "build:ext": "lerna run --stream --parallel build:ext",
-    "eslint:fix": "cd src/js && eslint --ext .js,.ts,.tsx --fix .",
-    "eslint:check": "cd src/js && eslint --ext .js,.ts,.tsx .",
+    "eslint:fix": "cd js && eslint --cache-location=../build/.eslintcache --ext .js,.ts,.tsx --fix .",
+    "eslint:check": "cd js && eslint --ext .js,.ts,.tsx .",
     "watch": "lerna run --stream --parallel watch"
   },
   "workspaces": [
-    "src/js/*"
+    "js/*"
   ]
 }

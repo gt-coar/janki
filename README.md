@@ -9,16 +9,6 @@
 [workflow]:
   https://github.com/gt-coar/janki/actions?query=branch%3Amain+workflow%3A.github%2Fworkflows%2Fci.yml
 
-> > > ### What is [janki](#janki)?
-> > >
-> > > ---
-> > >
-> > > - [ ] a system for mastering complex topics by reviewing topical _Cards_
-> > > - [ ] a _JupyterLab_ extension for creating, viewing, and **reviewing** _Cards_
-> > > - [ ] a _Jupyter Server_ extension for storing _Cards_
-> > > - [ ] a _Command Line Interface_ for importing/exporting _Cards_ to other formats
-> > > - [ ] free software licensed under the [BSD-3-Clause] License
-
 ## How does it Work?
 
 ## Install
@@ -66,7 +56,7 @@ _Import Cards_.
 
 #### In Markdown
 
-Create a
+> TBD: Markdown can be
 
 #### In PDF
 
@@ -75,7 +65,7 @@ Create a
 ## Import/Export
 
 > both mechanisms support a `-j/--jmespath` argument, allowing for rich filtering of the
-> _Cards_ imported or exported. See the
+> _Cards_ imported or exported. See the [full CLI documentation][cli-docs].
 
 [jmespath]: https://jmespath.org
 
@@ -93,7 +83,7 @@ jupyter janki export -o my-janki.anki2.json -f anki2
 
 [contributing guide]: https://github.com/gt-coar/janki/blob/main/CONTRIBUTING.md
 
----
+## [cli-docs]: https://janki.rtfd.io/cli
 
 > Copyright (c) 2021 University System of Georgia and janki contributors
 >

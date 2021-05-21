@@ -1,0 +1,721 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "default": {},
+  "definitions": {
+    "anki-template": {
+      "properties": {
+        "afmt": {
+          "type": "string"
+        },
+        "bafmt": {
+          "type": "string"
+        },
+        "bqfmt": {
+          "type": "string"
+        },
+        "did": {
+          "type": "null"
+        },
+        "name": {
+          "type": "string"
+        },
+        "ord": {
+          "type": "integer"
+        },
+        "qfmt": {
+          "type": "string"
+        }
+      },
+      "required": ["afmt", "bafmt", "bqfmt", "did", "name", "ord", "qfmt"],
+      "title": "Template",
+      "type": "object"
+    },
+    "api-collection": {
+      "properties": {
+        "cards": {
+          "additionalProperties": {
+            "properties": {
+              "data": {
+                "type": "string"
+              },
+              "did": {
+                "type": "integer"
+              },
+              "due": {
+                "type": "integer"
+              },
+              "factor": {
+                "type": "integer"
+              },
+              "flags": {
+                "type": "integer"
+              },
+              "id": {
+                "type": "integer"
+              },
+              "ivl": {
+                "type": "integer"
+              },
+              "lapses": {
+                "type": "integer"
+              },
+              "left": {
+                "type": "integer"
+              },
+              "mod": {
+                "type": "integer"
+              },
+              "nid": {
+                "type": "integer"
+              },
+              "odid": {
+                "type": "integer"
+              },
+              "odue": {
+                "type": "integer"
+              },
+              "ord": {
+                "type": "integer"
+              },
+              "queue": {
+                "type": "integer"
+              },
+              "reps": {
+                "type": "integer"
+              },
+              "type": {
+                "type": "integer"
+              },
+              "usn": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "data",
+              "did",
+              "due",
+              "factor",
+              "flags",
+              "id",
+              "ivl",
+              "lapses",
+              "left",
+              "mod",
+              "nid",
+              "odid",
+              "odue",
+              "ord",
+              "queue",
+              "reps",
+              "type",
+              "usn"
+            ],
+            "title": "Card",
+            "type": "object"
+          },
+          "type": "object"
+        },
+        "col": {
+          "additionalProperties": {
+            "properties": {
+              "conf": {
+                "properties": {
+                  "activeDecks": {
+                    "items": {
+                      "type": "integer"
+                    },
+                    "type": "array"
+                  },
+                  "addToCur": {
+                    "type": "boolean"
+                  },
+                  "collapseTime": {
+                    "type": "integer"
+                  },
+                  "curDeck": {
+                    "type": "integer"
+                  },
+                  "curModel": {
+                    "type": "string"
+                  },
+                  "dueCounts": {
+                    "type": "boolean"
+                  },
+                  "estTimes": {
+                    "type": "boolean"
+                  },
+                  "newBury": {
+                    "type": "boolean"
+                  },
+                  "newSpread": {
+                    "type": "integer"
+                  },
+                  "nextPos": {
+                    "type": "integer"
+                  },
+                  "sortBackwards": {
+                    "type": "boolean"
+                  },
+                  "sortType": {
+                    "type": "string"
+                  },
+                  "timeLim": {
+                    "type": "integer"
+                  }
+                },
+                "type": "object"
+              },
+              "crt": {
+                "type": "integer"
+              },
+              "dconf": {
+                "additionalProperties": {
+                  "properties": {
+                    "autoplay": {
+                      "type": "boolean"
+                    },
+                    "id": {
+                      "type": "integer"
+                    },
+                    "lapse": {
+                      "properties": {
+                        "delays": {
+                          "items": {
+                            "type": "integer"
+                          },
+                          "type": "array"
+                        },
+                        "leechAction": {
+                          "type": "integer"
+                        },
+                        "leechFails": {
+                          "type": "integer"
+                        },
+                        "minInt": {
+                          "type": "integer"
+                        },
+                        "mult": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "delays",
+                        "leechAction",
+                        "leechFails",
+                        "minInt",
+                        "mult"
+                      ],
+                      "type": "object"
+                    },
+                    "maxTaken": {
+                      "type": "integer"
+                    },
+                    "mod": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "new": {
+                      "properties": {
+                        "bury": {
+                          "type": "boolean"
+                        },
+                        "delays": {
+                          "items": {
+                            "type": "integer"
+                          },
+                          "type": "array"
+                        },
+                        "initialFactor": {
+                          "type": "integer"
+                        },
+                        "ints": {
+                          "items": {
+                            "type": "integer"
+                          },
+                          "type": "array"
+                        },
+                        "order": {
+                          "type": "integer"
+                        },
+                        "perDay": {
+                          "type": "integer"
+                        },
+                        "separate": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "bury",
+                        "delays",
+                        "initialFactor",
+                        "ints",
+                        "order",
+                        "perDay",
+                        "separate"
+                      ],
+                      "type": "object"
+                    },
+                    "replayq": {
+                      "type": "boolean"
+                    },
+                    "rev": {
+                      "properties": {
+                        "bury": {
+                          "type": "boolean"
+                        },
+                        "ease4": {
+                          "type": "number"
+                        },
+                        "fuzz": {
+                          "type": "number"
+                        },
+                        "ivlFct": {
+                          "type": "integer"
+                        },
+                        "maxIvl": {
+                          "type": "integer"
+                        },
+                        "minSpace": {
+                          "type": "integer"
+                        },
+                        "perDay": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "bury",
+                        "ease4",
+                        "fuzz",
+                        "ivlFct",
+                        "maxIvl",
+                        "minSpace",
+                        "perDay"
+                      ],
+                      "type": "object"
+                    },
+                    "timer": {
+                      "type": "integer"
+                    },
+                    "usn": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "autoplay",
+                    "id",
+                    "lapse",
+                    "maxTaken",
+                    "mod",
+                    "name",
+                    "new",
+                    "replayq",
+                    "rev",
+                    "timer",
+                    "usn"
+                  ],
+                  "title": "Deck Configuration",
+                  "type": "object"
+                },
+                "type": "object"
+              },
+              "decks": {
+                "additionalProperties": {
+                  "properties": {
+                    "collapsed": {
+                      "type": "boolean"
+                    },
+                    "conf": {
+                      "type": "integer"
+                    },
+                    "desc": {
+                      "type": "string"
+                    },
+                    "dyn": {
+                      "type": "integer"
+                    },
+                    "extendNew": {
+                      "type": "integer"
+                    },
+                    "extendRev": {
+                      "type": "integer"
+                    },
+                    "id": {
+                      "type": "integer"
+                    },
+                    "lrnToday": {
+                      "items": {
+                        "type": "integer"
+                      },
+                      "type": "array"
+                    },
+                    "mod": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "newToday": {
+                      "items": {
+                        "type": "integer"
+                      },
+                      "type": "array"
+                    },
+                    "revToday": {
+                      "items": {
+                        "type": "integer"
+                      },
+                      "type": "array"
+                    },
+                    "timeToday": {
+                      "items": {
+                        "type": "integer"
+                      },
+                      "type": "array"
+                    },
+                    "usn": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "collapsed",
+                    "conf",
+                    "desc",
+                    "dyn",
+                    "extendNew",
+                    "extendRev",
+                    "id",
+                    "lrnToday",
+                    "mod",
+                    "name",
+                    "newToday",
+                    "revToday",
+                    "timeToday",
+                    "usn"
+                  ],
+                  "title": "Deck",
+                  "type": "object"
+                },
+                "type": "object"
+              },
+              "dty": {
+                "type": "integer"
+              },
+              "id": {
+                "type": "integer"
+              },
+              "ls": {
+                "type": "integer"
+              },
+              "mod": {
+                "type": "integer"
+              },
+              "models": {
+                "additionalProperties": {
+                  "properties": {
+                    "css": {
+                      "type": "string"
+                    },
+                    "did": {
+                      "type": "integer"
+                    },
+                    "flds": {
+                      "items": {
+                        "properties": {
+                          "font": {
+                            "type": "string"
+                          },
+                          "media": {
+                            "type": "array"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "ord": {
+                            "type": "integer"
+                          },
+                          "rtl": {
+                            "type": "boolean"
+                          },
+                          "size": {
+                            "type": "integer"
+                          },
+                          "sticky": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "font",
+                          "media",
+                          "name",
+                          "ord",
+                          "rtl",
+                          "size",
+                          "sticky"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "id": {
+                      "type": "integer"
+                    },
+                    "latexPost": {
+                      "type": "string"
+                    },
+                    "latexPre": {
+                      "type": "string"
+                    },
+                    "mod": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "req": {
+                      "items": {
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": ["integer", "string"]
+                            },
+                            {
+                              "items": {
+                                "type": "integer"
+                              },
+                              "type": "array"
+                            }
+                          ]
+                        },
+                        "type": "array"
+                      },
+                      "type": "array"
+                    },
+                    "sortf": {
+                      "type": "integer"
+                    },
+                    "tags": {
+                      "type": "array"
+                    },
+                    "tmpls": {
+                      "items": {
+                        "$ref": "#/definitions/anki-template"
+                      },
+                      "type": "array"
+                    },
+                    "type": {
+                      "type": "integer"
+                    },
+                    "usn": {
+                      "type": "integer"
+                    },
+                    "vers": {
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "css",
+                    "did",
+                    "flds",
+                    "id",
+                    "latexPost",
+                    "latexPre",
+                    "mod",
+                    "name",
+                    "req",
+                    "sortf",
+                    "tags",
+                    "tmpls",
+                    "type",
+                    "usn",
+                    "vers"
+                  ],
+                  "title": "Model",
+                  "type": "object"
+                },
+                "type": "object"
+              },
+              "scm": {
+                "type": "integer"
+              },
+              "tags": {
+                "type": "object"
+              },
+              "usn": {
+                "type": "integer"
+              },
+              "ver": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "conf",
+              "crt",
+              "dconf",
+              "decks",
+              "dty",
+              "id",
+              "ls",
+              "mod",
+              "models",
+              "scm",
+              "tags",
+              "usn",
+              "ver"
+            ],
+            "title": "Collection Metadata",
+            "type": "object"
+          },
+          "type": "object"
+        },
+        "notes": {
+          "additionalProperties": {
+            "properties": {
+              "csum": {
+                "type": "integer"
+              },
+              "data": {
+                "type": "string"
+              },
+              "flags": {
+                "type": "integer"
+              },
+              "flds": {
+                "type": "string"
+              },
+              "guid": {
+                "type": "string"
+              },
+              "id": {
+                "type": "integer"
+              },
+              "mid": {
+                "type": "integer"
+              },
+              "mod": {
+                "type": "integer"
+              },
+              "sfld": {
+                "type": "string"
+              },
+              "tags": {
+                "type": "string"
+              },
+              "usn": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "csum",
+              "data",
+              "flags",
+              "flds",
+              "guid",
+              "id",
+              "mid",
+              "mod",
+              "sfld",
+              "tags",
+              "usn"
+            ],
+            "title": "Note",
+            "type": "object"
+          },
+          "type": "object"
+        },
+        "path": {
+          "type": "string"
+        },
+        "revlog": {
+          "additionalProperties": {
+            "properties": {
+              "cid": {
+                "type": "integer"
+              },
+              "ease": {
+                "type": "integer"
+              },
+              "factor": {
+                "type": "integer"
+              },
+              "id": {
+                "type": "integer"
+              },
+              "ivl": {
+                "type": "integer"
+              },
+              "lastIvl": {
+                "type": "integer"
+              },
+              "time": {
+                "type": "integer"
+              },
+              "type": {
+                "type": "integer"
+              },
+              "usn": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "cid",
+              "ease",
+              "factor",
+              "id",
+              "ivl",
+              "lastIvl",
+              "time",
+              "type",
+              "usn"
+            ],
+            "title": "Rev",
+            "type": "object"
+          },
+          "type": "object"
+        }
+      },
+      "required": ["cards", "col", "notes", "path"],
+      "title": "Collection",
+      "type": "object"
+    },
+    "api-contents-path": {
+      "description": "a contents API path as understood by `/api/contents/{:path}`",
+      "format": "uri",
+      "type": "string"
+    },
+    "api-extensions": {
+      "default": ["anki2", "apkg"],
+      "type": "array"
+    },
+    "api-url-root": {
+      "default": ["janki"],
+      "type": "array"
+    },
+    "lab-user-settings": {
+      "default": {},
+      "description": "user-configured settings",
+      "properties": {
+        "collections": {
+          "description": "Ephemeral collections not saved in files",
+          "items": {
+            "$ref": "#/definitions/api-collection"
+          },
+          "type": "array"
+        }
+      },
+      "title": "Janki Settings",
+      "type": "object"
+    }
+  },
+  "description": "Configure Janki spaced-repetition cards",
+  "jupyter.lab.setting-icon": "@gt-coar/janki:janki",
+  "jupyter.lab.setting-icon-label": "Card Collections",
+  "oneOf": [
+    {
+      "$ref": "#/definitions/lab-user-settings"
+    }
+  ],
+  "title": "Card Collections",
+  "type": "object"
+}
