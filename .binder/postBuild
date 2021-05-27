@@ -11,4 +11,4 @@ export IN_BINDER=1
 
 jlpm cache clean
 
-doit -n8 binder || doit binder
+doit binder || doit binder
