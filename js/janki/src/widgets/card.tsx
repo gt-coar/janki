@@ -7,23 +7,30 @@ import * as React from 'react';
 
 import * as SCHEMA from '../_schema';
 import { FIELD_DELIMITER } from '../constants';
-import { CSS, ICollectionModel } from '../tokens';
+import { CSS, ICardModel } from '../tokens';
 
 Mustache.escape = function (text) {
   return text;
 };
 
-export class Card extends VDomRenderer<ICollectionModel> {
-  readonly cardId: number;
-  constructor(model: ICollectionModel, cardId: number) {
+export class Card extends VDomRenderer<ICardModel> {
+  constructor(model: ICardModel) {
     super(model);
-    this.cardId = cardId;
     this.addClass(CSS.card);
   }
 
+  dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+    this.model.dispose();
+    super.dispose();
+  }
+
   protected render() {
-    const { notes, cards, col } = this.model.collection;
-    const card = cards[`${this.cardId}`];
+    const { collection } = this.model.collection;
+    const { notes, cards, col } = collection;
+    const card = cards[`${this.model.cardId}`];
     const note = notes[`${card.nid}`];
     const model = (col['1'].models || {})[`${note.mid}`];
     const template = model?.tmpls[card.ord];
@@ -99,8 +106,10 @@ export class Card extends VDomRenderer<ICollectionModel> {
   renderNoteTemplate(tmpl: string, context: Record<string, string>): string {
     let html = Mustache.render(tmpl, context);
 
-    for (const [name, url] of Object.entries(this.model.media)) {
-      html = html.replace(name, url);
+    for (const path of Object.keys(this.model.collection.futureMedia)) {
+      if (html.indexOf(path) !== -1) {
+        html = html.replace(path, this.model.getMedia(path));
+      }
     }
 
     return html;

@@ -2,6 +2,7 @@
 // Distributed under the terms of the BSD-3-Clause License.
 
 import { VDomRenderer } from '@jupyterlab/apputils';
+import { launcherIcon, addIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
 
 import * as SCHEMA from '../_schema';
@@ -12,9 +13,10 @@ export class Decks extends VDomRenderer<CollectionModel> {
   constructor(model: CollectionModel) {
     super(model);
     this.addClass(CSS.decks);
+    this.addClass(CSS.cards);
   }
 
-  protected render() {
+  protected render(): JSX.Element | JSX.Element[] {
     const { collection } = this.model;
 
     if (!collection) {
@@ -27,15 +29,7 @@ export class Decks extends VDomRenderer<CollectionModel> {
       return <div>No decks yet.</div>;
     }
 
-    return (
-      <table>
-        <thead>
-          <th>Name</th>
-          <th>Cards</th>
-        </thead>
-        <tbody>{Object.values(decks).map(this.renderDeck)}</tbody>
-      </table>
-    );
+    return Object.values(decks).map(this.renderDeck);
   }
 
   renderDeck = (deck: SCHEMA.Deck) => {
@@ -43,21 +37,34 @@ export class Decks extends VDomRenderer<CollectionModel> {
       (card) => card.did === deck.id
     );
 
-    const onClick = () => this.model.requestDecks({ deckIds: [deck.id] });
+    const onReview = () => this.model.requestDecks({ deckIds: [deck.id] });
+    const onAdd = () => console.log('woo');
 
     return (
-      <tr key={deck.id}>
-        <th>{deck.name}</th>
-        <th>{cards.length}</th>
-        <td>
+      <div key={deck.id} className={CSS.card}>
+        <div className={CSS.template}>
+          <label>
+            <h3>{deck.name}</h3>
+          </label>
+        </div>
+        <div className={CSS.meta}>
           <button
             className={[CSS.LAB.styled, CSS.LAB.accept].join(' ')}
-            onClick={onClick}
+            onClick={onAdd}
           >
-            Open
+            <addIcon.react tag="div" />
+            <label>Card</label>
           </button>
-        </td>
-      </tr>
+          <label>{cards.length} Cards</label>
+          <button
+            className={[CSS.LAB.styled, CSS.LAB.accept].join(' ')}
+            onClick={onReview}
+          >
+            <launcherIcon.react tag="div" />
+            <label>Review</label>
+          </button>
+        </div>
+      </div>
     );
   };
 }

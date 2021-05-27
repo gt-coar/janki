@@ -7,7 +7,13 @@ import { VDomModel } from '@jupyterlab/apputils';
 
 import * as SCHEMA from '../_schema';
 import { DEBUG, JSON_FIELDS, APKG_MEDIA_JSON, APKG_COLLECTION } from '../constants';
-import { ICollectionModel, ICardManager, ICardsQuery, ICardsRequest } from '../tokens';
+import {
+  ICollectionModel,
+  ICardManager,
+  ICardsQuery,
+  ICardsRequest,
+  IMediaFuture,
+} from '../tokens';
 
 export const Q_CARDS = `SELECT * from cards;`;
 export const Q_COLL_META = `SELECT * from col;`;
@@ -21,6 +27,7 @@ export class CollectionModel extends VDomModel implements ICollectionModel {
   private _archiveModel: ArchiveModel | null;
   private _dbModel: DBModel | null;
   private _media: Record<string, string>;
+  private _futureMedia: Record<string, IMediaFuture>;
   private _manager: ICardManager;
 
   set manager(manager: ICardManager) {
@@ -43,6 +50,10 @@ export class CollectionModel extends VDomModel implements ICollectionModel {
 
   get media(): Record<string, string> {
     return this._media || {};
+  }
+
+  get futureMedia(): Record<string, IMediaFuture> {
+    return this._futureMedia || {};
   }
 
   get path() {
@@ -125,18 +136,30 @@ export class CollectionModel extends VDomModel implements ICollectionModel {
       }
     }
 
+    this._media = {};
+    this._futureMedia = {};
+
     if (Object.keys(mediaMap).length) {
-      const media: Record<string, string> = {};
       // iterate again for media
       for (const [path, member] of this._archiveModel.members.entries()) {
-        if (mediaMap[path]) {
-          media[mediaMap[path]] = URL.createObjectURL(await member.file.extract());
+        const mediaPath = mediaMap[path];
+        if (mediaPath) {
+          this._futureMedia[mediaPath] = this.scheduleOneMedia(mediaPath, member);
         }
       }
-      DEBUG && console.info(media);
-      this._media = media;
     }
     this.stateChanged.emit(void 0);
+  }
+
+  scheduleOneMedia(mediaPath: string, member: ArchiveModel.IEntry): IMediaFuture {
+    const task = async () => {
+      DEBUG && console.log('future', mediaPath);
+      const blobUrl = URL.createObjectURL(await member.file.extract());
+      this._media[mediaPath] = blobUrl;
+      DEBUG && console.log('......', mediaPath);
+    };
+
+    return task;
   }
 
   protected getCards(): { [k: string]: SCHEMA.Card } {

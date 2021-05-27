@@ -83,7 +83,6 @@ const corePlugin: JupyterFrontEndPlugin<ICardManager> = {
       const content = new Cards(request.model, new CardsQueryModel(request.query));
       const main = new MainAreaWidget({ content });
       app.shell.add(main, 'main');
-      console.log(sender, request);
     });
 
     if (restorer) {

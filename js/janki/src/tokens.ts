@@ -31,6 +31,7 @@ export const CSS = {
   model: 'jp-JankiModel',
   decks: 'jp-JankiDecks',
   template: 'jp-JankiTemplate',
+  meta: 'jp-JankiMeta',
   debug: 'jp-JANKI-DEBUG',
   front: 'jk-mod-front',
   back: 'jk-mod-back',
@@ -64,6 +65,13 @@ export interface ICollectionModel extends VDomRenderer.IModel {
   requestDecks(query: ICardsQuery): void;
   collection: SCHEMA.Collection;
   media: Record<string, string>;
+  futureMedia: Record<string, IMediaFuture>;
+}
+
+export interface ICardModel extends VDomRenderer.IModel {
+  cardId: number;
+  collection: ICollectionModel;
+  getMedia(path: string): string;
 }
 
 export interface ICardsQuery {
@@ -73,4 +81,8 @@ export interface ICardsQuery {
 export interface ICardsRequest {
   model: ICollectionModel;
   query: ICardsQuery;
+}
+
+export interface IMediaFuture {
+  (): Promise<void>;
 }

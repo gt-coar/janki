@@ -6,6 +6,7 @@ import { Panel, PanelLayout } from '@lumino/widgets';
 import * as SCHEMA from '../_schema';
 import { DEBUG } from '../constants';
 import { jankiCardsIcon } from '../icons';
+import { CardModel } from '../models/card';
 import { CardsQueryModel } from '../models/query';
 import { CSS, ICollectionModel } from '../tokens';
 
@@ -36,6 +37,7 @@ export class Cards extends Panel {
     this.node.appendChild(this.style);
     this.node.appendChild(this.frame);
     this.updateTitle();
+    setTimeout(() => this.updateCards().catch(console.warn), 100);
   }
 
   updateTitle() {
@@ -47,10 +49,14 @@ export class Cards extends Panel {
     if (this.isDisposed) {
       return;
     }
+    for (const card of this.cards.values()) {
+      card.dispose();
+    }
+    this.cards.clear();
     this.model.stateChanged.disconnect(this.updateCards, this);
   }
 
-  updateCards() {
+  async updateCards() {
     this.updateTitle();
 
     const { collection } = this.model;
@@ -72,7 +78,8 @@ export class Cards extends Panel {
     }
     for (const cardId of cardIds) {
       if (!this.cards.has(cardId)) {
-        const widget = new Card(this.model, cardId);
+        const cardModel = new CardModel(cardId, this.model);
+        const widget = new Card(cardModel);
         this.cards.set(cardId, widget);
         panelLayout.addWidget(widget);
       }
