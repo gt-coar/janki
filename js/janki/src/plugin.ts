@@ -8,14 +8,15 @@ import {
   JupyterFrontEndPlugin,
   ILayoutRestorer,
 } from '@jupyterlab/application';
-import { WidgetTracker } from '@jupyterlab/apputils';
+import { WidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
 import { IDocumentWidget, DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { CardCollectionFactory } from './factory';
 import { jankiIcon, jankiPkgIcon } from './icons';
 import { CardManager } from './manager';
+import { CardsQueryModel } from './models/query';
 import { NS, PLUGIN_ID, ICardManager, FACTORY, FILE_TYPES } from './tokens';
-import { CardCollection } from './widgets';
+import { CardCollection, Cards } from './widgets';
 
 /**
  * The editor tracker extension.
@@ -76,6 +77,13 @@ const corePlugin: JupyterFrontEndPlugin<ICardManager> = {
 
     const tracker = new WidgetTracker<IDocumentWidget<CardCollection>>({
       namespace: NS,
+    });
+
+    manager.cardsRequested.connect(async (sender, request) => {
+      const content = new Cards(request.model, new CardsQueryModel(request.query));
+      const main = new MainAreaWidget({ content });
+      app.shell.add(main, 'main');
+      console.log(sender, request);
     });
 
     if (restorer) {

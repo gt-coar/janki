@@ -1,7 +1,9 @@
 // Copyright (c) 2021 University System of Georgia and janki contributors
 // Distributed under the terms of the BSD-3-Clause License.
+import { VDomRenderer } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Token } from '@lumino/coreutils';
+import { ISignal } from '@lumino/signaling';
 
 import * as PACKAGE_ from '../package.json';
 
@@ -16,6 +18,8 @@ export const ICardManager = new Token<ICardManager>(PLUGIN_ID);
 export interface ICardManager {
   ready: Promise<void>;
   collection(...path: string[]): Promise<SCHEMA.Collection>;
+  requestCards(request: ICardsRequest): void;
+  cardsRequested: ISignal<ICardManager, ICardsRequest>;
 }
 
 export const CSS = {
@@ -53,4 +57,20 @@ export namespace ICardCollection {
     manager: ICardManager;
     context: DocumentRegistry.Context;
   }
+}
+
+export interface ICollectionModel extends VDomRenderer.IModel {
+  manager: ICardManager;
+  requestDecks(query: ICardsQuery): void;
+  collection: SCHEMA.Collection;
+  media: Record<string, string>;
+}
+
+export interface ICardsQuery {
+  deckIds: number[];
+}
+
+export interface ICardsRequest {
+  model: ICollectionModel;
+  query: ICardsQuery;
 }

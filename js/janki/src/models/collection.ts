@@ -7,20 +7,30 @@ import { VDomModel } from '@jupyterlab/apputils';
 
 import * as SCHEMA from '../_schema';
 import { DEBUG, JSON_FIELDS, APKG_MEDIA_JSON, APKG_COLLECTION } from '../constants';
+import { ICollectionModel, ICardManager, ICardsQuery, ICardsRequest } from '../tokens';
 
 export const Q_CARDS = `SELECT * from cards;`;
 export const Q_COLL_META = `SELECT * from col;`;
 export const Q_NOTES = `SELECT * from notes;`;
 export const Q_REVS = `SELECT * from revlog;`;
 
-export class CollectionModel extends VDomModel {
+export class CollectionModel extends VDomModel implements ICollectionModel {
   private _collection: SCHEMA.Collection;
   private _data: string;
   private _path: string;
   private _archiveModel: ArchiveModel | null;
   private _dbModel: DBModel | null;
   private _media: Record<string, string>;
-  private _currentDeck: number;
+  private _manager: ICardManager;
+
+  set manager(manager: ICardManager) {
+    this._manager = manager;
+    this.stateChanged.emit(void 0);
+  }
+
+  get manager() {
+    return this._manager;
+  }
 
   set collection(collection: SCHEMA.Collection) {
     this._collection = collection;
@@ -44,13 +54,9 @@ export class CollectionModel extends VDomModel {
     this.stateChanged.emit(void 0);
   }
 
-  get currentDeck() {
-    return this._currentDeck;
-  }
-
-  set currentDeck(currentDeck: number) {
-    this._currentDeck = currentDeck;
-    this.stateChanged.emit(void 0);
+  requestDecks(query: ICardsQuery): void {
+    const request: ICardsRequest = { model: this, query };
+    this.manager.requestCards(request);
   }
 
   get isApkg() {

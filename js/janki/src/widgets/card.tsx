@@ -7,16 +7,15 @@ import * as React from 'react';
 
 import * as SCHEMA from '../_schema';
 import { FIELD_DELIMITER } from '../constants';
-import { CollectionModel } from '../models/collection';
-import { CSS } from '../tokens';
+import { CSS, ICollectionModel } from '../tokens';
 
 Mustache.escape = function (text) {
   return text;
 };
 
-export class Card extends VDomRenderer<CollectionModel> {
+export class Card extends VDomRenderer<ICollectionModel> {
   readonly cardId: number;
-  constructor(model: CollectionModel, cardId: number) {
+  constructor(model: ICollectionModel, cardId: number) {
     super(model);
     this.cardId = cardId;
     this.addClass(CSS.card);

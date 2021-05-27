@@ -42,9 +42,9 @@ export class Decks extends VDomRenderer<CollectionModel> {
     const cards = Object.values(this.model.collection?.cards || []).filter(
       (card) => card.did === deck.id
     );
-    const onClick = () => {
-      this.model.currentDeck = deck.id;
-    };
+
+    const onClick = () => this.model.requestDecks({ deckIds: [deck.id] });
+
     return (
       <tr key={deck.id}>
         <th>{deck.name}</th>

@@ -5,13 +5,15 @@
 import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
 import { PromiseDelegate } from '@lumino/coreutils';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import * as SCHEMA from './_schema';
 import { API_NS } from './constants';
-import { ICardManager } from './tokens';
+import { ICardManager, ICardsRequest } from './tokens';
 
 export class CardManager implements ICardManager {
   private _ready = new PromiseDelegate<void>();
+  private _cardsRequested = new Signal<CardManager, ICardsRequest>(this);
 
   constructor() {
     this._ready.resolve();
@@ -19,6 +21,14 @@ export class CardManager implements ICardManager {
 
   get ready() {
     return this._ready.promise;
+  }
+
+  get cardsRequested(): ISignal<ICardManager, ICardsRequest> {
+    return this._cardsRequested;
+  }
+
+  requestCards(request: ICardsRequest): void {
+    this._cardsRequested.emit(request);
   }
 
   async collection(...path: string[]): Promise<SCHEMA.Collection> {
