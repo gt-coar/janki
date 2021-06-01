@@ -37,11 +37,14 @@ export const CSS = {
   debug: 'jp-JANKI-DEBUG',
   front: 'jk-mod-front',
   back: 'jk-mod-back',
+  modelPicker: 'jp-JankiModelPicker',
   LAB: {
     html: 'jp-RenderedHTMLCommon',
     card: 'jp-LauncherCard',
     styled: 'jp-mod-styled',
     accept: 'jp-mod-accept',
+    select: 'jp-HTMLSelect',
+    default: 'jp-DefaultStyle',
   },
 };
 
@@ -94,6 +97,7 @@ export interface ICardsRequest {
 export interface INewCardModel extends VDomRenderer.IModel {
   collection: ICollectionModel;
   card: Partial<SCHEMA.Card>;
+  models: SCHEMA.Model[];
 }
 
 export interface INewCardRequest {

@@ -17,7 +17,7 @@ import { CardManager } from './manager';
 import { NewCardModel } from './models/newCard';
 import { CardsQueryModel } from './models/query';
 import { NS, PLUGIN_ID, ICardManager, FACTORY, FILE_TYPES } from './tokens';
-import { CardCollection, Cards, NewCard } from './widgets';
+import { CardCollection, Cards, NewCard, CardModelPicker } from './widgets';
 
 /**
  * The editor tracker extension.
@@ -89,6 +89,7 @@ const corePlugin: JupyterFrontEndPlugin<ICardManager> = {
     manager.newCardRequested.connect(async (sender, request) => {
       const content = new NewCard({ model: new NewCardModel(request) });
       const main = new MainAreaWidget({ content });
+      main.toolbar.addItem('template', new CardModelPicker(content.model));
       app.shell.add(main, 'main');
     });
 

@@ -23,6 +23,12 @@ export class NewCardModel extends VDomModel implements INewCardModel {
   get collection() {
     return this._collection;
   }
+
+  get models() {
+    const { collection } = this.collection;
+    const { col } = collection;
+    return [...Object.values(col['1'].models || {})];
+  }
 }
 
 export namespace NewCardModel {
