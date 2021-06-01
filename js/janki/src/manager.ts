@@ -9,11 +9,12 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import * as SCHEMA from './_schema';
 import { API_NS } from './constants';
-import { ICardManager, ICardsRequest } from './tokens';
+import { ICardManager, ICardsRequest, INewCardRequest } from './tokens';
 
 export class CardManager implements ICardManager {
   private _ready = new PromiseDelegate<void>();
   private _cardsRequested = new Signal<CardManager, ICardsRequest>(this);
+  private _newCardRequested = new Signal<CardManager, INewCardRequest>(this);
 
   constructor() {
     this._ready.resolve();
@@ -29,6 +30,14 @@ export class CardManager implements ICardManager {
 
   requestCards(request: ICardsRequest): void {
     this._cardsRequested.emit(request);
+  }
+
+  get newCardRequested(): ISignal<ICardManager, INewCardRequest> {
+    return this._newCardRequested;
+  }
+
+  requestNewCard(request: INewCardRequest) {
+    this._newCardRequested.emit(request);
   }
 
   async collection(...path: string[]): Promise<SCHEMA.Collection> {

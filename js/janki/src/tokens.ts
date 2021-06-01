@@ -19,7 +19,9 @@ export interface ICardManager {
   ready: Promise<void>;
   collection(...path: string[]): Promise<SCHEMA.Collection>;
   requestCards(request: ICardsRequest): void;
+  requestNewCard(request: INewCardRequest): void;
   cardsRequested: ISignal<ICardManager, ICardsRequest>;
+  newCardRequested: ISignal<ICardManager, INewCardRequest>;
 }
 
 export const CSS = {
@@ -74,6 +76,11 @@ export interface ICardModel extends VDomRenderer.IModel {
   getMedia(path: string): string;
 }
 
+export interface IMediaFuture {
+  (): Promise<void>;
+}
+
+// requesting cards
 export interface ICardsQuery {
   deckIds: number[];
 }
@@ -83,6 +90,13 @@ export interface ICardsRequest {
   query: ICardsQuery;
 }
 
-export interface IMediaFuture {
-  (): Promise<void>;
+// making cards
+export interface INewCardModel extends VDomRenderer.IModel {
+  collection: ICollectionModel;
+  card: Partial<SCHEMA.Card>;
+}
+
+export interface INewCardRequest {
+  collection: ICollectionModel;
+  card: Partial<SCHEMA.Card>;
 }

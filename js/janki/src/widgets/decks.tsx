@@ -38,7 +38,7 @@ export class Decks extends VDomRenderer<CollectionModel> {
     );
 
     const onReview = () => this.model.requestDecks({ deckIds: [deck.id] });
-    const onAdd = () => console.log('woo');
+    const onAdd = () => this.model.requestNewCard({ did: deck.id });
 
     return (
       <div key={deck.id} className={CSS.card}>

@@ -4,3 +4,4 @@
 export * from './card';
 export * from './cards';
 export * from './collection';
+export * from './newCard';

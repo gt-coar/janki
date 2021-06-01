@@ -12,6 +12,7 @@ import {
   ICardManager,
   ICardsQuery,
   ICardsRequest,
+  INewCardRequest,
   IMediaFuture,
 } from '../tokens';
 
@@ -68,6 +69,11 @@ export class CollectionModel extends VDomModel implements ICollectionModel {
   requestDecks(query: ICardsQuery): void {
     const request: ICardsRequest = { model: this, query };
     this.manager.requestCards(request);
+  }
+
+  requestNewCard(card: Partial<SCHEMA.Card>) {
+    const request: INewCardRequest = { collection: this, card };
+    this.manager.requestNewCard(request);
   }
 
   get isApkg() {

@@ -14,9 +14,10 @@ import { IDocumentWidget, DocumentRegistry } from '@jupyterlab/docregistry';
 import { CardCollectionFactory } from './factory';
 import { jankiIcon, jankiPkgIcon } from './icons';
 import { CardManager } from './manager';
+import { NewCardModel } from './models/newCard';
 import { CardsQueryModel } from './models/query';
 import { NS, PLUGIN_ID, ICardManager, FACTORY, FILE_TYPES } from './tokens';
-import { CardCollection, Cards } from './widgets';
+import { CardCollection, Cards, NewCard } from './widgets';
 
 /**
  * The editor tracker extension.
@@ -81,6 +82,12 @@ const corePlugin: JupyterFrontEndPlugin<ICardManager> = {
 
     manager.cardsRequested.connect(async (sender, request) => {
       const content = new Cards(request.model, new CardsQueryModel(request.query));
+      const main = new MainAreaWidget({ content });
+      app.shell.add(main, 'main');
+    });
+
+    manager.newCardRequested.connect(async (sender, request) => {
+      const content = new NewCard({ model: new NewCardModel(request) });
       const main = new MainAreaWidget({ content });
       app.shell.add(main, 'main');
     });
