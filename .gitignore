@@ -9,9 +9,12 @@ __pycache__
 *-wal
 *.egg-info
 *.tsbuildinfo
+**/labextensions/
 build/
 dist/
 docs/_reports/
+JANKI_DEBUG*
 lib/
 node_modules/
-**/labextensions/
+untitled*
+Untitled*
