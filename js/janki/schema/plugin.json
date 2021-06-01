@@ -3,6 +3,7 @@
   "default": {},
   "definitions": {
     "anki-template": {
+      "additionalProperties": false,
       "properties": {
         "afmt": {
           "type": "string"
@@ -31,9 +32,11 @@
       "type": "object"
     },
     "api-collection": {
+      "additionalProperties": false,
       "properties": {
         "cards": {
           "additionalProperties": {
+            "additionalProperties": false,
             "properties": {
               "data": {
                 "type": "string"
@@ -117,8 +120,10 @@
         },
         "col": {
           "additionalProperties": {
+            "additionalProperties": false,
             "properties": {
               "conf": {
+                "additionalProperties": false,
                 "properties": {
                   "activeDecks": {
                     "items": {
@@ -163,6 +168,7 @@
                     "type": "integer"
                   }
                 },
+                "title": "Review Configuration",
                 "type": "object"
               },
               "crt": {
@@ -170,6 +176,7 @@
               },
               "dconf": {
                 "additionalProperties": {
+                  "additionalProperties": false,
                   "properties": {
                     "autoplay": {
                       "type": "boolean"
@@ -178,6 +185,7 @@
                       "type": "integer"
                     },
                     "lapse": {
+                      "additionalProperties": false,
                       "properties": {
                         "delays": {
                           "items": {
@@ -205,6 +213,7 @@
                         "minInt",
                         "mult"
                       ],
+                      "title": "Lapse",
                       "type": "object"
                     },
                     "maxTaken": {
@@ -217,6 +226,7 @@
                       "type": "string"
                     },
                     "new": {
+                      "additionalProperties": false,
                       "properties": {
                         "bury": {
                           "type": "boolean"
@@ -255,12 +265,14 @@
                         "perDay",
                         "separate"
                       ],
+                      "title": "New",
                       "type": "object"
                     },
                     "replayq": {
                       "type": "boolean"
                     },
                     "rev": {
+                      "additionalProperties": false,
                       "properties": {
                         "bury": {
                           "type": "boolean"
@@ -293,6 +305,7 @@
                         "minSpace",
                         "perDay"
                       ],
+                      "title": "Review Configuration",
                       "type": "object"
                     },
                     "timer": {
@@ -322,6 +335,7 @@
               },
               "decks": {
                 "additionalProperties": {
+                  "additionalProperties": false,
                   "properties": {
                     "collapsed": {
                       "type": "boolean"
@@ -413,6 +427,7 @@
               },
               "models": {
                 "additionalProperties": {
+                  "additionalProperties": false,
                   "properties": {
                     "css": {
                       "type": "string"
@@ -422,6 +437,7 @@
                     },
                     "flds": {
                       "items": {
+                        "additionalProperties": false,
                         "properties": {
                           "font": {
                             "type": "string"
@@ -454,6 +470,7 @@
                           "size",
                           "sticky"
                         ],
+                        "title": "Field",
                         "type": "object"
                       },
                       "type": "array"
@@ -571,6 +588,7 @@
         },
         "notes": {
           "additionalProperties": {
+            "additionalProperties": false,
             "properties": {
               "csum": {
                 "type": "integer"
@@ -629,6 +647,7 @@
         },
         "revlog": {
           "additionalProperties": {
+            "additionalProperties": false,
             "properties": {
               "cid": {
                 "type": "integer"

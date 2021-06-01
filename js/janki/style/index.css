@@ -118,6 +118,35 @@
   margin: 0 var(--jp-notebook-padding) var(--jp-notebook-padding) 0;
 }
 
+/* new card */
+.jp-JankiPicker label {
+  line-height: 1.8;
+  display: inline-block;
+  padding: 0 0.5em;
+  color: var(--jp-ui-font-color2);
+  font-style: italic;
+}
+
+.jp-JankiNewCardTemplate {
+  overflow-y: auto;
+}
+
+.jp-JankiFieldEditor {
+  display: flex;
+  flex-direction: row;
+  padding: 0.5em;
+  padding-bottom: 0;
+}
+
+.jp-JankiFieldEditor > label {
+  min-width: 20em;
+}
+
+.jp-JankiFieldEditor > .jp-Editor {
+  border: solid 1px var(--jp-border-color1);
+  flex: 1;
+}
+
 /* debug cruft, maybe take out */
 .jp-JankiCollection:not(.jp-JANKI-DEBUG) iframe {
   display: none;

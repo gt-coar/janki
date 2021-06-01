@@ -29,9 +29,9 @@ export class Card extends VDomRenderer<ICardModel> {
 
   protected render() {
     const { collection } = this.model.collection;
-    const { notes, cards, col } = collection;
-    const card = cards[`${this.model.cardId}`];
-    const note = notes[`${card.nid}`];
+    const { col } = collection;
+    const card = this.getCard();
+    const note = this.getNote();
     const model = (col['1'].models || {})[`${note.mid}`];
     const template = model?.tmpls[card.ord];
 
@@ -44,6 +44,18 @@ export class Card extends VDomRenderer<ICardModel> {
     }
 
     return <div>{this.renderRawFields(card, note)}</div>;
+  }
+
+  getNote(): SCHEMA.Note {
+    const { collection } = this.model.collection;
+    const { notes } = collection;
+    return notes[`${this.model.cardId}`];
+  }
+
+  getCard(): SCHEMA.Card {
+    const { collection } = this.model.collection;
+    const { cards } = collection;
+    return cards[`${this.model.cardId}`];
   }
 
   renderRawFields = (card: SCHEMA.Card, note: SCHEMA.Note) => {

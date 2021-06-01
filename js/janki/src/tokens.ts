@@ -1,6 +1,7 @@
 // Copyright (c) 2021 University System of Georgia and janki contributors
 // Distributed under the terms of the BSD-3-Clause License.
 import { VDomRenderer } from '@jupyterlab/apputils';
+import { IEditorServices, CodeEditor } from '@jupyterlab/codeeditor';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Token } from '@lumino/coreutils';
 import { ISignal } from '@lumino/signaling';
@@ -22,6 +23,7 @@ export interface ICardManager {
   requestNewCard(request: INewCardRequest): void;
   cardsRequested: ISignal<ICardManager, ICardsRequest>;
   newCardRequested: ISignal<ICardManager, INewCardRequest>;
+  editorServices: IEditorServices;
 }
 
 export const CSS = {
@@ -37,7 +39,11 @@ export const CSS = {
   debug: 'jp-JANKI-DEBUG',
   front: 'jk-mod-front',
   back: 'jk-mod-back',
-  modelPicker: 'jp-JankiModelPicker',
+  newCard: 'jp-JankiNewCard',
+  newCardTemplate: 'jp-JankiNewCardTemplate',
+  newCardPreview: 'jp-JankiNewCardPreview',
+  picker: 'jp-JankiPicker',
+  fieldEditor: 'jp-JankiFieldEditor',
   LAB: {
     html: 'jp-RenderedHTMLCommon',
     card: 'jp-LauncherCard',
@@ -97,10 +103,26 @@ export interface ICardsRequest {
 export interface INewCardModel extends VDomRenderer.IModel {
   collection: ICollectionModel;
   card: Partial<SCHEMA.Card>;
+  note: Partial<SCHEMA.Note>;
+  template: Partial<SCHEMA.Template>;
+
+  modelId: number;
+  model: SCHEMA.Model;
+
   models: SCHEMA.Model[];
+  templates: SCHEMA.Template[];
+  decks: SCHEMA.Deck[];
+
+  setField(ord: number, value: string): void;
+  getField(ord: number): string;
+
+  // gah widgets
+  createEditor(options: CodeEditor.IOptions): CodeEditor.IEditor;
 }
 
 export interface INewCardRequest {
   collection: ICollectionModel;
   card: Partial<SCHEMA.Card>;
+  note: Partial<SCHEMA.Note>;
+  template: Partial<SCHEMA.Template>;
 }

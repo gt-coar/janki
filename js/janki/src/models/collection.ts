@@ -71,8 +71,17 @@ export class CollectionModel extends VDomModel implements ICollectionModel {
     this.manager.requestCards(request);
   }
 
-  requestNewCard(card: Partial<SCHEMA.Card>) {
-    const request: INewCardRequest = { collection: this, card };
+  requestNewCard(
+    card: Partial<SCHEMA.Card>,
+    note: Partial<SCHEMA.Note> = {},
+    template: Partial<SCHEMA.Template> = {}
+  ) {
+    const request: INewCardRequest = {
+      collection: this,
+      card,
+      note,
+      template,
+    };
     this.manager.requestNewCard(request);
   }
 

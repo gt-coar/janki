@@ -2,6 +2,7 @@
 // Distributed under the terms of the BSD-3-Clause License.
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+import { IEditorServices } from '@jupyterlab/codeeditor';
 import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
 import { PromiseDelegate } from '@lumino/coreutils';
@@ -15,13 +16,19 @@ export class CardManager implements ICardManager {
   private _ready = new PromiseDelegate<void>();
   private _cardsRequested = new Signal<CardManager, ICardsRequest>(this);
   private _newCardRequested = new Signal<CardManager, INewCardRequest>(this);
+  private _editorServices: IEditorServices;
 
-  constructor() {
+  constructor(options: CardManager.IOptions) {
+    this._editorServices = options.editorServices;
     this._ready.resolve();
   }
 
   get ready() {
     return this._ready.promise;
+  }
+
+  get editorServices() {
+    return this._editorServices;
   }
 
   get cardsRequested(): ISignal<ICardManager, ICardsRequest> {
@@ -71,5 +78,11 @@ export class CardManager implements ICardManager {
     }
 
     return data as T;
+  }
+}
+
+export namespace CardManager {
+  export interface IOptions {
+    editorServices: IEditorServices;
   }
 }

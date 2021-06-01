@@ -8,39 +8,38 @@ import * as React from 'react';
 import * as SCHEMA from '../_schema';
 import { INewCardModel, CSS } from '../tokens';
 
-export class CardModelPicker extends VDomRenderer<INewCardModel> {
+export class DeckPicker extends VDomRenderer<INewCardModel> {
   constructor(model: INewCardModel) {
     super(model);
     this.addClass(CSS.picker);
   }
 
   protected render() {
-    const { models } = this.model;
-    // const defaultValue = card.mid ? `${card.mid}` : '';
+    const { decks, card } = this.model;
 
     return [
-      <label key="label">Model</label>,
+      <label key="label">Deck</label>,
       <HTMLSelect
         key="select"
         onInput={this.onChange}
-        // defaultValue={defaultValue}
-        aria-label="Model"
-        title="Select Model"
+        defaultValue={card.did}
+        aria-label="Deck"
+        title="Select Deck"
       >
-        {models.map(this.renderOption)}
+        {decks.map(this.renderOption)}
       </HTMLSelect>,
     ];
   }
 
-  protected renderOption = (model: SCHEMA.Model) => {
+  protected renderOption = (deck: SCHEMA.Deck) => {
     return (
-      <option key={model.id} value={model.id}>
-        {model.name}
+      <option key={deck.id} value={deck.id}>
+        {deck.name}
       </option>
     );
   };
 
   protected onChange = (evt: React.ChangeEvent<HTMLSelectElement>) => {
-    this.model.modelId = parseInt(evt.currentTarget.value);
+    this.model.card = { ...this.model.card, did: parseInt(evt.currentTarget.value) };
   };
 }

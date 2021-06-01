@@ -6,3 +6,5 @@ export * from './cards';
 export * from './collection';
 export * from './newCard';
 export * from './cardModelPicker';
+export * from './deckPicker';
+export * from './templatePicker';
