@@ -5,3 +5,13 @@
   flex: 1;
   overflow: auto;
 }
+
+.jp-SQLite3-Query-Grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-SQLite3-Query .lm-DataGrid {
+  flex: 1;
+  height: 100%;
+}

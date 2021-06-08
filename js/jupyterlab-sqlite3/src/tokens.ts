@@ -19,9 +19,15 @@ export const sqliteIcon = new LabIcon({
  */
 export const MIME_TYPE = 'application/vnd.sqlite3';
 
+export const FACTORY_NAME = 'SQLite3';
+
 export const FILE_TYPE = {
-  name: 'SQLite3',
+  name: FACTORY_NAME,
   mimeTypes: [MIME_TYPE, 'application/x-sqlite3'],
   extensions: ['.sqlite3', '.sqlite', '.db'],
   icon: sqliteIcon.name,
 };
+
+export namespace CommandIds {
+  export const query = `${NS}:query`;
+}

@@ -3,7 +3,11 @@
   "version": "0.1.0",
   "description": "basic model for working with sqlite3 files in JupyterLab",
   "dependencies": {
-    "sql.js": "~1.5.0"
+    "@jupyterlab/application": "3",
+    "@jupyterlab/docmanager": "3",
+    "@jupyterlab/fileeditor": "3",
+    "sql.js": "~1.5.0",
+    "@lumino/datagrid": "^0.25.0"
   },
   "keywords": [
     "jupyter",
@@ -45,7 +49,8 @@
   "sideEffects": true,
   "jupyterlab": {
     "webpackConfig": "./webpack.config.js",
-    "mimeExtension": "lib/plugin.js",
+    "extension": "./lib/plugins/mimeHelper.js",
+    "mimeExtension": "./lib/plugins/mime.js",
     "discovery": {
       "server": {
         "base": {
@@ -56,7 +61,17 @@
         ]
       }
     },
-    "outputDir": "../../py/jupyterlab-sqlite3/src/jupyterlab_sqlite3/labextensions/@gt-coar/jupyterlab-sqlite3"
+    "outputDir": "../../py/jupyterlab-sqlite3/src/jupyterlab_sqlite3/labextensions/@gt-coar/jupyterlab-sqlite3",
+    "sharedPackages": {
+      "@lumino/datagrid": {
+        "bundled": true,
+        "singleton": false
+      },
+      "sql.js": {
+        "bundled": true,
+        "singleton": false
+      }
+    }
   },
   "styleModule": "style/index.js"
 }

@@ -2,6 +2,7 @@
 // Distributed under the terms of the BSD-3-Clause License.
 
 import { VDomModel } from '@jupyterlab/apputils';
+import { Signal, ISignal } from '@lumino/signaling';
 import { Database } from 'sql.js';
 
 import { ensureSQLite } from './sqlite';
@@ -21,6 +22,7 @@ export class Model extends VDomModel {
   private _db: Database | null;
   private _tables: Model.TTableMap = new Map();
   private _array: Uint8Array;
+  private _queryRequested = new Signal<Model, any>(this);
 
   dispose() {
     if (this.isDisposed) {
@@ -31,6 +33,14 @@ export class Model extends VDomModel {
       this._db = null;
     }
     super.dispose();
+  }
+
+  get queryRequested(): ISignal<Model, any> {
+    return this._queryRequested;
+  }
+
+  requestQuery(args: any) {
+    this._queryRequested.emit(args);
   }
 
   set data(data: string) {
