@@ -23,6 +23,7 @@ export class Model extends VDomModel {
   private _tables: Model.TTableMap = new Map();
   private _array: Uint8Array;
   private _queryRequested = new Signal<Model, any>(this);
+  private _dataChanged = new Signal<Model, any>(this);
 
   dispose() {
     if (this.isDisposed) {
@@ -89,6 +90,28 @@ export class Model extends VDomModel {
     }
     this._array = ia;
     await this.updateDb();
+  }
+
+  async saveToModel(): Promise<boolean> {
+    const binArray = this._db?.export() || null;
+    if (!binArray) {
+      return false;
+    }
+    const b64 = btoa(String.fromCharCode.apply(null, binArray));
+    console.table([
+      { what: 'old', length: this._data.length, data: this._data },
+      { what: 'new', length: b64.length, data: b64 },
+    ]);
+    if (b64 === this._data) {
+      return false;
+    }
+    this._data = b64;
+    this._dataChanged.emit(void 0);
+    return true;
+  }
+
+  get dataChanged(): ISignal<Model, void> {
+    return this._dataChanged;
   }
 
   protected async updateDb(): Promise<void> {

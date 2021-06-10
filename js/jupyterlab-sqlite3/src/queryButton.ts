@@ -26,12 +26,20 @@ export class SQLiteQueryButton
     sqlite.queryRequested.connect((sender: any, args: any) => {
       this._queryRequested.emit({ db: sqlite, ...args });
     });
-    const btn = new CommandToolbarButton({
+    const queryBtn = new CommandToolbarButton({
       commands: this.commands,
       id: CommandIds.query,
     });
-    panel.toolbar.insertItem(9, 'query', btn);
-    return new DisposableDelegate(() => btn.dispose());
+    const saveBtn = new CommandToolbarButton({
+      commands: this.commands,
+      id: CommandIds.save,
+    });
+    panel.toolbar.insertItem(9, 'query', queryBtn);
+    panel.toolbar.insertItem(9, 'save', saveBtn);
+    return new DisposableDelegate(() => {
+      queryBtn.dispose();
+      saveBtn.dispose();
+    });
   }
 
   get queryRequested() {

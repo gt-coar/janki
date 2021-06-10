@@ -30,4 +30,5 @@ export const FILE_TYPE = {
 
 export namespace CommandIds {
   export const query = `${NS}:query`;
+  export const save = `${NS}:save`;
 }

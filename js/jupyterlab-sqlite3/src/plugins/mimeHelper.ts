@@ -6,7 +6,7 @@ import { MainAreaWidget, ToolbarButton, Toolbar } from '@jupyterlab/apputils';
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
-import { searchIcon, runIcon, linkIcon } from '@jupyterlab/ui-components';
+import { searchIcon, saveIcon, runIcon, linkIcon } from '@jupyterlab/ui-components';
 import { Widget } from '@lumino/widgets';
 
 import { Model } from '../model';
@@ -22,15 +22,19 @@ const mimeHelperPlugin: JupyterFrontEndPlugin<void> = {
     editorTracker: IEditorTracker
   ) => {
     const { commands, docRegistry } = app;
-    const button = new SQLiteQueryButton();
-    button.queryRequested.connect((sender: any, args: any) => execute(args));
-    button.commands = commands;
-    docRegistry.addWidgetExtension(FACTORY_NAME, button);
+
+    // there's probably a better pattern for this
     SqlQuery.setEditorServices(editorServices);
+
+    // add the query button to all database viewers
+    const queryBtn = new SQLiteQueryButton();
+    queryBtn.queryRequested.connect((sender: any, args: any) => executeQuery(args));
+    queryBtn.commands = commands;
+    docRegistry.addWidgetExtension(FACTORY_NAME, queryBtn);
 
     let nextId = 0;
 
-    const execute = async (args: any) => {
+    const executeQuery = async (args: any) => {
       // TODO: better
       let db: Model = args.db;
       if (!db) {
@@ -63,7 +67,6 @@ const mimeHelperPlugin: JupyterFrontEndPlugin<void> = {
         tooltip: 'Link to Editor',
         icon: linkIcon,
         onClick: async () => {
-          app.shell.activateById(main.id);
           const candidates: IDocumentWidget<FileEditor>[] = [];
 
           editorTracker.forEach((editor) => {
@@ -92,10 +95,38 @@ const mimeHelperPlugin: JupyterFrontEndPlugin<void> = {
       app.shell.add(main, 'main', { mode: 'split-right' });
     };
 
+    const executeSave = async (args: any) => {
+      let { db } = args || {};
+      if (!db) {
+        // todo: must do a better job of finding this
+        let doc: Widget;
+        try {
+          doc = app.shell.activeWidget as any;
+          db = (doc as any).content.layout.widgets[0].renderer.model as Model;
+        } catch (err) {
+          console.error(err);
+          return;
+        }
+        // Export the database to an Uint8Array containing the SQLite database file
+        const wasSaved = await db.saveToModel();
+        if (wasSaved) {
+          const saved = await commands.execute('docmanager:save');
+          console.log(saved);
+        }
+      }
+    };
+
+    // actually register commands
     commands.addCommand(CommandIds.query, {
       label: 'query',
       icon: searchIcon,
-      execute,
+      execute: executeQuery,
+    });
+
+    commands.addCommand(CommandIds.save, {
+      label: 'save',
+      icon: saveIcon,
+      execute: executeSave,
     });
   },
   requires: [IEditorServices, IEditorTracker],
