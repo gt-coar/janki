@@ -46,9 +46,8 @@ export class SqlQuery extends SplitPanel {
     this.createGrid().catch(console.warn);
     this.model.stateChanged.connect(() => {
       const { results, queryTime } = this.model;
-      this.title.label = `${results ? results.length : ''} rows in ${Math.round(
-        queryTime
-      )}ms`;
+      const roughQueryTime = `${queryTime}`.slice(0, 4);
+      this.title.label = `${results ? results.length : ''} rows in ${roughQueryTime}ms`;
     });
   }
 
@@ -73,16 +72,28 @@ export class SqlQuery extends SplitPanel {
     }
 
     this._editor.model.value.changed.connect(() => {
-      this.model.query = this._editor.model.value.text;
+      try {
+        this.model.query = this._editor.model.value.text;
+      } catch (err) {
+        console.log(err);
+      }
     });
     this.model.stateChanged.connect(() => {
-      if (this._editor.model.value.text != this.model.query) {
-        this._editor.model.value.text = this.model.query;
+      try {
+        if (this._editor.model.value.text != this.model.query) {
+          this._editor.model.value.text = this.model.query;
+        }
+      } catch (err) {
+        console.log(err);
       }
     });
 
     if (this.model.query) {
-      this._editor.model.value.text = this.model.query;
+      try {
+        this._editor.model.value.text = this.model.query;
+      } catch (err) {
+        console.log(err);
+      }
     }
   };
 
@@ -96,6 +107,9 @@ export class SqlQuery extends SplitPanel {
     const { DataGrid, BasicKeyHandler, BasicMouseHandler, BasicSelectionModel } =
       await import('@lumino/datagrid');
     const grid = (this._grid = new DataGrid());
+    grid.editingEnabled = true;
+    grid.stretchLastColumn = true;
+    grid.stretchLastRow = true;
     grid.keyHandler = new BasicKeyHandler();
     grid.mouseHandler = new BasicMouseHandler();
     (this._gridPanel.layout as PanelLayout).addWidget(grid);
@@ -227,7 +241,8 @@ export class QueryModel extends VDomModel {
     try {
       this.results = this._db.query<any>(this._query);
     } catch (err) {
-      console.error(err);
+      console.error('run', err);
+      this.results = [{ error: err }];
     }
     this._queryTime = performance.now() - start;
     this.changed();
