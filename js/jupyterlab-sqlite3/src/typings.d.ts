@@ -10,10 +10,3 @@ declare module '*.svg' {
   const script: string;
   export default script;
 }
-
-declare module "*worker.ts" {
-  class WebpackWorker extends Worker {
-    constructor();
-  }
-  export default WebpackWorker;
-}

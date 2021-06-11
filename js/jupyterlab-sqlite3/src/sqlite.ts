@@ -6,20 +6,20 @@ import type { SqlJsStatic } from 'sql.js';
 
 import * as SQL_WASM_URL from '!!file-loader!sql.js/dist/sql-wasm.wasm';
 
-import SQLite3Worker from "./worker.ts";
-
 let SQL: SqlJsStatic;
 
 let LOADING: PromiseDelegate<SqlJsStatic>;
 
-let worker: Worker;
+let worker: any;
 
 export async function ensureSQLite(): Promise<SqlJsStatic> {
-  if(!worker) {
+  if (!worker) {
     try {
       worker = await initWorker();
-    } catch(err) {
+    } catch (err) {
       console.error(err);
+    } finally {
+      console.log('worker', worker);
     }
   }
 
@@ -50,12 +50,9 @@ export async function ensureSQLite(): Promise<SqlJsStatic> {
   return SQL;
 }
 
-export async function initWorker(): Promise<SQLite3Worker> {
-  const worker = new SQLite3Worker();
+async function initWorker(): Promise<any> {
+  const Worker = (await import('./sqlite.comlink')) as any;
+  const worker = new Worker();
   console.log(worker);
-  worker.postMessage({ limit: 1000 });
-  worker.onmessage = (event: MessageEvent) => {
-    console.log('host', event)
-  };
   return worker;
 }

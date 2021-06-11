@@ -7,6 +7,7 @@
     "esModuleInterop": true,
     "incremental": true,
     "jsx": "react",
+    "lib": ["es2019", "es6", "dom", "webworker"],
     "module": "esnext",
     "moduleResolution": "node",
     "noEmitOnError": true,
@@ -17,8 +18,7 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "strictNullChecks": true,
-    "target": "es2017",
-    "types": [],
-    "lib": ["es2017", "webworker", "dom"]
+    "target": "esnext",
+    "types": []
   }
 }

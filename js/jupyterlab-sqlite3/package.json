@@ -6,8 +6,8 @@
     "@jupyterlab/application": "3",
     "@jupyterlab/docmanager": "3",
     "@jupyterlab/fileeditor": "3",
-    "sql.js": "~1.5.0",
-    "@lumino/datagrid": "^0.25.0"
+    "@lumino/datagrid": "^0.25.0",
+    "sql.js": "~1.5.0"
   },
   "keywords": [
     "jupyter",
@@ -27,9 +27,11 @@
   },
   "devDependencies": {
     "@jupyterlab/builder": "^3.0.8",
-    "typescript": "~4.2.4",
+    "@types/sql.js": "^1.4.2",
+    "comlink": "^4.3.1",
+    "comlink-loader": "^2.0.0",
     "react": "^17.0.1",
-    "@types/sql.js": "^1.4.2"
+    "typescript": "~4.2.4"
   },
   "files": [
     "{lib,style,src}/**/*.{.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf,css}",
@@ -43,8 +45,8 @@
     "url": "https://github.com/gt-coar/janki"
   },
   "scripts": {
-    "build:ext": "jupyter labextension build .",
-    "watch": "jupyter labextension watch ."
+    "build:ext": "jupyter labextension build --debug .",
+    "watch": "jupyter labextension watch --debug ."
   },
   "sideEffects": true,
   "jupyterlab": {
