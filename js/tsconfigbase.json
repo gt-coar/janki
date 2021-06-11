@@ -18,6 +18,7 @@
     "sourceMap": true,
     "strictNullChecks": true,
     "target": "es2017",
-    "types": []
+    "types": [],
+    "lib": ["es2017", "webworker", "dom"]
   }
 }

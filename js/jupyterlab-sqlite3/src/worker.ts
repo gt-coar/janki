@@ -2,27 +2,21 @@
 // Distributed under the terms of the BSD-3-Clause License.
 
 import { PromiseDelegate } from '@lumino/coreutils';
+
 import type { SqlJsStatic } from 'sql.js';
 
 import * as SQL_WASM_URL from '!!file-loader!sql.js/dist/sql-wasm.wasm';
-
-import SQLite3Worker from "./worker.ts";
 
 let SQL: SqlJsStatic;
 
 let LOADING: PromiseDelegate<SqlJsStatic>;
 
-let worker: Worker;
+console.log('worker started', event);
+
+// We alias self to ctx and give it our newly created type
+const ctx: Worker = self as any;
 
 export async function ensureSQLite(): Promise<SqlJsStatic> {
-  if(!worker) {
-    try {
-      worker = await initWorker();
-    } catch(err) {
-      console.error(err);
-    }
-  }
-
   if (SQL) {
     return SQL;
   }
@@ -50,12 +44,23 @@ export async function ensureSQLite(): Promise<SqlJsStatic> {
   return SQL;
 }
 
-export async function initWorker(): Promise<SQLite3Worker> {
-  const worker = new SQLite3Worker();
-  console.log(worker);
-  worker.postMessage({ limit: 1000 });
-  worker.onmessage = (event: MessageEvent) => {
-    console.log('host', event)
-  };
-  return worker;
+class SQLite3Worker {
+  calculate(limit: number): string[] {
+    return ["woo"];
+  }
 }
+
+// Setup a new prime sieve once on instancation
+const worker = new SQLite3Worker();
+
+// We send a message back to the main thread
+ctx.addEventListener("message", (event: MessageEvent) => {
+  // Get the limit from the event data
+  const limit = event.data.limit;
+
+  // Calculate the primes
+  const primes = worker.calculate(limit);
+
+  // Send the primes back to the main thread
+  ctx.postMessage({ primes });
+});
