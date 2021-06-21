@@ -117,11 +117,11 @@ export class CollectionModel extends VDomModel implements ICollectionModel {
     }
     DEBUG && console.info('db tables', this._dbModel.tables);
     this.collection = {
-      cards: this.getCards(),
-      col: this.getCollectionMetadata(),
-      notes: this.getNotes(),
+      cards: await this.getCards(),
+      col: await this.getCollectionMetadata(),
+      notes: await this.getNotes(),
       path: this.path,
-      revlog: this.getRevs(),
+      revlog: await this.getRevs(),
     };
     this.stateChanged.emit(void 0);
   }
@@ -177,40 +177,44 @@ export class CollectionModel extends VDomModel implements ICollectionModel {
     return task;
   }
 
-  protected getCards(): { [k: string]: SCHEMA.Card } {
+  protected async getCards(): Promise<{ [k: string]: SCHEMA.Card }> {
     let cards: { [k: string]: SCHEMA.Card } = {};
     if (this._dbModel) {
-      for (const card of this._dbModel.query<SCHEMA.Card>(Q_CARDS)) {
+      const rows = await this._dbModel.query<SCHEMA.Card>(Q_CARDS);
+      for (const card of rows) {
         cards[card.id] = card;
       }
     }
     return cards;
   }
 
-  protected getCollectionMetadata(): { [k: string]: SCHEMA.CollectionMetadata } {
+  protected async getCollectionMetadata(): Promise<{ [k: string]: SCHEMA.CollectionMetadata }> {
     let cols: { [k: string]: SCHEMA.CollectionMetadata } = {};
     if (this._dbModel) {
-      for (const col of this._dbModel.query<SCHEMA.CollectionMetadata>(Q_COLL_META)) {
+      const rows = await this._dbModel.query<SCHEMA.CollectionMetadata>(Q_COLL_META);
+      for (const col of rows) {
         cols[col.id] = this.blobToJSON('col', col) as SCHEMA.CollectionMetadata;
       }
     }
     return cols;
   }
 
-  protected getNotes(): { [k: string]: SCHEMA.Note } {
+  protected async getNotes(): Promise<{ [k: string]: SCHEMA.Note }> {
     let notes: { [k: string]: SCHEMA.Note } = {};
     if (this._dbModel) {
-      for (const note of this._dbModel.query<SCHEMA.Note>(Q_NOTES)) {
+      const rows = await this._dbModel.query<SCHEMA.Note>(Q_NOTES);
+      for (const note of rows) {
         notes[note.id] = note;
       }
     }
     return notes;
   }
 
-  protected getRevs(): { [k: string]: SCHEMA.Rev } {
+  protected async getRevs(): Promise<{ [k: string]: SCHEMA.Rev }> {
     let revs: { [k: string]: SCHEMA.Rev } = {};
     if (this._dbModel) {
-      for (const rev of this._dbModel.query<SCHEMA.Rev>(Q_REVS)) {
+      const rows = await this._dbModel.query<SCHEMA.Rev>(Q_REVS);
+      for (const rev of rows) {
         revs[rev.id] = rev;
       }
     }

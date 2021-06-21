@@ -3,9 +3,9 @@
 
 import { VDomModel } from '@jupyterlab/apputils';
 import { Signal, ISignal } from '@lumino/signaling';
-import { Database } from 'sql.js';
 
 import { ensureSQLite } from './sqlite';
+import { ISQLiteWorker, IRemoteSQLWorker } from './tokens';
 
 const Q_TABLE_COLUMNS = `
 SELECT
@@ -19,7 +19,7 @@ order by tableName, p.name;
 
 export class Model extends VDomModel {
   private _data: string;
-  private _db: Database | null;
+  private _db: ISQLiteWorker.IDBMeta;
   private _tables: Model.TTableMap = new Map();
   private _array: Uint8Array;
   private _queryRequested = new Signal<Model, any>(this);
@@ -30,8 +30,8 @@ export class Model extends VDomModel {
       return;
     }
     if (this._db) {
-      this._db.close();
-      this._db = null;
+      void Private.SQL.close(this._db);
+      this._db = null as any;
     }
     super.dispose();
   }
@@ -62,16 +62,22 @@ export class Model extends VDomModel {
     this.updateDb().catch(console.error);
   }
 
-  get db() {
-    return this._db;
-  }
-
-  query<T = any>(sqlString: string, bindings?: Record<string, any>): T[] {
-    const result: T[] = [];
+  async query<T = any>(sqlString: string, bindings?: Record<string, any>): Promise<T[]> {
+    let result: T[] = [];
     if (this._db) {
-      const stmt = this._db.prepare(sqlString);
-      while (stmt.step()) {
-        result.push(stmt.getAsObject() as unknown as T);
+      const raw = await Private.SQL.exec(this._db, sqlString);
+      if(raw.length) {
+        const {columns, values} = raw.slice(-1)[0];
+        const nColumns = columns.length;
+        const nRows = values.length;
+        result = new Array(nRows);
+
+        for(let i = 0; i < nRows; i++) {
+          result[i] = {} as any;
+          for(let j = 0; j < nColumns; j++) {
+            (result[i] as any)[columns[j]] = values[i][j];
+          }
+        }
       }
     }
     return result;
@@ -93,7 +99,7 @@ export class Model extends VDomModel {
   }
 
   async saveToModel(): Promise<boolean> {
-    const binArray = this._db?.export() || null;
+    const binArray = await Private.SQL.export(this._db);
     if (!binArray) {
       return false;
     }
@@ -115,19 +121,20 @@ export class Model extends VDomModel {
   }
 
   protected async updateDb(): Promise<void> {
-    const SQL = await ensureSQLite();
-    this._db = new SQL.Database(this._array);
+    if (!Private.SQL) {
+      await Private._ensureSQLite();
+    }
+
+    this._db = await Private.SQL.open({ data: this._array });
     await this.updateTables();
   }
 
   protected async updateTables(): Promise<void> {
     const tables: Model.TTableMap = new Map();
     if (this._db) {
-      const stmt = this._db.prepare(Q_TABLE_COLUMNS);
-      while (stmt.step()) {
-        //
-        const { tableName, ...column } =
-          stmt.getAsObject() as unknown as Model.IColumnWithTableName;
+      const rows = await this.query<Model.IColumnWithTableName>(Q_TABLE_COLUMNS);
+      for(const row of rows) {
+        const {tableName, ...column} = row;
         let table = tables.get(tableName);
         if (!table) {
           table = { name: tableName, columns: new Map() };
@@ -160,5 +167,15 @@ export namespace Model {
 
   export interface IColumnWithTableName extends IColumn {
     tableName: string;
+  }
+}
+
+namespace Private {
+  export let SQL: IRemoteSQLWorker;
+
+  export async function _ensureSQLite(): Promise<void> {
+    if (!SQL) {
+      SQL = await ensureSQLite();
+    }
   }
 }

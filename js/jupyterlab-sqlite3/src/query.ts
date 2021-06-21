@@ -239,7 +239,7 @@ export class QueryModel extends VDomModel {
   async runQuery() {
     const start = performance.now();
     try {
-      this.results = this._db.query<any>(this._query);
+      this.results = await this._db.query(this._query);
     } catch (err) {
       console.error('run', err);
       this.results = [{ error: err }];

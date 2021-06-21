@@ -46,10 +46,11 @@ export class Card extends VDomRenderer<ICardModel> {
     return <div>{this.renderRawFields(card, note)}</div>;
   }
 
-  getNote(): SCHEMA.Note {
+  getNote(card?: SCHEMA.Card): SCHEMA.Note {
     const { collection } = this.model.collection;
     const { notes } = collection;
-    return notes[`${this.model.cardId}`];
+    card = card || this.getCard();
+    return notes[`${card.nid}`];
   }
 
   getCard(): SCHEMA.Card {

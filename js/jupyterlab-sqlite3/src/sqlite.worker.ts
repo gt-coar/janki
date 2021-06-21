@@ -5,85 +5,83 @@
  * This is proxied by Comlink to move sqlite actions off the main thread
  */
 
-import * as Comlink from "comlink";
+let NEXT_ID = 0;
 
-import type * as _SQL from 'sql.js';
+import { expose } from 'comlink';
+import type * as SQL from 'sql.js';
+
+import { ISQLiteWorker } from './tokens';
 
 import * as SQL_WASM_URL from '!!file-loader!sql.js/dist/sql-wasm.wasm';
 
-export async function open(options: IOpenOptions): Promise<IOpenOptions> {
-  await Private.open(options);
-  return options;
-}
+export class SQLiteWorker implements ISQLiteWorker {
+  private _SQL: SQL.SqlJsStatic;
+  private _dbs: Map<string, SQL.Database> = new Map();
 
-export async function each(
-  sql: string,
-  params: _SQL.BindParams,
-  callback: _SQL.ParamsCallback,
-  done: () => void
-): Promise<any> {
-  console.log('each', [sql, params, callback, done]);
-  return [sql, params, callback, done];
-}
+  async open(options: ISQLiteWorker.IOpenOptions): Promise<ISQLiteWorker.IDBMeta> {
+    await this.SQL();
+    const meta: ISQLiteWorker.IDBMeta = { id: `${++NEXT_ID}` };
+    this._dbs.set(meta.id, new this._SQL.Database(options.data));
+    return meta;
+  }
 
-namespace Private {
-  let SQL: _SQL.SqlJsStatic;
+  async exec(
+    dbMeta: ISQLiteWorker.IDBMeta,
+    sql: string,
+    bindParams?: SQL.BindParams
+  ): Promise<SQL.QueryExecResult[]> {
+    const db = this._dbs.get(dbMeta.id);
 
-  const dbs = new Map<string, _SQL.Database>();
-
-  async function sql(): Promise<_SQL.SqlJsStatic> {
-    console.log('sql was', SQL);
-
-    if (!SQL) {
-      const initSqlJs = await import('sql.js');
-
-      SQL = await initSqlJs.default({
-        locateFile: (file: string) => {
-          switch (file) {
-            case 'sql-wasm.wasm':
-              return SQL_WASM_URL.default;
-              break;
-            default:
-              throw new Error(`UNEXPECTED SQL.JS FILE ${file}`);
-          }
-        },
-      });
-      console.log('sql is', SQL);
+    if (!db) {
+      throw new Error(`Unknown db: ${dbMeta.id}`);
     }
-    return SQL;
+
+    return db.exec(sql, bindParams);
   }
 
-  export async function open(args: IOpenOptions) {
-    console.log('opening', args);
-    await sql();
-    dbs.set(args.id, new SQL.Database());
-    console.log('opened', args);
+  async export(dbMeta: ISQLiteWorker.IDBMeta): Promise<Uint8Array> {
+    const db = this._dbs.get(dbMeta.id);
+
+    if (!db) {
+      throw new Error(`Unknown db: ${dbMeta.id}`);
+    }
+
+    return db.export();
   }
 
-  export async function close(args: IOpenOptions) {
-    console.log('closing', args);
-    await sql();
-    const db = dbs.get(args.id);
+  async close(dbMeta: ISQLiteWorker.IDBMeta): Promise<void> {
+    const db = this._dbs.get(dbMeta.id);
+
     if (db) {
       db.close();
-      dbs.delete(args.id);
+      this._dbs.delete(dbMeta.id);
     }
-    console.log('closed', args);
   }
 
-  export function db(id: string): _SQL.Database | null {
-    return dbs.get(id) || null;
+  async SQL(): Promise<SQL.SqlJsStatic> {
+    if (!this._SQL) {
+      this._SQL = await this.initSQL();
+    }
+    return this._SQL;
+  }
+
+  async initSQL(): Promise<SQL.SqlJsStatic> {
+    const initSqlJs = await import('sql.js');
+
+    return await initSqlJs.default({
+      locateFile: (file: string) => {
+        switch (file) {
+          case 'sql-wasm.wasm':
+            return SQL_WASM_URL.default;
+            break;
+          default:
+            throw new Error(`UNEXPECTED SQL.JS FILE ${file}`);
+        }
+      },
+    });
   }
 }
 
-/**
- * options for establishing a database connection
- */
-export interface IOpenOptions {
-  /** the unique Database identifier */
-  id: string;
-}
+const worker = new SQLiteWorker();
 
-const workerApi = { open, each };
-
-Comlink.expose(workerApi);
+expose(worker);
