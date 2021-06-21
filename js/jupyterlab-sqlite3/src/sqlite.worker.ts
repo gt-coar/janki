@@ -4,13 +4,12 @@
 /**
  * This is proxied by Comlink to move sqlite actions off the main thread
  */
+
+import * as Comlink from "comlink";
+
 import type * as _SQL from 'sql.js';
 
 import * as SQL_WASM_URL from '!!file-loader!sql.js/dist/sql-wasm.wasm';
-
-export async function greet(subject: string): Promise<string> {
-  return `Hello, ${subject}!`;
-}
 
 export async function open(options: IOpenOptions): Promise<IOpenOptions> {
   await Private.open(options);
@@ -84,3 +83,7 @@ export interface IOpenOptions {
   /** the unique Database identifier */
   id: string;
 }
+
+const workerApi = { open, each };
+
+Comlink.expose(workerApi);

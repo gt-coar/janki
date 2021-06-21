@@ -19,7 +19,7 @@ export async function ensureSQLite(): Promise<SqlJsStatic> {
     } catch (err) {
       console.error(err);
     } finally {
-      console.log('worker', worker);
+      // console.log('worker', worker);
     }
   }
 
@@ -51,8 +51,9 @@ export async function ensureSQLite(): Promise<SqlJsStatic> {
 }
 
 async function initWorker(): Promise<any> {
-  const Worker = (await import('./sqlite.comlink')) as any;
-  const worker = new Worker();
-  console.log(worker);
-  return worker;
+  const Comlink = await import("comlink");
+  // const workerUrl: any = await import('!!file-loader!./sqlite.worker');
+  const worker = new Worker(new URL('./sqlite.worker.js', import.meta.url), {type: 'module'});
+  const obj: any = Comlink.wrap(worker);
+  return obj;
 }
