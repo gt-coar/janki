@@ -5,39 +5,60 @@ import { Panel, PanelLayout } from '@lumino/widgets';
 
 import * as SCHEMA from '../_schema';
 import { DEBUG } from '../constants';
-import { CollectionModel } from '../models/collection';
-import { CSS } from '../tokens';
+import { jankiCardsIcon } from '../icons';
+import { CardModel } from '../models/card';
+import { CardsQueryModel } from '../models/query';
+import { CSS, ICollectionModel } from '../tokens';
 
 import { Card } from './card';
 
 export class Cards extends Panel {
-  readonly model: CollectionModel;
-  readonly cards: Map<string, Card>;
+  readonly model: ICollectionModel;
+  readonly cards: Map<number, Card>;
   readonly style: HTMLStyleElement;
   readonly frame: HTMLIFrameElement;
+  private _query: CardsQueryModel;
 
-  constructor(model: CollectionModel) {
+  constructor(model: ICollectionModel, query: CardsQueryModel) {
     super();
+    this.model = model;
+    this._query = query;
+
+    this.title.icon = jankiCardsIcon;
+
     this.style = document.createElement('style');
     this.frame = document.createElement('iframe');
     this.frame.src = 'about:blank';
     this.cards = new Map();
-    this.model = model;
     this.addClass(CSS.cards);
     this.model.stateChanged.connect(this.updateCards, this);
+    this._query.stateChanged.connect(this.updateCards, this);
     // finally wire up dom
     this.node.appendChild(this.style);
     this.node.appendChild(this.frame);
+    this.updateTitle();
+    setTimeout(() => this.updateCards().catch(console.warn), 100);
+  }
+
+  updateTitle() {
+    const { cardIds } = this;
+    this.title.label = `${cardIds.length} Card${cardIds.length === 1 ? '' : 's'}`;
   }
 
   dispose() {
     if (this.isDisposed) {
       return;
     }
+    for (const card of this.cards.values()) {
+      card.dispose();
+    }
+    this.cards.clear();
     this.model.stateChanged.disconnect(this.updateCards, this);
   }
 
-  updateCards() {
+  async updateCards() {
+    this.updateTitle();
+
     const { collection } = this.model;
 
     DEBUG && console.info('updateCards', collection);
@@ -46,20 +67,32 @@ export class Cards extends Panel {
       return;
     }
 
+    const { cardIds } = this;
+
     this.updateStyle();
     const panelLayout = this.layout as PanelLayout;
     for (const [cardId, widget] of this.cards.entries()) {
-      if (!collection.cards[cardId]) {
+      if (cardIds.indexOf(cardId) === -1) {
         panelLayout.removeWidget(widget);
       }
     }
-    for (const cardId of Object.keys(collection.cards)) {
+    for (const cardId of cardIds) {
       if (!this.cards.has(cardId)) {
-        const widget = new Card(this.model, cardId);
+        const cardModel = new CardModel(cardId, this.model);
+        const widget = new Card(cardModel);
         this.cards.set(cardId, widget);
         panelLayout.addWidget(widget);
       }
     }
+  }
+
+  get cardIds(): number[] {
+    const { collection } = this.model;
+    const { deckIds } = this._query;
+
+    return Object.values(collection.cards)
+      .filter((card) => deckIds.includes(card.did))
+      .map((card) => card.id);
   }
 
   /**

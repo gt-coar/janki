@@ -7,25 +7,31 @@ import * as React from 'react';
 
 import * as SCHEMA from '../_schema';
 import { FIELD_DELIMITER } from '../constants';
-import { CollectionModel } from '../models/collection';
-import { CSS } from '../tokens';
+import { CSS, ICardModel } from '../tokens';
 
 Mustache.escape = function (text) {
   return text;
 };
 
-export class Card extends VDomRenderer<CollectionModel> {
-  readonly cardId: string;
-  constructor(model: CollectionModel, cardId: string) {
+export class Card extends VDomRenderer<ICardModel> {
+  constructor(model: ICardModel) {
     super(model);
-    this.cardId = cardId;
     this.addClass(CSS.card);
   }
 
+  dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+    this.model.dispose();
+    super.dispose();
+  }
+
   protected render() {
-    const { notes, cards, col } = this.model.collection;
-    const card = cards[this.cardId];
-    const note = notes[`${card.nid}`];
+    const { collection } = this.model.collection;
+    const { col } = collection;
+    const card = this.getCard();
+    const note = this.getNote();
     const model = (col['1'].models || {})[`${note.mid}`];
     const template = model?.tmpls[card.ord];
 
@@ -38,6 +44,19 @@ export class Card extends VDomRenderer<CollectionModel> {
     }
 
     return <div>{this.renderRawFields(card, note)}</div>;
+  }
+
+  getNote(card?: SCHEMA.Card): SCHEMA.Note {
+    const { collection } = this.model.collection;
+    const { notes } = collection;
+    card = card || this.getCard();
+    return notes[`${card.nid}`];
+  }
+
+  getCard(): SCHEMA.Card {
+    const { collection } = this.model.collection;
+    const { cards } = collection;
+    return cards[`${this.model.cardId}`];
   }
 
   renderRawFields = (card: SCHEMA.Card, note: SCHEMA.Note) => {
@@ -100,8 +119,10 @@ export class Card extends VDomRenderer<CollectionModel> {
   renderNoteTemplate(tmpl: string, context: Record<string, string>): string {
     let html = Mustache.render(tmpl, context);
 
-    for (const [name, url] of Object.entries(this.model.media)) {
-      html = html.replace(name, url);
+    for (const path of this.model.collection.futureMedia) {
+      if (html.indexOf(path) !== -1) {
+        html = html.replace(path, this.model.getMedia(path));
+      }
     }
 
     return html;

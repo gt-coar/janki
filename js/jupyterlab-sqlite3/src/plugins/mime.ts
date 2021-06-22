@@ -1,15 +1,14 @@
 // Copyright (c) 2021 University System of Georgia and janki contributors
 // Distributed under the terms of the BSD-3-Clause License.
-
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import { PLUGIN_ID, FILE_TYPE } from './tokens';
-import { rendererFactory } from './widget';
+import { PLUGIN_ID, FILE_TYPE } from '../tokens';
+import { rendererFactory } from '../widget';
 
 /**
  * Extension definition.
  */
-const extension: IRenderMime.IExtension = {
+const mimeExtension: IRenderMime.IExtension = {
   id: PLUGIN_ID,
   rendererFactory,
   rank: 0,
@@ -24,4 +23,4 @@ const extension: IRenderMime.IExtension = {
   },
 };
 
-export default extension;
+export default [mimeExtension];

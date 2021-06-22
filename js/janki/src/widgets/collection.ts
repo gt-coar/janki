@@ -4,14 +4,14 @@
 import { PathExt } from '@jupyterlab/coreutils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { PromiseDelegate } from '@lumino/coreutils';
-import { Panel, PanelLayout } from '@lumino/widgets';
+import { Panel, PanelLayout, SplitPanel } from '@lumino/widgets';
 
 import { DEBUG } from '../constants';
 import { CollectionModel } from '../models/collection';
 import { ICardCollection, ICardManager, CSS } from '../tokens';
 
 import { CollectionBar } from './bar';
-import { Cards } from './cards';
+import { Decks } from './decks';
 
 export class CardCollection extends Panel {
   private _ready = new PromiseDelegate<void>();
@@ -47,13 +47,21 @@ export class CardCollection extends Panel {
       this.addClass(cls)
     );
     const model = (this.model = new CollectionModel());
+    model.manager = this.manager;
     const layout = this.layout as PanelLayout;
 
     const bar = new CollectionBar(model);
-    const cards = new Cards(model);
+    const split = new SplitPanel();
+    split.orientation = 'horizontal';
+
+    const decks = new Decks(model);
+
+    SplitPanel.setStretch(decks, 1);
+
+    split.addWidget(decks);
 
     layout.addWidget(bar);
-    layout.addWidget(cards);
+    layout.addWidget(split);
 
     context.pathChanged.connect(this._onPathChanged, this);
     model.stateChanged.connect(this._onModelStateChanged, this);
@@ -96,6 +104,7 @@ export class CardCollection extends Panel {
     await this.context.ready;
     this.model.path = this.context.path;
     this.model.data = this.context.model.toString();
+    // TODO: restor server-based stuff?
     // this.model.collection = await this.manager.collection(this.context.path);
   }
 }

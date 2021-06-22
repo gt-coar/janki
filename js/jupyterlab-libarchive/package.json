@@ -39,7 +39,7 @@
     "url": "https://github.com/gt-coar/janki"
   },
   "scripts": {
-    "build:ext": "jupyter labextension build .",
+    "build:ext": "jupyter labextension build --debug .",
     "watch": "jupyter labextension watch ."
   },
   "sideEffects": true,
@@ -56,7 +56,13 @@
       }
     },
     "outputDir": "../../py/jupyterlab-libarchive/src/jupyterlab_libarchive/labextensions/@gt-coar/jupyterlab-libarchive",
-    "webpackConfig": "./webpack.config.js"
+    "webpackConfig": "./webpack.config.js",
+    "sharedPackages": {
+      "libarchive.js": {
+        "bundled": true,
+        "singleton": false
+      }
+    }
   },
   "styleModule": "style/index.js"
 }

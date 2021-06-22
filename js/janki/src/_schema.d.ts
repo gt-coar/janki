@@ -36,7 +36,6 @@ export interface Collection {
   revlog?: {
     [k: string]: Rev;
   };
-  [k: string]: unknown;
 }
 export interface Card {
   data: string;
@@ -57,25 +56,9 @@ export interface Card {
   reps: number;
   type: number;
   usn: number;
-  [k: string]: unknown;
 }
 export interface CollectionMetadata {
-  conf: {
-    activeDecks?: number[];
-    addToCur?: boolean;
-    collapseTime?: number;
-    curDeck?: number;
-    curModel?: string;
-    dueCounts?: boolean;
-    estTimes?: boolean;
-    newBury?: boolean;
-    newSpread?: number;
-    nextPos?: number;
-    sortBackwards?: boolean;
-    sortType?: string;
-    timeLim?: number;
-    [k: string]: unknown;
-  };
+  conf: ReviewConfiguration;
   crt: number;
   dconf: {
     [k: string]: DeckConfiguration;
@@ -96,46 +79,59 @@ export interface CollectionMetadata {
   };
   usn: number;
   ver: number;
-  [k: string]: unknown;
+}
+export interface ReviewConfiguration {
+  activeDecks?: number[];
+  addToCur?: boolean;
+  collapseTime?: number;
+  curDeck?: number;
+  curModel?: string;
+  dueCounts?: boolean;
+  estTimes?: boolean;
+  newBury?: boolean;
+  newSpread?: number;
+  nextPos?: number;
+  sortBackwards?: boolean;
+  sortType?: string;
+  timeLim?: number;
 }
 export interface DeckConfiguration {
   autoplay: boolean;
   id: number;
-  lapse: {
-    delays: number[];
-    leechAction: number;
-    leechFails: number;
-    minInt: number;
-    mult: number;
-    [k: string]: unknown;
-  };
+  lapse: Lapse;
   maxTaken: number;
   mod: number;
   name: string;
-  new: {
-    bury: boolean;
-    delays: number[];
-    initialFactor: number;
-    ints: number[];
-    order: number;
-    perDay: number;
-    separate: boolean;
-    [k: string]: unknown;
-  };
+  new: New;
   replayq: boolean;
-  rev: {
-    bury: boolean;
-    ease4: number;
-    fuzz: number;
-    ivlFct: number;
-    maxIvl: number;
-    minSpace: number;
-    perDay: number;
-    [k: string]: unknown;
-  };
+  rev: ReviewConfiguration1;
   timer: number;
   usn: number;
-  [k: string]: unknown;
+}
+export interface Lapse {
+  delays: number[];
+  leechAction: number;
+  leechFails: number;
+  minInt: number;
+  mult: number;
+}
+export interface New {
+  bury: boolean;
+  delays: number[];
+  initialFactor: number;
+  ints: number[];
+  order: number;
+  perDay: number;
+  separate: boolean;
+}
+export interface ReviewConfiguration1 {
+  bury: boolean;
+  ease4: number;
+  fuzz: number;
+  ivlFct: number;
+  maxIvl: number;
+  minSpace: number;
+  perDay: number;
 }
 export interface Deck {
   collapsed: boolean;
@@ -152,21 +148,11 @@ export interface Deck {
   revToday: number[];
   timeToday: number[];
   usn: number;
-  [k: string]: unknown;
 }
 export interface Model {
   css: string;
   did: number;
-  flds: {
-    font: string;
-    media: unknown[];
-    name: string;
-    ord: number;
-    rtl: boolean;
-    size: number;
-    sticky: boolean;
-    [k: string]: unknown;
-  }[];
+  flds: Field[];
   id: number;
   latexPost: string;
   latexPre: string;
@@ -179,7 +165,15 @@ export interface Model {
   type: number;
   usn: number;
   vers: unknown[];
-  [k: string]: unknown;
+}
+export interface Field {
+  font: string;
+  media: unknown[];
+  name: string;
+  ord: number;
+  rtl: boolean;
+  size: number;
+  sticky: boolean;
 }
 export interface Template {
   afmt: string;
@@ -189,7 +183,6 @@ export interface Template {
   name: string;
   ord: number;
   qfmt: string;
-  [k: string]: unknown;
 }
 export interface Note {
   csum: number;
@@ -203,7 +196,6 @@ export interface Note {
   sfld: string;
   tags: string;
   usn: number;
-  [k: string]: unknown;
 }
 export interface Rev {
   cid: number;
@@ -215,5 +207,4 @@ export interface Rev {
   time: number;
   type: number;
   usn: number;
-  [k: string]: unknown;
 }

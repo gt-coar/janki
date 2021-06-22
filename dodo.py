@@ -608,7 +608,7 @@ class P:
         ALL_TS_SRC,
         ALL_STYLE,
         ESLINTRC,
-        ALL_PKG_JS,
+        *[p for p in ALL_PKG_JS if not "/lib/" in str(p)],
     )
     ALL_SHELL = [BINDER / "postBuild"]
     ALL_HEADERS = PU._clean(
@@ -778,7 +778,7 @@ class U:
 
 
 os.environ.update(
-    NODE_OPTS="--max-old-space-size=4096",
+    NODE_OPTS="--max-old-space-size=8192",
     PYTHONIOENCODING="utf-8",
     PIP_DISABLE_PIP_VERSION_CHECK="1",
 )

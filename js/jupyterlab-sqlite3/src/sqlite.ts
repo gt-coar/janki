@@ -2,38 +2,39 @@
 // Distributed under the terms of the BSD-3-Clause License.
 
 import { PromiseDelegate } from '@lumino/coreutils';
-import type { SqlJsStatic } from 'sql.js';
 
-import * as SQL_WASM_URL from '!!file-loader!sql.js/dist/sql-wasm.wasm';
+import { IRemoteSQLWorker } from './tokens';
 
-let SQL: SqlJsStatic;
+let COMM: IRemoteSQLWorker;
+let LOADING: PromiseDelegate<IRemoteSQLWorker> | undefined;
 
-let LOADING: PromiseDelegate<SqlJsStatic>;
-
-export async function ensureSQLite(): Promise<SqlJsStatic> {
-  if (SQL) {
-    return SQL;
-  }
+export async function ensureSQLite(): Promise<IRemoteSQLWorker> {
   if (LOADING) {
-    return await LOADING.promise;
+    return LOADING.promise;
   }
 
-  LOADING = new PromiseDelegate();
+  if (!COMM) {
+    LOADING = new PromiseDelegate();
 
-  const initSqlJs = await import('sql.js');
+    try {
+      COMM = await initComm();
+      LOADING.resolve(COMM);
+    } catch (err) {
+      LOADING.reject(err);
+    } finally {
+      LOADING = void 0;
+    }
+  }
 
-  SQL = await initSqlJs.default({
-    locateFile: (file: string) => {
-      switch (file) {
-        case 'sql-wasm.wasm':
-          return SQL_WASM_URL.default;
-          break;
-        default:
-          throw new Error(`UNEXPECTED SQL.JS FILE ${file}`);
-      }
-    },
+  return COMM;
+}
+
+async function initComm(): Promise<IRemoteSQLWorker> {
+  const { wrap } = await import('comlink');
+  // const workerUrl: any = await import('!!file-loader!./sqlite.worker');
+  const worker = new Worker(new URL('./sqlite.worker.js', import.meta.url), {
+    type: 'module',
   });
-  LOADING.resolve(SQL);
-
-  return SQL;
+  const obj: any = wrap(worker);
+  return obj;
 }

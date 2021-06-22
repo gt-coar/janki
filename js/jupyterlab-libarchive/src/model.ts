@@ -71,5 +71,6 @@ export class Model extends VDomModel {
 }
 
 export namespace Model {
-  export type TFileMap = Map<string, ICompressedFileEntry>;
+  export type IEntry = ICompressedFileEntry;
+  export type TFileMap = Map<string, IEntry>;
 }

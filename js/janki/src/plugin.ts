@@ -8,21 +8,35 @@ import {
   JupyterFrontEndPlugin,
   ILayoutRestorer,
 } from '@jupyterlab/application';
-import { WidgetTracker } from '@jupyterlab/apputils';
+import { WidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
+import { IEditorServices } from '@jupyterlab/codeeditor';
 import { IDocumentWidget, DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { CardCollectionFactory } from './factory';
 import { jankiIcon, jankiPkgIcon } from './icons';
 import { CardManager } from './manager';
+import { NewCardModel } from './models/newCard';
+import { CardsQueryModel } from './models/query';
 import { NS, PLUGIN_ID, ICardManager, FACTORY, FILE_TYPES } from './tokens';
-import { CardCollection } from './widgets';
+import {
+  CardCollection,
+  Cards,
+  NewCard,
+  CardModelPicker,
+  DeckPicker,
+  TemplatePicker,
+} from './widgets';
 
 /**
  * The editor tracker extension.
  */
 const corePlugin: JupyterFrontEndPlugin<ICardManager> = {
-  activate: (app: JupyterLab, restorer?: ILayoutRestorer) => {
-    const manager = new CardManager();
+  activate: (
+    app: JupyterLab,
+    editorServices: IEditorServices,
+    restorer?: ILayoutRestorer
+  ) => {
+    const manager = new CardManager({ editorServices });
 
     app.docRegistry.addFileType({
       name: 'anki2',
@@ -78,6 +92,22 @@ const corePlugin: JupyterFrontEndPlugin<ICardManager> = {
       namespace: NS,
     });
 
+    manager.cardsRequested.connect(async (sender, request) => {
+      const content = new Cards(request.model, new CardsQueryModel(request.query));
+      const main = new MainAreaWidget({ content });
+      app.shell.add(main, 'main');
+    });
+
+    manager.newCardRequested.connect(async (sender, request) => {
+      const content = new NewCard({ model: new NewCardModel(request) });
+      const main = new MainAreaWidget({ content });
+      const { toolbar } = main;
+      toolbar.addItem('deck-picker', new DeckPicker(content.model));
+      toolbar.addItem('model-picker', new CardModelPicker(content.model));
+      toolbar.addItem('template-picker', new TemplatePicker(content.model));
+      app.shell.add(main, 'main');
+    });
+
     if (restorer) {
       // Handle state restoration.
       void restorer.restore(tracker, {
@@ -90,7 +120,7 @@ const corePlugin: JupyterFrontEndPlugin<ICardManager> = {
     return manager;
   },
   id: PLUGIN_ID,
-  requires: [],
+  requires: [IEditorServices],
   optional: [ILayoutRestorer],
   provides: ICardManager,
   autoStart: true,

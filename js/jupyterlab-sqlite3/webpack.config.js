@@ -8,6 +8,9 @@ module.exports = {
       crypto: false,
     },
   },
+  optimization: {
+    minimize: false,
+  },
   module: {
     rules: [
       {

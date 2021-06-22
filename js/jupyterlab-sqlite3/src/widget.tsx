@@ -34,15 +34,25 @@ export class DBRenderer extends VDomRenderer<Model> {
               <th>cid</th>
               <th>default</th>
               <th>not null</th>
+              <th>query</th>
             </tr>
           </thead>
-          <tbody>{Array.from(table.columns.values()).map(this.renderColumn)}</tbody>
+          <tbody>
+            {Array.from(table.columns.values()).map((column) => {
+              return this.renderColumn(table, column);
+            })}
+          </tbody>
         </table>
       </li>
     );
   };
 
-  protected renderColumn = (column: Model.IColumn) => {
+  protected renderColumn = (table: Model.ITable, column: Model.IColumn) => {
+    const onClick = () => {
+      this.model.requestQuery({
+        query: `SELECT DISTINCT ${column.name} FROM ${table.name};`,
+      });
+    };
     return (
       <tr key={column.name}>
         <th>{column.name}</th>
@@ -51,6 +61,11 @@ export class DBRenderer extends VDomRenderer<Model> {
         <td>{column.cid}</td>
         <td>{column.dflt_value}</td>
         <td>{column.notnull}</td>
+        <td>
+          <button className="jp-mod-styled jp-mod-accept" onClick={onClick}>
+            <code>SELECT *</code>
+          </button>
+        </td>
       </tr>
     );
   };
@@ -89,8 +104,20 @@ export class SQLite3 extends Panel implements IRenderMime.IRenderer {
    */
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     if (this._dbModel) {
-      this._dbModel.data = model.data[this._mimeType] as string;
+      const data = model.data[this._mimeType] as string;
+      this._dbModel.dataChanged.connect(() => {
+        if (this._dbModel?.data) {
+          let newData = {} as any;
+          newData[this._mimeType] = this._dbModel.data;
+          model.setData({ data: newData });
+        }
+      });
+      this._dbModel.data = data;
     }
+  }
+
+  get renderer() {
+    return this._renderer;
   }
 
   private _mimeType: string;
