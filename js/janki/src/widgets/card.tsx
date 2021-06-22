@@ -119,7 +119,7 @@ export class Card extends VDomRenderer<ICardModel> {
   renderNoteTemplate(tmpl: string, context: Record<string, string>): string {
     let html = Mustache.render(tmpl, context);
 
-    for (const path of Object.keys(this.model.collection.futureMedia)) {
+    for (const path of this.model.collection.futureMedia) {
       if (html.indexOf(path) !== -1) {
         html = html.replace(path, this.model.getMedia(path));
       }

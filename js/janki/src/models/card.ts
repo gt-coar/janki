@@ -13,7 +13,6 @@ export class CardModel extends VDomModel implements ICardModel {
     super();
     this._cardId = cardId;
     this._collection = collection;
-    collection.stateChanged.connect(() => this.stateChanged.emit(void 0));
   }
 
   get cardId() {
@@ -26,16 +25,17 @@ export class CardModel extends VDomModel implements ICardModel {
 
   getMedia(path: string): string {
     let readyPath = this._collection.media[path];
+
     if (readyPath) {
       return readyPath;
     }
 
-    let mediaFuture = this._collection.futureMedia[path];
+    if (this._collection.futureMedia.indexOf(path) !== -1) {
+      const promise = this._collection.fetchMediaFuture(path);
 
-    if (mediaFuture) {
-      mediaFuture()
-        .then(() => this.stateChanged.emit(void 0))
-        .catch(console.warn);
+      if (promise) {
+        promise.then(() => this.stateChanged.emit(void 0)).catch(console.warn);
+      }
     }
 
     return '';

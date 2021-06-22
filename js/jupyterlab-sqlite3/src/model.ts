@@ -62,19 +62,22 @@ export class Model extends VDomModel {
     this.updateDb().catch(console.error);
   }
 
-  async query<T = any>(sqlString: string, bindings?: Record<string, any>): Promise<T[]> {
+  async query<T = any>(
+    sqlString: string,
+    bindings?: Record<string, any>
+  ): Promise<T[]> {
     let result: T[] = [];
     if (this._db) {
       const raw = await Private.SQL.exec(this._db, sqlString);
-      if(raw.length) {
-        const {columns, values} = raw.slice(-1)[0];
+      if (raw.length) {
+        const { columns, values } = raw.slice(-1)[0];
         const nColumns = columns.length;
         const nRows = values.length;
         result = new Array(nRows);
 
-        for(let i = 0; i < nRows; i++) {
+        for (let i = 0; i < nRows; i++) {
           result[i] = {} as any;
-          for(let j = 0; j < nColumns; j++) {
+          for (let j = 0; j < nColumns; j++) {
             (result[i] as any)[columns[j]] = values[i][j];
           }
         }
@@ -133,8 +136,8 @@ export class Model extends VDomModel {
     const tables: Model.TTableMap = new Map();
     if (this._db) {
       const rows = await this.query<Model.IColumnWithTableName>(Q_TABLE_COLUMNS);
-      for(const row of rows) {
-        const {tableName, ...column} = row;
+      for (const row of rows) {
+        const { tableName, ...column } = row;
         let table = tables.get(tableName);
         if (!table) {
           table = { name: tableName, columns: new Map() };

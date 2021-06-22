@@ -80,7 +80,6 @@ export class SQLite3 extends Panel implements IRenderMime.IRenderer {
    */
   constructor(options: IRenderMime.IRendererOptions) {
     super();
-    console.log('SQLite3 options', options);
     this._mimeType = options.mimeType;
     this.addClass(CLASS_NAME);
     this._dbModel = new Model();

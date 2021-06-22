@@ -76,7 +76,8 @@ export interface ICollectionModel extends VDomRenderer.IModel {
   requestDecks(query: ICardsQuery): void;
   collection: SCHEMA.Collection;
   media: Record<string, string>;
-  futureMedia: Record<string, IMediaFuture>;
+  futureMedia: string[];
+  fetchMediaFuture(path: string): Promise<void> | null;
 }
 
 export interface ICardModel extends VDomRenderer.IModel {

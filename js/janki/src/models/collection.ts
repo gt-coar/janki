@@ -1,9 +1,9 @@
 // Copyright (c) 2021 University System of Georgia and janki contributors
 // Distributed under the terms of the BSD-3-Clause License.
-
 import { Model as ArchiveModel } from '@gt-coar/jupyterlab-libarchive';
 import { Model as DBModel } from '@gt-coar/jupyterlab-sqlite3';
 import { VDomModel } from '@jupyterlab/apputils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
 import * as SCHEMA from '../_schema';
 import { DEBUG, JSON_FIELDS, APKG_MEDIA_JSON, APKG_COLLECTION } from '../constants';
@@ -13,7 +13,6 @@ import {
   ICardsQuery,
   ICardsRequest,
   INewCardRequest,
-  IMediaFuture,
 } from '../tokens';
 
 export const Q_CARDS = `SELECT * from cards;`;
@@ -28,8 +27,11 @@ export class CollectionModel extends VDomModel implements ICollectionModel {
   private _archiveModel: ArchiveModel | null;
   private _dbModel: DBModel | null;
   private _media: Record<string, string>;
-  private _futureMedia: Record<string, IMediaFuture>;
+  private _futureMedia: Record<string, Promise<void> | null>;
   private _manager: ICardManager;
+
+  /** A mapping of the full file names to integer short paths in the archive */
+  private _mediaMap: Record<string, string>;
 
   set manager(manager: ICardManager) {
     this._manager = manager;
@@ -53,8 +55,8 @@ export class CollectionModel extends VDomModel implements ICollectionModel {
     return this._media || {};
   }
 
-  get futureMedia(): Record<string, IMediaFuture> {
-    return this._futureMedia || {};
+  get futureMedia(): string[] {
+    return [...Object.keys(this._futureMedia || {})];
   }
 
   get path() {
@@ -117,10 +119,11 @@ export class CollectionModel extends VDomModel implements ICollectionModel {
     }
     DEBUG && console.info('db tables', this._dbModel.tables);
     this.collection = {
+      path: this.path,
+      // db models
       cards: await this.getCards(),
       col: await this.getCollectionMetadata(),
       notes: await this.getNotes(),
-      path: this.path,
       revlog: await this.getRevs(),
     };
     this.stateChanged.emit(void 0);
@@ -132,9 +135,12 @@ export class CollectionModel extends VDomModel implements ICollectionModel {
     }
 
     DEBUG && console.info('archive members', this._archiveModel.members);
+
     let file: File;
     let buf: ArrayBuffer;
-    let mediaMap: Record<string, string> = {};
+
+    this._mediaMap = {};
+
     for (const [path, member] of this._archiveModel.members.entries()) {
       switch (path) {
         case APKG_COLLECTION:
@@ -143,8 +149,9 @@ export class CollectionModel extends VDomModel implements ICollectionModel {
           this._dbModel.array = new Uint8Array(buf);
           break;
         case APKG_MEDIA_JSON:
-          file = await member.file.extract();
-          mediaMap = JSON.parse(await file.text());
+          this._mediaMap = await this.invertMediaMap(
+            await (await member.file.extract()).text()
+          );
           break;
         default:
           break;
@@ -154,27 +161,57 @@ export class CollectionModel extends VDomModel implements ICollectionModel {
     this._media = {};
     this._futureMedia = {};
 
-    if (Object.keys(mediaMap).length) {
-      // iterate again for media
-      for (const [path, member] of this._archiveModel.members.entries()) {
-        const mediaPath = mediaMap[path];
-        if (mediaPath) {
-          this._futureMedia[mediaPath] = this.scheduleOneMedia(mediaPath, member);
-        }
-      }
+    for (const mediaPath of Object.keys(this._mediaMap)) {
+      this._futureMedia[mediaPath] = null;
     }
+
     this.stateChanged.emit(void 0);
   }
 
-  scheduleOneMedia(mediaPath: string, member: ArchiveModel.IEntry): IMediaFuture {
-    const task = async () => {
-      DEBUG && console.log('future', mediaPath);
-      const blobUrl = URL.createObjectURL(await member.file.extract());
-      this._media[mediaPath] = blobUrl;
-      DEBUG && console.log('......', mediaPath);
-    };
+  async invertMediaMap(raw: string): Promise<Record<string, string>> {
+    const parsed = JSON.parse(raw) as Record<string, string>;
+    let inverted = {} as Record<string, string>;
+    for (let [inArchive, realName] of Object.entries(parsed)) {
+      inverted[realName] = inArchive;
+    }
 
-    return task;
+    return inverted;
+  }
+
+  private _mediaQueue: string[] = [];
+  private _mediaLock: PromiseDelegate<void>;
+
+  async scheduleOneMedia(mediaPath: string): Promise<void> {
+    const inArchive = this._mediaMap[mediaPath];
+    if (this._media[mediaPath]) {
+      return;
+    }
+
+    this._mediaQueue.push(mediaPath);
+
+    while (this._mediaQueue[0] !== mediaPath) {
+      await this._mediaLock.promise;
+    }
+
+    this._mediaLock = new PromiseDelegate();
+
+    const { file } = this._archiveModel?.members.get(inArchive) || {};
+
+    if (file) {
+      const extracted = await file.extract();
+      const blobUrl = URL.createObjectURL(extracted);
+      this._media[mediaPath] = blobUrl;
+    }
+
+    this._mediaQueue.shift();
+    this._mediaLock.resolve();
+  }
+
+  fetchMediaFuture(mediaPath: string): Promise<void> | null {
+    if (!this._futureMedia[mediaPath]) {
+      this._futureMedia[mediaPath] = this.scheduleOneMedia(mediaPath);
+    }
+    return this._futureMedia[mediaPath] || null;
   }
 
   protected async getCards(): Promise<{ [k: string]: SCHEMA.Card }> {
@@ -188,7 +225,9 @@ export class CollectionModel extends VDomModel implements ICollectionModel {
     return cards;
   }
 
-  protected async getCollectionMetadata(): Promise<{ [k: string]: SCHEMA.CollectionMetadata }> {
+  protected async getCollectionMetadata(): Promise<{
+    [k: string]: SCHEMA.CollectionMetadata;
+  }> {
     let cols: { [k: string]: SCHEMA.CollectionMetadata } = {};
     if (this._dbModel) {
       const rows = await this._dbModel.query<SCHEMA.CollectionMetadata>(Q_COLL_META);
